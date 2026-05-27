@@ -65,11 +65,10 @@ Crear archivo:
 ```text
 backend/.env
 ```
-
-## Ejemplo
+Contenido:
 
 ```env
-DATABASE_URL=postgresql://postgres:password@localhost:5432/refugio_db
+url_bdd=postgresql://postgres:password@localhost:5432/refugio_db
 SECRET_KEY=tu_secret
 ```
 
@@ -113,17 +112,41 @@ flask run
 
 # BASE DE DATOS POSTGRESQL
 
-Crear una base de datos llamada:
-
+Crear la base de datos  en pgAdmin (PostgreSQL):
+- Click derecho Databases -> Create -> Database 
+- Nombre: 
 ```text
 refugio_db
 ```
 
-Luego ejecutar migraciones.
+Crear las tablas, ejecutando migraciones:
+```bash
+flask db upgrade
+```
+Crear variable de entorno en archivo .env (usando hostname, port, username y password de tu conexión local):
+
+```env
+url_bdd=postgresql://postgres:password@localhost:5432/refugio_db
+SECRET_KEY=tu_secret
+```
+
+## Cuando hay cambios en los modelos
+
+Quien hizo el cambio:
+```bash
+flask db migrate -m "descripcion del cambio"
+flask db upgrade
+```
+Y luego commitear y pushear incluyendo la carpeta `migrations/`
+
+Los demás integrantes:
+```bash
+flask db upgrade
+```
 
 ---
 
-# CREAR MIGRACIONES
+## CREAR MIGRACIONES (Configuración inicial)
 
 ```bash
 flask db init
