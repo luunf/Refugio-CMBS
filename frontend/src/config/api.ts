@@ -1,6 +1,6 @@
 // src/config/api.ts
-const API_URL = "http://192.168.0.102:5000/api";
-
+//const API_URL = "http://192.168.0.102:5000/api";
+const API_URL = "http://192.168.1.106:5000/api";
 export const api = {
   getTareas: async (mes?: number, year?: number) => {
     const params = mes && year ? `?mes=${mes}&year=${year}` : "";
