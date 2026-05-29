@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { api } from "@/config/api";
 
 interface Props {
@@ -19,59 +19,30 @@ export default function TareaCard({ tarea, onActualizar }: Props) {
     ? tarea.hora.substring(0, 5)
     : tarea.es_todo_el_dia ? "Todo el día" : "";
 
-  const voluntarios = tarea.personas?.map((p: any) => p.nombre).join(", ")
-    || "Sin asignar";
+  const voluntarios = tarea.personas?.map((p: any) => p.nombre).join(", ") || "Sin asignar";
 
   return (
-    <TouchableOpacity
-      onPress={() => setExpandida(!expandida)}
-      className="mb-2"
-    >
-      <View className="flex-row items-center justify-between py-2">
-        {/* Nombre y hora */}
-        <View className="flex-1">
-          <Text
-            className={`text-base ${tarea.completada ? "line-through text-gray-400" : "text-gray-800"}`}
-            numberOfLines={expandida ? undefined : 1}
-          >
-            {tarea.nombre}
-          </Text>
+    <TouchableOpacity onPress={() => setExpandida(!expandida)} style={styles.container}>
+      <View style={styles.fila}>
+        <Text style={[styles.nombre, tarea.completada && styles.completada]} numberOfLines={expandida ? undefined : 1}>
+          {tarea.nombre}
+        </Text>
+        {hora ? <Text style={styles.hora}>{hora}</Text> : null}
+        <View style={styles.voluntariosBadge}>
+          <Text style={styles.voluntariosText} numberOfLines={1}>{voluntarios}</Text>
         </View>
-
-        {/* Hora */}
-        {hora ? (
-          <Text className="text-gray-500 text-sm mx-2">{hora}</Text>
-        ) : null}
-
-        {/* Voluntarios */}
-        <View className="bg-orange-50 border border-orange-200 rounded-full px-2 py-1">
-          <Text className="text-orange-600 text-xs" numberOfLines={1}>
-            {voluntarios}
-          </Text>
-        </View>
-
-        {/* Chevron */}
-        <Text className="text-orange-400 ml-2">{expandida ? "▲" : "▼"}</Text>
+        <Text style={styles.chevron}>{expandida ? "▲" : "▼"}</Text>
       </View>
 
-      {/* Detalle expandido */}
       {expandida && (
-        <View className="bg-orange-50 rounded-xl p-3 mt-1">
-          <Text className="text-gray-600 text-sm">
-            <Text className="font-semibold">Horario: </Text>
-            {hora}
-          </Text>
-          <Text className="text-gray-600 text-sm mt-1">
-            <Text className="font-semibold">Voluntarios: </Text>
-            {voluntarios}
-          </Text>
+        <View style={styles.detalle}>
+          <Text style={styles.detalleTexto}><Text style={styles.bold}>Horario: </Text>{hora || "—"}</Text>
+          <Text style={styles.detalleTexto}><Text style={styles.bold}>Voluntarios: </Text>{voluntarios}</Text>
           <TouchableOpacity
             onPress={toggleCompletada}
-            className={`mt-3 py-2 rounded-full items-center ${
-              tarea.completada ? "bg-gray-300" : "bg-orange-400"
-            }`}
+            style={[styles.btnCompletar, tarea.completada && styles.btnCompletarGris]}
           >
-            <Text className="text-white font-semibold text-sm">
+            <Text style={styles.btnCompletarText}>
               {tarea.completada ? "Marcar pendiente" : "Marcar completada"}
             </Text>
           </TouchableOpacity>
@@ -80,3 +51,34 @@ export default function TareaCard({ tarea, onActualizar }: Props) {
     </TouchableOpacity>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { marginBottom: 8 },
+  fila: { flexDirection: "row", alignItems: "center", paddingVertical: 8 },
+  nombre: { flex: 1, fontSize: 15, color: "#1f2937" },
+  completada: { textDecorationLine: "line-through", color: "#9ca3af" },
+  hora: { fontSize: 13, color: "#6b7280", marginHorizontal: 8 },
+  voluntariosBadge: {
+    backgroundColor: "#fff7ed",
+    borderWidth: 1,
+    borderColor: "#fed7aa",
+    borderRadius: 20,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    maxWidth: 120,
+  },
+  voluntariosText: { color: "#ea580c", fontSize: 12 },
+  chevron: { color: "#f97316", marginLeft: 8 },
+  detalle: { backgroundColor: "#fff7ed", borderRadius: 12, padding: 12, marginTop: 4 },
+  detalleTexto: { color: "#4b5563", fontSize: 13, marginBottom: 4 },
+  bold: { fontWeight: "600" },
+  btnCompletar: {
+    backgroundColor: "#f97316",
+    borderRadius: 20,
+    paddingVertical: 8,
+    alignItems: "center",
+    marginTop: 8,
+  },
+  btnCompletarGris: { backgroundColor: "#d1d5db" },
+  btnCompletarText: { color: "white", fontWeight: "600", fontSize: 13 },
+});
