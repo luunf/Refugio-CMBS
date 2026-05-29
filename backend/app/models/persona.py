@@ -8,7 +8,7 @@ class Persona(db.Model):
     apellido = db.Column(db.String)
     telefono = db.Column(db.String)
     direccion = db.Column(db.String)
-    email = db.Column(db.String, nullable=False, unique=True)
+    
 
     roles = db.relationship("Rol", secondary="personas_roles", back_populates="personas")
     usuario = db.relationship("Usuario", back_populates="persona", uselist=False, cascade="all, delete-orphan")
