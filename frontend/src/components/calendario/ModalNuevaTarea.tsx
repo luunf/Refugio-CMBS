@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Modal, View, Text, TextInput, TouchableOpacity,
-  ScrollView, ActivityIndicator
+  ScrollView, ActivityIndicator, StyleSheet
 } from "react-native";
 import { api } from "@/config/api";
 
@@ -22,21 +22,7 @@ export default function ModalNuevaTarea({
   );
   const [hora, setHora] = useState("");
   const [esTodoElDia, setEsTodoElDia] = useState(false);
-  const [personasIds, setPersonasIds] = useState<number[]>([]);
-  const [personas, setPersonas] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (visible) {
-      api.getPersonas().then(setPersonas).catch(console.error);
-    }
-  }, [visible]);
-
-  const togglePersona = (id: number) => {
-    setPersonasIds((prev) =>
-      prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]
-    );
-  };
 
   const handleCrear = async () => {
     if (!nombre || !fecha) return;
@@ -48,15 +34,13 @@ export default function ModalNuevaTarea({
         hora: esTodoElDia ? null : hora || null,
         es_todo_el_dia: esTodoElDia,
         completada: false,
-        personas_ids: personasIds,
+        personas_ids: [],
       });
       onCreada();
       onClose();
-      // Reset
       setNombre("");
       setHora("");
       setEsTodoElDia(false);
-      setPersonasIds([]);
     } catch (e) {
       console.error(e);
     } finally {
@@ -66,100 +50,72 @@ export default function ModalNuevaTarea({
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <View className="flex-1 justify-end bg-black/40">
-        <View className="bg-orange-50 rounded-t-3xl p-6 max-h-[90%]">
-          {/* Header modal */}
-          <View className="flex-row justify-between items-center mb-4">
-            <Text className="text-xl font-bold">Nueva tarea</Text>
+      <View style={styles.overlay}>
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <Text style={styles.titulo}>Nueva tarea</Text>
             <TouchableOpacity onPress={onClose}>
-              <Text className="text-2xl text-gray-500">✕</Text>
+              <Text style={styles.cerrar}>✕</Text>
             </TouchableOpacity>
           </View>
 
           <ScrollView showsVerticalScrollIndicator={false}>
-            {/* Nombre */}
-            <Text className="font-semibold mb-1">Nombre*</Text>
+            <Text style={styles.label}>Nombre*</Text>
             <TextInput
               value={nombre}
               onChangeText={setNombre}
               placeholder="Ej: Limpiar caniles"
-              className="bg-white border border-gray-200 rounded-xl px-3 py-2 mb-4"
+              style={styles.input}
             />
 
-            {/* Fecha */}
-            <Text className="font-semibold mb-1">Fecha*</Text>
+            <Text style={styles.label}>Fecha*</Text>
             <TextInput
               value={fecha}
               onChangeText={setFecha}
               placeholder="YYYY-MM-DD"
-              className="bg-white border border-gray-200 rounded-xl px-3 py-2 mb-4"
+              style={styles.input}
             />
 
-            {/* Horario */}
-            <Text className="font-semibold mb-2">Horario*</Text>
-            <View className="flex-row mb-4 gap-2">
+            <Text style={styles.label}>Horario*</Text>
+            <View style={styles.row}>
               <TouchableOpacity
                 onPress={() => setEsTodoElDia(false)}
-                className={`flex-1 py-2 rounded-full items-center ${
-                  !esTodoElDia ? "bg-orange-400" : "bg-orange-100"
-                }`}
+                style={[styles.btnTipo, !esTodoElDia && styles.btnTipoActivo]}
               >
-                <Text className={!esTodoElDia ? "text-white font-semibold" : "text-orange-400"}>
+                <Text style={!esTodoElDia ? styles.btnTipoTextoActivo : styles.btnTipoTexto}>
                   Puntual
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => setEsTodoElDia(true)}
-                className={`flex-1 py-2 rounded-full items-center ${
-                  esTodoElDia ? "bg-orange-400" : "bg-orange-100"
-                }`}
+                style={[styles.btnTipo, esTodoElDia && styles.btnTipoActivo]}
               >
-                <Text className={esTodoElDia ? "text-white font-semibold" : "text-orange-400"}>
+                <Text style={esTodoElDia ? styles.btnTipoTextoActivo : styles.btnTipoTexto}>
                   Todo el día
                 </Text>
               </TouchableOpacity>
             </View>
 
-            {/* Hora (solo si es puntual) */}
             {!esTodoElDia && (
               <>
-                <Text className="font-semibold mb-1">Hora (HH:MM)</Text>
+                <Text style={styles.label}>Hora (HH:MM)</Text>
                 <TextInput
                   value={hora}
                   onChangeText={setHora}
                   placeholder="Ej: 10:00"
-                  className="bg-white border border-gray-200 rounded-xl px-3 py-2 mb-4"
+                  style={styles.input}
                 />
               </>
             )}
 
-            {/* Voluntarios */}
-            <Text className="font-semibold mb-2">Voluntarios</Text>
-            {personas.map((p) => (
-              <TouchableOpacity
-                key={p.id_persona}
-                onPress={() => togglePersona(p.id_persona)}
-                className={`flex-row items-center py-2 px-3 rounded-xl mb-2 ${
-                  personasIds.includes(p.id_persona)
-                    ? "bg-orange-400"
-                    : "bg-white border border-gray-200"
-                }`}
-              >
-                <Text className={personasIds.includes(p.id_persona) ? "text-white" : "text-gray-700"}>
-                  {p.nombre} {p.apellido}
-                </Text>
-              </TouchableOpacity>
-            ))}
-
-            {/* Botón crear */}
             <TouchableOpacity
               onPress={handleCrear}
               disabled={loading}
-              className="bg-orange-400 py-3 rounded-full items-center mt-4 mb-2"
+              style={styles.btnCrear}
             >
               {loading
                 ? <ActivityIndicator color="white" />
-                : <Text className="text-white font-bold text-base">Crear nueva tarea</Text>
+                : <Text style={styles.btnCrearTexto}>Crear nueva tarea</Text>
               }
             </TouchableOpacity>
           </ScrollView>
@@ -168,3 +124,83 @@ export default function ModalNuevaTarea({
     </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0,0,0,0.4)",
+  },
+  container: {
+    backgroundColor: "#fff7ed",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    maxHeight: "90%",
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  titulo: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#111827",
+  },
+  cerrar: {
+    fontSize: 22,
+    color: "#6b7280",
+  },
+  label: {
+    fontWeight: "600",
+    marginBottom: 4,
+    color: "#111827",
+  },
+  input: {
+    backgroundColor: "white",
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginBottom: 16,
+  },
+  row: {
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 16,
+  },
+  btnTipo: {
+    flex: 1,
+    paddingVertical: 8,
+    borderRadius: 20,
+    alignItems: "center",
+    backgroundColor: "#ffedd5",
+  },
+  btnTipoActivo: {
+    backgroundColor: "#f97316",
+  },
+  btnTipoTexto: {
+    color: "#f97316",
+    fontWeight: "600",
+  },
+  btnTipoTextoActivo: {
+    color: "white",
+    fontWeight: "600",
+  },
+  btnCrear: {
+    backgroundColor: "#f97316",
+    paddingVertical: 14,
+    borderRadius: 20,
+    alignItems: "center",
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  btnCrearTexto: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+});

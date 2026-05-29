@@ -1,18 +1,16 @@
 // src/config/api.ts
-//const API_URL = "http://192.168.0.102:5000/api";
-const API_URL = "http://192.168.1.106:5000/api";
+const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:5000";
+//const API_URL = "http://192.168.1.106:5000/api";
 export const api = {
   getTareas: async (mes?: number, year?: number) => {
     const params = mes && year ? `?mes=${mes}&year=${year}` : "";
     const res = await fetch(`${API_URL}/tareas${params}`);
     return res.json();
   },
-
   getTarea: async (id: number) => {
     const res = await fetch(`${API_URL}/tareas/${id}`);
     return res.json();
   },
-
   createTarea: async (data: any) => {
     const res = await fetch(`${API_URL}/tareas`, {
       method: "POST",
@@ -21,7 +19,6 @@ export const api = {
     });
     return res.json();
   },
-
   updateTarea: async (id: number, data: any) => {
     const res = await fetch(`${API_URL}/tareas/${id}`, {
       method: "PATCH",
@@ -30,14 +27,12 @@ export const api = {
     });
     return res.json();
   },
-
   deleteTarea: async (id: number) => {
     const res = await fetch(`${API_URL}/tareas/${id}`, {
       method: "DELETE",
     });
     return res.json();
   },
-
   getPersonas: async () => {
     const res = await fetch(`${API_URL}/personas`);
     return res.json();

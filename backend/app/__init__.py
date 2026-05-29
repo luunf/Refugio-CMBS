@@ -7,7 +7,7 @@ from app.services.firebase_service import FirebaseService
 from app.utils.error_handlers import register_error_handlers
 
 # Blueprints
-from app.routes.tareas import tareas_bp
+from app.routes.tareas import tarea_bp
 from app.routes.auth_routes import auth_bp
 from app.routes.usuario_routes import usuario_bp
 from app.routes.persona_routes import persona_bp
@@ -36,7 +36,7 @@ def create_app():
         from app import models
 
     # Blueprints
-    app.register_blueprint(tareas_bp, url_prefix="/api")
+    app.register_blueprint(tarea_bp, url_prefix="/tareas")
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(usuario_bp, url_prefix="/usuarios")
     app.register_blueprint(persona_bp, url_prefix="/personas")
