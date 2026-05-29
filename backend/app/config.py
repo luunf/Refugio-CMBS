@@ -7,3 +7,5 @@ load_dotenv()
 class Config:
     SQLALCHEMY_DATABASE_URI = os.getenv('url_bdd')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    FIREBASE_CREDENTIALS_PATH = os.getenv('FIREBASE_CREDENTIALS_PATH', 'firebasekey.json')
