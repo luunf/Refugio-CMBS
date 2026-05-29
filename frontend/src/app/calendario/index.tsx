@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useCallback } from "react";
 import {
   View, Text, ScrollView, TouchableOpacity,
-  ActivityIndicator, SafeAreaView
+  ActivityIndicator, StyleSheet
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { api } from "@/config/api";
 import TareaCard from "@/components/calendario/TareaCard";
 import ModalNuevaTarea from "@/components/calendario/ModalNuevaTarea";
@@ -11,7 +12,6 @@ const MESES = [
   "Enero","Febrero","Marzo","Abril","Mayo","Junio",
   "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
 ];
-
 const DIAS_SEMANA = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
 
 export default function CalendarioScreen() {
@@ -47,7 +47,6 @@ export default function CalendarioScreen() {
     setYear(nuevoYear);
   };
 
-  // Agrupar tareas por día
   const tareasPorDia: Record<number, any[]> = {};
   tareas.forEach((t) => {
     const dia = new Date(t.fecha + "T00:00:00").getDate();
@@ -55,59 +54,46 @@ export default function CalendarioScreen() {
     tareasPorDia[dia].push(t);
   });
 
-  const diasConTareas = Object.keys(tareasPorDia)
-    .map(Number)
-    .sort((a, b) => a - b);
+  const diasConTareas = Object.keys(tareasPorDia).map(Number).sort((a, b) => a - b);
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-100">
+    <SafeAreaView style={styles.container}>
       {/* Header */}
-      <View className="bg-orange-400 px-4 py-4">
-        <Text className="text-white text-2xl font-bold">Calendario</Text>
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Calendario</Text>
       </View>
 
       {/* Selector de mes */}
-      <View className="flex-row items-center justify-between px-4 py-3 bg-white">
+      <View style={styles.selectorMes}>
         <TouchableOpacity onPress={() => cambiarMes(-1)}>
-          <Text className="text-2xl text-orange-400">‹</Text>
+          <Text style={styles.chevron}>‹</Text>
         </TouchableOpacity>
-        <Text className="text-lg font-semibold">
-          {MESES[mes - 1]} {year}
-        </Text>
+        <Text style={styles.mesText}>{MESES[mes - 1]} {year}</Text>
         <TouchableOpacity onPress={() => cambiarMes(1)}>
-          <Text className="text-2xl text-orange-400">›</Text>
+          <Text style={styles.chevron}>›</Text>
         </TouchableOpacity>
-
-        {/* Botón + */}
-        <TouchableOpacity
-          onPress={() => setModalVisible(true)}
-          className="bg-orange-400 w-10 h-10 rounded-full items-center justify-center ml-2"
-        >
-          <Text className="text-white text-2xl font-bold">+</Text>
+        <TouchableOpacity style={styles.btnAgregar} onPress={() => setModalVisible(true)}>
+          <Text style={styles.btnAgregarText}>+</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Lista de días */}
+      {/* Lista */}
       {loading ? (
-        <ActivityIndicator size="large" color="#f97316" className="mt-10" />
+        <ActivityIndicator size="large" color="#f97316" style={{ marginTop: 40 }} />
       ) : (
-        <ScrollView className="flex-1 px-4 pt-2">
+        <ScrollView style={{ flex: 1, paddingHorizontal: 16, paddingTop: 8 }}>
           {diasConTareas.length === 0 ? (
-            <Text className="text-center text-gray-400 mt-10">
-              No hay tareas este mes
-            </Text>
+            <Text style={styles.sinTareas}>No hay tareas este mes</Text>
           ) : (
             diasConTareas.map((dia) => {
               const fecha = new Date(year, mes - 1, dia);
               const nombreDia = DIAS_SEMANA[fecha.getDay()];
               return (
-                <View key={dia} className="bg-white rounded-2xl p-4 mb-3 shadow-sm">
-                  {/* Encabezado del día */}
-                  <View className="flex-row justify-between mb-2">
-                    <Text className="text-3xl font-light text-gray-700">{dia}</Text>
-                    <Text className="text-lg text-gray-500 self-end">{nombreDia}</Text>
+                <View key={dia} style={styles.diaCard}>
+                  <View style={styles.diaHeader}>
+                    <Text style={styles.diaNumero}>{dia}</Text>
+                    <Text style={styles.diaNombre}>{nombreDia}</Text>
                   </View>
-                  {/* Tareas del día */}
                   {tareasPorDia[dia].map((tarea) => (
                     <TareaCard
                       key={tarea.id_tarea}
@@ -119,11 +105,10 @@ export default function CalendarioScreen() {
               );
             })
           )}
-          <View className="h-6" />
+          <View style={{ height: 24 }} />
         </ScrollView>
       )}
 
-      {/* Modal nueva tarea */}
       <ModalNuevaTarea
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
@@ -134,3 +119,83 @@ export default function CalendarioScreen() {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f3f4f6",
+  },
+  header: {
+    backgroundColor: "#f97316",
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  headerText: {
+    color: "white",
+    fontSize: 24,
+    fontWeight: "bold",
+  },
+  selectorMes: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: "white",
+  },
+  chevron: {
+    fontSize: 28,
+    color: "#f97316",
+  },
+  mesText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#111827",
+  },
+  btnAgregar: {
+    backgroundColor: "#f97316",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  btnAgregarText: {
+    color: "white",
+    fontSize: 24,
+    fontWeight: "bold",
+    lineHeight: 28,
+  },
+  sinTareas: {
+    textAlign: "center",
+    color: "#9ca3af",
+    marginTop: 40,
+    fontSize: 16,
+  },
+  diaCard: {
+    backgroundColor: "white",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  diaHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+  diaNumero: {
+    fontSize: 32,
+    fontWeight: "300",
+    color: "#374151",
+  },
+  diaNombre: {
+    fontSize: 18,
+    color: "#6b7280",
+    alignSelf: "flex-end",
+  },
+});
