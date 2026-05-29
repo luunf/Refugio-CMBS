@@ -10,18 +10,21 @@ def get_personas(decoded_token):
     return PersonaController.get_all_personas()
 
 @persona_bp.route('/<int:persona_id>', methods=['GET'])
-@token_required
-def get_persona(decoded_token, persona_id):
+#@token_required
+#def get_persona(decoded_token, persona_id):
+def get_persona(persona_id):
     return PersonaController.get_persona(persona_id)
 
 @persona_bp.route('', methods=['POST'])
-@token_required
-def create_persona(decoded_token):
+#@token_required
+#def create_persona(decoded_token):
+def create_persona():
     return PersonaController.create_persona()
 
 @persona_bp.route('/<int:persona_id>', methods=['PATCH'])
-@token_required
-def update_persona(decoded_token, persona_id):
+#@token_required
+#def update_persona(decoded_token, persona_id):
+def update_persona(persona_id):
     return PersonaController.update_persona(persona_id)
 
 @persona_bp.route('/<int:persona_id>', methods=['DELETE'])

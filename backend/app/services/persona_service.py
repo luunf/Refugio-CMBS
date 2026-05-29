@@ -1,5 +1,3 @@
-# app/services/persona_service.py
-
 from app.extensions import db
 from app.models import Persona, Rol, Animal, Usuario
 from sqlalchemy.orm import joinedload
@@ -122,11 +120,30 @@ class PersonaService:
     @staticmethod
     def crear_persona(data):
 
+        email = data.get("email")
+
+        if not email:
+
+            raise Exception(
+                "El email es obligatorio"
+            )
+
+        existing_persona = Persona.query.filter_by(
+            email=email
+        ).first()
+
+        if existing_persona:
+
+            raise Exception(
+                "Ya existe una persona con ese email"
+            )
+
         persona = Persona(
             nombre=data.get("nombre"),
             apellido=data.get("apellido"),
             telefono=data.get("telefono"),
-            direccion=data.get("direccion")
+            direccion=data.get("direccion"),
+            email=email
         )
 
         db.session.add(persona)
@@ -139,6 +156,11 @@ class PersonaService:
             rol = Rol.query.get(rol_id)
 
             if rol:
+
+                # NO permitir sacar voluntario
+                if rol.nombre == "voluntario":
+                    continue
+
                 persona.roles.append(rol)
 
         db.session.commit()
@@ -151,8 +173,34 @@ class PersonaService:
         persona = Persona.query.get(persona_id)
 
         if not persona:
-            raise Exception("Persona no encontrada")
 
+            raise Exception(
+                "Persona no encontrada"
+            )
+
+        # EMAIL
+        if "email" in data:
+
+            # si tiene usuario -> no puede
+            if persona.usuario and persona.usuario.activo:
+
+                raise Exception(
+                    "No se puede modificar el email porque tiene un usuario activo"
+                )
+
+            existing_persona = Persona.query.filter_by(
+                email=data["email"]
+            ).first()
+
+            if existing_persona and existing_persona.id_persona != persona.id_persona:
+
+                raise Exception(
+                    "El email ya está registrado"
+                )
+
+            persona.email = data["email"]
+
+        # DATOS
         if "nombre" in data:
             persona.nombre = data["nombre"]
 
@@ -165,15 +213,25 @@ class PersonaService:
         if "direccion" in data:
             persona.direccion = data["direccion"]
 
+        # ROLES
         if "roles" in data:
 
-            persona.roles.clear()
+            roles_actuales = []
+
+            # mantener voluntario siempre
+            for rol in persona.roles:
+
+                if rol.nombre == "voluntario":
+                    roles_actuales.append(rol)
+
+            persona.roles = roles_actuales
 
             for rol_id in data["roles"]:
 
                 rol = Rol.query.get(rol_id)
 
-                if rol:
+                if rol and rol not in persona.roles:
+
                     persona.roles.append(rol)
 
         db.session.commit()

@@ -1,5 +1,3 @@
-# app/controllers/persona_controller.py
-
 from flask import request, jsonify
 from app.services.persona_service import PersonaService
 
