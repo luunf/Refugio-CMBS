@@ -3,6 +3,7 @@ from app.models import Persona, Rol, Animal, Usuario
 from sqlalchemy.orm import joinedload
 
 
+
 class PersonaService:
 
     @staticmethod
@@ -16,7 +17,7 @@ class PersonaService:
 
             query = query.filter(
                 Persona.roles.any(
-                    Rol.nombre == rol_nombre
+                    Rol.nombre.ilike(f"%{rol_nombre}%")
                 )
             )
 
@@ -35,9 +36,9 @@ class PersonaService:
 
                 "email": (
                     p.usuario.email
-                    if p.usuario else None
+                    if p.usuario else p.email
                 ),
-
+    
                 "roles": [
                     {
                         "id_rol": r.id_rol,
@@ -68,7 +69,7 @@ class PersonaService:
 
             "email": (
                 persona.usuario.email
-                if persona.usuario else None
+                if persona.usuario else persona.email
             ),
 
             "roles": [
@@ -103,7 +104,7 @@ class PersonaService:
 
                 "email": (
                     p.usuario.email
-                    if p.usuario else None
+                    if p.usuario else p.email
                 ),
 
                 "roles": [
@@ -123,20 +124,12 @@ class PersonaService:
         email = data.get("email")
 
         if not email:
+            raise Exception("El email es obligatorio")
 
-            raise Exception(
-                "El email es obligatorio"
-            )
-
-        existing_persona = Persona.query.filter_by(
-            email=email
-        ).first()
+        existing_persona = Persona.query.filter_by(email=email).first()
 
         if existing_persona:
-
-            raise Exception(
-                "Ya existe una persona con ese email"
-            )
+            raise Exception("Ya existe una persona con ese email")
 
         persona = Persona(
             nombre=data.get("nombre"),
@@ -149,18 +142,16 @@ class PersonaService:
         db.session.add(persona)
         db.session.flush()
 
+        #rol automatico de voluntario
+        rol_voluntario = Rol.query.filter_by(nombre="voluntario").first()
+        if rol_voluntario:
+            persona.roles.append(rol_voluntario)
+
+        #demas roles
         roles_ids = data.get("roles", [])
-
         for rol_id in roles_ids:
-
             rol = Rol.query.get(rol_id)
-
-            if rol:
-
-                # NO permitir sacar voluntario
-                if rol.nombre == "voluntario":
-                    continue
-
+            if rol and rol.nombre != "voluntario": 
                 persona.roles.append(rol)
 
         db.session.commit()
@@ -173,17 +164,11 @@ class PersonaService:
         persona = Persona.query.get(persona_id)
 
         if not persona:
+            raise Exception("Persona no encontrada")
 
-            raise Exception(
-                "Persona no encontrada"
-            )
-
-        # EMAIL
         if "email" in data:
 
-            # si tiene usuario -> no puede
             if persona.usuario and persona.usuario.activo:
-
                 raise Exception(
                     "No se puede modificar el email porque tiene un usuario activo"
                 )
@@ -193,14 +178,10 @@ class PersonaService:
             ).first()
 
             if existing_persona and existing_persona.id_persona != persona.id_persona:
-
-                raise Exception(
-                    "El email ya está registrado"
-                )
+                raise Exception("El email ya está registrado")
 
             persona.email = data["email"]
 
-        # DATOS
         if "nombre" in data:
             persona.nombre = data["nombre"]
 
@@ -213,26 +194,19 @@ class PersonaService:
         if "direccion" in data:
             persona.direccion = data["direccion"]
 
-        # ROLES
         if "roles" in data:
-
-            roles_actuales = []
-
-            # mantener voluntario siempre
-            for rol in persona.roles:
-
-                if rol.nombre == "voluntario":
-                    roles_actuales.append(rol)
-
-            persona.roles = roles_actuales
+            persona.roles = []
 
             for rol_id in data["roles"]:
-
                 rol = Rol.query.get(rol_id)
-
                 if rol and rol not in persona.roles:
-
                     persona.roles.append(rol)
+
+            # si quedo sin roles, poner voluntario
+            if not persona.roles:
+                rol_voluntario = Rol.query.filter_by(nombre="voluntario").first()
+                if rol_voluntario:
+                    persona.roles.append(rol_voluntario)
 
         db.session.commit()
 

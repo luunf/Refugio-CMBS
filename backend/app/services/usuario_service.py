@@ -127,3 +127,7 @@ class UsuarioService:
         db.session.commit()
 
         return True
+    
+    @staticmethod
+    def get_usuario_by_id(usuario_id):
+        return Usuario.query.get(usuario_id)

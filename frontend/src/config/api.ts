@@ -1,40 +1,95 @@
-// src/config/api.ts
+import axios from "axios";
+
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:5000";
-//const API_URL = "http://192.168.1.106:5000/api";
+
+const apiClient = axios.create({
+  baseURL: API_URL,
+  headers: { "Content-Type": "application/json" },
+});
+
+apiClient.interceptors.request.use((config) => {
+  // const token = await getFirebaseToken();
+  // config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
 export const api = {
+  // PERSONAS 
+  getPersonas: async (rol?: string) => {
+    const params = rol ? { rol } : {};
+    const res = await apiClient.get("/personas", { params });
+    return res.data;
+  },
+  getPersona: async (id: number) => {
+    const res = await apiClient.get(`/personas/${id}`);
+    return res.data;
+  },
+  createPersona: async (data: any) => {
+    const res = await apiClient.post("/personas", data);
+    return res.data;
+  },
+  updatePersona: async (id: number, data: any) => {
+    const res = await apiClient.patch(`/personas/${id}`, data);
+    return res.data;
+  },
+  deletePersona: async (id: number) => {
+    const res = await apiClient.delete(`/personas/${id}`);
+    return res.data;
+  },
+
+  //USUARIOS
+  getUsuarios: async () => {
+    const res = await apiClient.get("/usuarios");
+    return res.data;
+  },
+  createUsuario: async (data: any) => {
+    const res = await apiClient.post("/usuarios", data);
+    return res.data;
+  },
+  deleteUsuario: async (id: number) => {
+    const res = await apiClient.delete(`/usuarios/${id}`);
+    return res.data;
+  },
+
+  //ROLES
+  getRoles: async () => {
+    const res = await apiClient.get("/roles");
+    return res.data;
+  },
+
+  //TAREAS
   getTareas: async (mes?: number, year?: number) => {
-    const params = mes && year ? `?mes=${mes}&year=${year}` : "";
-    const res = await fetch(`${API_URL}/tareas${params}`);
-    return res.json();
+    const params = mes && year ? { mes, year } : {};
+    const res = await apiClient.get("/tareas", { params });
+    return res.data;
   },
   getTarea: async (id: number) => {
-    const res = await fetch(`${API_URL}/tareas/${id}`);
-    return res.json();
+    const res = await apiClient.get(`/tareas/${id}`);
+    return res.data;
   },
   createTarea: async (data: any) => {
-    const res = await fetch(`${API_URL}/tareas`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-    return res.json();
+    const res = await apiClient.post("/tareas", data);
+    return res.data;
   },
   updateTarea: async (id: number, data: any) => {
-    const res = await fetch(`${API_URL}/tareas/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-    return res.json();
+    const res = await apiClient.patch(`/tareas/${id}`, data);
+    return res.data;
   },
   deleteTarea: async (id: number) => {
-    const res = await fetch(`${API_URL}/tareas/${id}`, {
-      method: "DELETE",
-    });
-    return res.json();
+    const res = await apiClient.delete(`/tareas/${id}`);
+    return res.data;
   },
-  getPersonas: async () => {
-    const res = await fetch(`${API_URL}/personas`);
-    return res.json();
+
+  //AUTH
+  getMe: async () => {
+    const res = await apiClient.get("/auth/me");
+    return res.data;
   },
+
+  //auth de desarrollo sin firebase
+  devLogin: async (usuarioId: number) => {
+    const res = await apiClient.get(`/auth/dev-login/${usuarioId}`);
+    return res.data;
+  },
+  
 };

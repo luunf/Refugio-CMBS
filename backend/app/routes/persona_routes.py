@@ -5,8 +5,9 @@ from app.utils.decorators import token_required
 persona_bp = Blueprint('personas', __name__)
 
 @persona_bp.route('', methods=['GET'])
-@token_required
-def get_personas(decoded_token):
+#@token_required
+#def get_personas(decoded_token):
+def get_personas():
     return PersonaController.get_all_personas()
 
 @persona_bp.route('/<int:persona_id>', methods=['GET'])
@@ -28,6 +29,7 @@ def update_persona(persona_id):
     return PersonaController.update_persona(persona_id)
 
 @persona_bp.route('/<int:persona_id>', methods=['DELETE'])
-@token_required
-def delete_persona(decoded_token, persona_id):
+#@token_required
+#def delete_persona(decoded_token, persona_id):
+def delete_persona(persona_id):
     return PersonaController.delete_persona(persona_id)
