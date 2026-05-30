@@ -20,11 +20,12 @@ class AnimalCompatibilidad(db.Model):
 
 class AnimalPersona(db.Model):
     __tablename__ = "animales_personas"
-    __table_args__ = (db.UniqueConstraint("animal_id", "persona_id", name="uq_animal_persona"),)
+    __table_args__ = (db.UniqueConstraint("animal_id", "persona_id", "rol_id", name="uq_animal_persona_rol"),)
 
     id = db.Column(db.Integer, primary_key=True)
     animal_id  = db.Column(db.Integer, db.ForeignKey("animales.id_animal", ondelete="CASCADE", onupdate="CASCADE"), nullable=False)
     persona_id = db.Column(db.Integer, db.ForeignKey("personas.id_persona", ondelete="CASCADE", onupdate="CASCADE"), nullable=False)
+    rol_id = db.Column(db.Integer, db.ForeignKey("roles.id_rol"), nullable=False)
 
 
 class PersonaRol(db.Model):
