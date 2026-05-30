@@ -63,20 +63,21 @@ class TareaController:
             return jsonify({"error": str(e)}), 500
 
     @staticmethod
-    def get_tareas_by_persona(persona_id):
+    def get_personas_by_tarea(tarea_id):
         try:
-            tareas = TareaService.get_tareas_by_persona(persona_id)
-            return jsonify(tareas), 200
+            personas = TareaService.get_personas_by_tarea(tarea_id)
+            return jsonify(personas), 200
         except Exception as e:
             if "no encontrada" in str(e):
                 return jsonify({"error": str(e)}), 404
             return jsonify({"error": str(e)}), 500
 
+##ver si este es el endpoit que va en personal controller       
     @staticmethod
-    def get_personas_by_tarea(tarea_id):
+    def get_tareas_by_persona(persona_id):
         try:
-            personas = TareaService.get_personas_by_tarea(tarea_id)
-            return jsonify(personas), 200
+            tareas = TareaService.get_tareas_by_persona(persona_id)
+            return jsonify(tareas), 200
         except Exception as e:
             if "no encontrada" in str(e):
                 return jsonify({"error": str(e)}), 404

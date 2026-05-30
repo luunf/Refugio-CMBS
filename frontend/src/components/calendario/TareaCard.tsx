@@ -1,18 +1,21 @@
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { api } from "@/config/api";
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
 interface Props {
   tarea: any;
-  onActualizar: () => void;
+  onUpdate: () => Promise<void>;
+  onDelete: () => Promise<void>;
 }
 
-export default function TareaCard({ tarea, onActualizar }: Props) {
+export default function TareaCard({ tarea, onUpdate, onDelete }: Props) {
   const [expandida, setExpandida] = useState(false);
 
   const toggleCompletada = async () => {
-    await api.updateTarea(tarea.id_tarea, { completada: !tarea.completada });
-    onActualizar();
+    await onUpdate();
+  };
+
+  const handleDelete = async () => {
+    await onDelete();
   };
 
   const hora = tarea.hora
@@ -45,6 +48,10 @@ export default function TareaCard({ tarea, onActualizar }: Props) {
             <Text style={styles.btnCompletarText}>
               {tarea.completada ? "Marcar pendiente" : "Marcar completada"}
             </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={handleDelete} style={styles.btnEliminar}>
+            <Text style={styles.btnEliminarText}>Eliminar tarea</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -81,4 +88,12 @@ const styles = StyleSheet.create({
   },
   btnCompletarGris: { backgroundColor: "#d1d5db" },
   btnCompletarText: { color: "white", fontWeight: "600", fontSize: 13 },
+  btnEliminar: {
+    backgroundColor: "#ef4444",
+    borderRadius: 20,
+    paddingVertical: 8,
+    alignItems: "center",
+    marginTop: 8,
+  },
+  btnEliminarText: { color: "white", fontWeight: "600", fontSize: 13 },
 });

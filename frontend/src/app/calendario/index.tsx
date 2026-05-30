@@ -1,48 +1,35 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useState, useEffect } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
   ActivityIndicator, StyleSheet
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { api } from "@/config/api";
-import TareaCard from "@/components/calendario/TareaCard";
-import ModalNuevaTarea from "@/components/calendario/ModalNuevaTarea";
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTareas } from '@/hooks/useTareas';
+import TareaCard from '@/components/calendario/TareaCard';
+import ModalNuevaTarea from '@/components/calendario/ModalNuevaTarea';
 
 const MESES = [
-  "Enero","Febrero","Marzo","Abril","Mayo","Junio",
-  "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
+  "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
 ];
-const DIAS_SEMANA = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
+const DIAS_SEMANA = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
 export default function CalendarioScreen() {
   const hoy = new Date();
   const [mes, setMes] = useState(hoy.getMonth() + 1);
   const [year, setYear] = useState(hoy.getFullYear());
-  const [tareas, setTareas] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-
-  const cargarTareas = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await api.getTareas(mes, year);
-      setTareas(Array.isArray(data) ? data : []);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  }, [mes, year]);
+  const { tareas, loading, cargarTareas, crearTarea, actualizarTarea, eliminarTarea } = useTareas(mes, year);
 
   useEffect(() => {
     cargarTareas();
-  }, [cargarTareas]);
+  }, [mes, year]);
 
   const cambiarMes = (direccion: number) => {
     let nuevoMes = mes + direccion;
     let nuevoYear = year;
     if (nuevoMes > 12) { nuevoMes = 1; nuevoYear++; }
-    if (nuevoMes < 1)  { nuevoMes = 12; nuevoYear--; }
+    if (nuevoMes < 1) { nuevoMes = 12; nuevoYear--; }
     setMes(nuevoMes);
     setYear(nuevoYear);
   };
@@ -53,17 +40,14 @@ export default function CalendarioScreen() {
     if (!tareasPorDia[dia]) tareasPorDia[dia] = [];
     tareasPorDia[dia].push(t);
   });
-
   const diasConTareas = Object.keys(tareasPorDia).map(Number).sort((a, b) => a - b);
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerText}>Calendario</Text>
       </View>
 
-      {/* Selector de mes */}
       <View style={styles.selectorMes}>
         <TouchableOpacity onPress={() => cambiarMes(-1)}>
           <Text style={styles.chevron}>‹</Text>
@@ -77,7 +61,6 @@ export default function CalendarioScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Lista */}
       {loading ? (
         <ActivityIndicator size="large" color="#f97316" style={{ marginTop: 40 }} />
       ) : (
@@ -86,8 +69,8 @@ export default function CalendarioScreen() {
             <Text style={styles.sinTareas}>No hay tareas este mes</Text>
           ) : (
             diasConTareas.map((dia) => {
-              const fecha = new Date(year, mes - 1, dia);
-              const nombreDia = DIAS_SEMANA[fecha.getDay()];
+              const fechaObj = new Date(year, mes - 1, dia);
+              const nombreDia = DIAS_SEMANA[fechaObj.getDay()];
               return (
                 <View key={dia} style={styles.diaCard}>
                   <View style={styles.diaHeader}>
@@ -98,7 +81,8 @@ export default function CalendarioScreen() {
                     <TareaCard
                       key={tarea.id_tarea}
                       tarea={tarea}
-                      onActualizar={cargarTareas}
+                      onUpdate={() => actualizarTarea(tarea.id_tarea, { completada: !tarea.completada })}
+                      onDelete={() => eliminarTarea(tarea.id_tarea)}
                     />
                   ))}
                 </View>
@@ -112,7 +96,7 @@ export default function CalendarioScreen() {
       <ModalNuevaTarea
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
-        onCreada={cargarTareas}
+        onCreate={crearTarea}
         mesActual={mes}
         yearActual={year}
       />
@@ -121,20 +105,9 @@ export default function CalendarioScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f3f4f6",
-  },
-  header: {
-    backgroundColor: "#f97316",
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-  },
-  headerText: {
-    color: "white",
-    fontSize: 24,
-    fontWeight: "bold",
-  },
+  container: { flex: 1, backgroundColor: "#f3f4f6" },
+  header: { backgroundColor: "#f97316", paddingHorizontal: 16, paddingVertical: 16 },
+  headerText: { color: "white", fontSize: 24, fontWeight: "bold" },
   selectorMes: {
     flexDirection: "row",
     alignItems: "center",
@@ -143,15 +116,8 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     backgroundColor: "white",
   },
-  chevron: {
-    fontSize: 28,
-    color: "#f97316",
-  },
-  mesText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#111827",
-  },
+  chevron: { fontSize: 28, color: "#f97316" },
+  mesText: { fontSize: 18, fontWeight: "600", color: "#111827" },
   btnAgregar: {
     backgroundColor: "#f97316",
     width: 40,
@@ -160,18 +126,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  btnAgregarText: {
-    color: "white",
-    fontSize: 24,
-    fontWeight: "bold",
-    lineHeight: 28,
-  },
-  sinTareas: {
-    textAlign: "center",
-    color: "#9ca3af",
-    marginTop: 40,
-    fontSize: 16,
-  },
+  btnAgregarText: { color: "white", fontSize: 24, fontWeight: "bold", lineHeight: 28 },
+  sinTareas: { textAlign: "center", color: "#9ca3af", marginTop: 40, fontSize: 16 },
   diaCard: {
     backgroundColor: "white",
     borderRadius: 16,
@@ -183,19 +139,7 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
   },
-  diaHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 8,
-  },
-  diaNumero: {
-    fontSize: 32,
-    fontWeight: "300",
-    color: "#374151",
-  },
-  diaNombre: {
-    fontSize: 18,
-    color: "#6b7280",
-    alignSelf: "flex-end",
-  },
+  diaHeader: { flexDirection: "row", justifyContent: "space-between", marginBottom: 8 },
+  diaNumero: { fontSize: 32, fontWeight: "300", color: "#374151" },
+  diaNombre: { fontSize: 18, color: "#6b7280", alignSelf: "flex-end" },
 });
