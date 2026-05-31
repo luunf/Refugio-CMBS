@@ -12,6 +12,9 @@ from app.routes.auth_routes import auth_bp
 from app.routes.usuario_routes import usuario_bp
 from app.routes.persona_routes import persona_bp
 from app.routes.rol_routes import rol_bp
+from app.routes.animal_routes import animal_bp
+from app.routes.estado_routes import estado_bp
+from app.routes.compatibilidad_routes import compatibilidad_bp
 
 
 def create_app():
@@ -41,6 +44,9 @@ def create_app():
     app.register_blueprint(usuario_bp, url_prefix="/usuarios")
     app.register_blueprint(persona_bp, url_prefix="/personas")
     app.register_blueprint(rol_bp, url_prefix="/roles")
+    app.register_blueprint(animal_bp, url_prefix="/animales")
+    app.register_blueprint(estado_bp, url_prefix="/estados")
+    app.register_blueprint(compatibilidad_bp, url_prefix="/compatibilidades")
 
     # Manejo de errores
     register_error_handlers(app)
