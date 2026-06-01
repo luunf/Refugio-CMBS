@@ -91,5 +91,36 @@ export const api = {
     const res = await apiClient.get(`/auth/dev-login/${usuarioId}`);
     return res.data;
   },
-  
+ 
+// TRATAMIENTOS
+  getTratamientos: async () => {
+    const res = await apiClient.get("/tratamientos");
+    return res.data;
+  },
+  createTratamientoEnVisita: async (visitaId: number, data: any) => {
+    const res = await apiClient.post(`/visitas/${visitaId}/tratamientos`, data);
+    return res.data;
+  },
+  updateTratamiento: async (id: number, data: any) => {
+    const res = await apiClient.patch(`/tratamientos/${id}`, data);
+    return res.data;
+  },
+  deleteTratamiento: async (id: number) => {
+    const res = await apiClient.delete(`/tratamientos/${id}`);
+    return res.data;
+  },
+  // Para crear visita (necesario para crearTratamientoCompleto)
+  createVisita: async (animalId: number, data: any) => {
+    const res = await apiClient.post(`/animales/${animalId}/visitas`, data);
+    return res.data;
+  },
+//ANIMAL
+  getAnimales: async (tipo?: string, estado_id?: number) => {
+  const params: any = {};
+  if (tipo) params.tipo = tipo;
+  if (estado_id) params.estado_id = estado_id;
+  const res = await apiClient.get("/animales", { params });
+  return res.data;
+},
 };
+

@@ -14,10 +14,7 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="personas" />
           <Stack.Screen name="calendario" />
-          {/* Sacar estas tres hasta que las crees: */}
-          {/* <Stack.Screen name="usuarios" /> */}
-          {/* <Stack.Screen name="animales" /> */}
-          {/* <Stack.Screen name="tratamientos" /> */}
+          <Stack.Screen name="tratamientos" />
         </Stack>
       </ThemeProvider>
     </AuthProvider>

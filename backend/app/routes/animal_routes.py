@@ -1,5 +1,6 @@
 from flask import Blueprint
 from app.controllers.animal_controller import AnimalController
+from app.controllers.visita_controller import VisitaController
 
 animal_bp = Blueprint('animales', __name__)
 
@@ -22,3 +23,11 @@ def update_animal(animal_id):
 @animal_bp.route('/<int:animal_id>', methods=['DELETE'])
 def delete_animal(animal_id):
     return AnimalController.delete_animal(animal_id)
+
+@animal_bp.route('/<int:animal_id>/visitas', methods=['GET'])
+def get_visitas_animal(animal_id):
+    return VisitaController.get_visitas(animal_id)
+
+@animal_bp.route('/<int:animal_id>/visitas', methods=['POST'])
+def create_visita_animal(animal_id):
+    return VisitaController.create_visita(animal_id)

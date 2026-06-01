@@ -4,7 +4,8 @@ import { api } from '@/config/api';
 export const useTratamientos = () => {
   const [tratamientos, setTratamientos] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-
+  const [error, setError] = useState<string | null>(null);
+  
   const cargarTratamientos = useCallback(async () => {
     setLoading(true);
     try {
@@ -12,23 +13,23 @@ export const useTratamientos = () => {
       setTratamientos(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error cargando tratamientos:', error);
+      setError('No se pudieron cargar los tratamientos');
     } finally {
       setLoading(false);
     }
   }, []);
 
   const crearTratamientoCompleto = useCallback(async (animalId: number, visitaData: any, tratamientoData: any) => {
-    try {
-      // 1. Crear la visita
-      const visita = await api.createVisita(animalId, visitaData);
-      // 2. Crear el tratamiento asociado a esa visita
-      await api.createTratamientoEnVisita(visita.id, tratamientoData);
-      await cargarTratamientos(); // recargar lista
-    } catch (error) {
-      console.error('Error creando tratamiento con visita:', error);
-      throw error;
-    }
-  }, [cargarTratamientos]);
+  try {
+    const visita = await api.createVisita(animalId, visitaData);
+    // El backend devuelve id_visita, no id
+    await api.createTratamientoEnVisita(visita.id_visita, tratamientoData);
+    await cargarTratamientos();
+  } catch (error) {
+    console.error('Error creando tratamiento con visita:', error);
+    throw error;
+  }
+}, [cargarTratamientos]);
 
   const actualizarTratamiento = useCallback(async (id: number, data: any) => {
     try {
@@ -50,12 +51,15 @@ export const useTratamientos = () => {
     }
   }, [cargarTratamientos]);
 
+  
   return {
     tratamientos,
     loading,
+    error,
     cargarTratamientos,
     crearTratamientoCompleto,
     actualizarTratamiento,
     eliminarTratamiento,
+    crearTratamiento: crearTratamientoCompleto,
   };
 };

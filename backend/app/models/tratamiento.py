@@ -11,3 +11,22 @@ class Tratamiento(db.Model):
     visita_id      = db.Column(db.Integer, db.ForeignKey("visitas_veterinarias.id_visita", ondelete="CASCADE", onupdate="CASCADE"), nullable=False)
 
     visita = db.relationship("VisitaVeterinaria", back_populates="tratamientos")
+
+    def to_dict(self):  # <-- adentro de la clase
+        animal_nombre = None
+        especie = None
+
+        if self.visita and self.visita.animal:
+            animal_nombre = self.visita.animal.nombre
+            especie = self.visita.animal.tipo
+
+        return {
+            "id": self.id_tratamiento,
+            "tipo": self.tipo,
+            "descripcion": self.descripcion,
+            "fecha_inicio": str(self.fecha_inicio) if self.fecha_inicio else None,
+            "fecha_fin": str(self.fecha_fin) if self.fecha_fin else None,
+            "visita_id": self.visita_id,
+            "animal_nombre": animal_nombre,
+            "especie": especie,
+        }

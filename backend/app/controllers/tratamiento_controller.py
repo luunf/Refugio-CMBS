@@ -1,36 +1,24 @@
 from flask import request, jsonify
-
 from app.services.tratamiento_service import TratamientoService
 
 
-class TratamientoController:
+def get_tratamientos():
+    tratamientos = TratamientoService.get_all()
+    return jsonify(tratamientos), 200
 
-    @staticmethod
-    def get_all():
 
-        tratamientos = TratamientoService.get_all()
+def create_tratamiento(visita_id):
+    data = request.get_json()
+    tratamiento = TratamientoService.create(visita_id, data)
+    return jsonify(tratamiento), 201
 
-        return jsonify(tratamientos), 200
 
-    @staticmethod
-    def create(visita_id):
+def update_tratamiento(id):
+    data = request.get_json()
+    tratamiento = TratamientoService.update(id, data)
+    return jsonify(tratamiento), 200
 
-        data = request.get_json()
 
-        tratamiento = TratamientoService.create(
-            visita_id,
-            data
-        )
-
-        return jsonify(tratamiento), 201
-
-    @staticmethod
-    def delete(id_tratamiento):
-
-        TratamientoService.delete(
-            id_tratamiento
-        )
-
-        return jsonify({
-            "message": "Tratamiento eliminado"
-        }), 200
+def delete_tratamiento(id):
+    TratamientoService.delete(id)
+    return jsonify({"message": "Tratamiento eliminado"}), 200

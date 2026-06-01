@@ -15,7 +15,8 @@ from app.routes.rol_routes import rol_bp
 from app.routes.animal_routes import animal_bp
 from app.routes.estado_routes import estado_bp
 from app.routes.compatibilidad_routes import compatibilidad_bp
-
+from app.routes.tratamiento_routes import tratamiento_bp
+from app.routes.visita_routes import visita_bp
 
 def create_app():
     app = Flask(__name__)
@@ -47,7 +48,8 @@ def create_app():
     app.register_blueprint(animal_bp, url_prefix="/animales")
     app.register_blueprint(estado_bp, url_prefix="/estados")
     app.register_blueprint(compatibilidad_bp, url_prefix="/compatibilidades")
-
+    app.register_blueprint(tratamiento_bp, url_prefix="/tratamientos")
+    app.register_blueprint(visita_bp, url_prefix="/visitas")
     # Manejo de errores
     register_error_handlers(app)
 

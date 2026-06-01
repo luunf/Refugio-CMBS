@@ -1,68 +1,101 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, TextInput, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  View, Text, ScrollView, TouchableOpacity,
+  ActivityIndicator, StyleSheet, TextInput,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTratamientos } from '@/hooks/useTratamientos';
-import TratamientoCard from '@/components/tratamientos/TratamientoCard';
-import ModalNuevoTratamiento from '@/components/tratamientos/ModalNuevoTratamiento';
+import { useTratamientos } from '../../hooks/useTratamientos';
+import TratamientoCard from '../../components/tratamientos/TratamientoCard';
+import ModalNuevoTratamiento from '../../components/tratamientos/ModalNuevoTratamiento';
 
-export default function TratamientosIndex() {
-  const { tratamientos, loading, cargarTratamientos, crearTratamientoCompleto } = useTratamientos();
-  const [modalVisible, setModalVisible] = useState(false);
-  const [filtroTipo, setFiltroTipo] = useState<'todos' | 'perros' | 'gatos'>('todos');
+const FILTROS_ESPECIE = [
+  { label: 'Todos', valor: 'Todos' },
+  { label: 'Perros', valor: 'perro' },
+  { label: 'Gatos', valor: 'gato' },
+];
+
+export default function TratamientosScreen() {
+  const {
+    tratamientos,
+    loading,
+    cargarTratamientos,
+    crearTratamientoCompleto,
+    eliminarTratamiento,
+  } = useTratamientos();
+
   const [busqueda, setBusqueda] = useState('');
+  const [filtro, setFiltro] = useState('Todos');
+  const [modalVisible, setModalVisible] = useState(false);
 
-  useEffect(() => {
-    cargarTratamientos();
-  }, []);
+  useEffect(() => { cargarTratamientos(); }, []);
 
-  const tratamientosFiltrados = tratamientos.filter((t) => {
-    const animal = t.animal;
-    if (!animal) return false;
-    const tipoAnimal = animal.tipo?.toLowerCase();
-    if (filtroTipo === 'perros' && tipoAnimal !== 'perro') return false;
-    if (filtroTipo === 'gatos' && tipoAnimal !== 'gato') return false;
-    if (busqueda && !animal.nombre.toLowerCase().includes(busqueda.toLowerCase())) return false;
-    return true;
+  const filtrados = tratamientos.filter(t => {
+    const animal = (t.animal_nombre ?? '').toLowerCase();
+    const especie = (t.especie ?? '').toLowerCase();
+    const matchBusqueda = animal.includes(busqueda.toLowerCase());
+    const matchFiltro = filtro === 'Todos' || especie === filtro;
+    return matchBusqueda && matchFiltro;
   });
 
   return (
     <SafeAreaView style={styles.container}>
+
+      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerText}>Tratamientos</Text>
-        <TouchableOpacity style={styles.btnAgregar} onPress={() => setModalVisible(true)}>
-          <Text style={styles.btnAgregarText}>+</Text>
+      </View>
+
+      {/* Buscador + botón agregar */}
+      <View style={styles.buscadorRow}>
+        <View style={styles.buscadorContainer}>
+          <Text style={styles.buscadorIcono}>🔍</Text>
+          <TextInput
+            value={busqueda}
+            onChangeText={setBusqueda}
+            placeholder="Buscar animal en tratamiento..."
+            style={styles.buscadorInput}
+            placeholderTextColor="#9ca3af"
+          />
+        </View>
+        <TouchableOpacity
+          style={styles.btnAgregar}
+          onPress={() => setModalVisible(true)}
+        >
+          <Text style={styles.btnAgregarTexto}>+</Text>
         </TouchableOpacity>
       </View>
 
-      <TextInput
-        placeholder="Buscar animal en tratamiento..."
-        value={busqueda}
-        onChangeText={setBusqueda}
-        style={styles.searchInput}
-      />
-
-      <View style={styles.filtros}>
-        {['todos', 'perros', 'gatos'].map((f) => (
+      {/* Filtros */}
+      <View style={styles.filtrosGrilla}>
+        {FILTROS_ESPECIE.map(f => (
           <TouchableOpacity
-            key={f}
-            onPress={() => setFiltroTipo(f as any)}
-            style={[styles.filtroBtn, filtroTipo === f && styles.filtroBtnActivo]}
+            key={f.valor}
+            onPress={() => setFiltro(f.valor)}
+            style={[styles.filtroBadge, filtro === f.valor && styles.filtroBadgeActivo]}
           >
-            <Text style={[styles.filtroTexto, filtroTipo === f && styles.filtroTextoActivo]}>
-              {f.charAt(0).toUpperCase() + f.slice(1)}
+            <Text style={filtro === f.valor ? styles.filtroTextoActivo : styles.filtroTexto}>
+              {f.label}
             </Text>
           </TouchableOpacity>
         ))}
       </View>
 
+      {/* Lista */}
       {loading ? (
         <ActivityIndicator size="large" color="#f97316" style={{ marginTop: 40 }} />
       ) : (
-        <ScrollView style={{ flex: 1, paddingHorizontal: 16, paddingTop: 8 }}>
-          {tratamientosFiltrados.length === 0 ? (
-            <Text style={styles.sinDatos}>No hay tratamientos registrados</Text>
+        <ScrollView style={styles.lista}>
+          {filtrados.length === 0 ? (
+            <Text style={styles.sinResultados}>No hay tratamientos registrados</Text>
           ) : (
-            tratamientosFiltrados.map((t) => <TratamientoCard key={t.id} tratamiento={t} />)
+            filtrados.map(t => (
+              <TratamientoCard
+                key={t.id}
+                tratamiento={t}
+                onDelete={eliminarTratamiento}
+                onAgendar={(t) => console.log('Agendar:', t)}
+              />
+            ))
           )}
           <View style={{ height: 24 }} />
         </ScrollView>
@@ -71,23 +104,121 @@ export default function TratamientosIndex() {
       <ModalNuevoTratamiento
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
-        onCreate={crearTratamientoCompleto}
+        onCrear={async (data) => {
+          await crearTratamientoCompleto(
+            data.animal_id,
+            {
+              fecha: data.fecha_inicio,
+              procedimiento: data.tipo,
+              estado: 'realizada',
+              veterinario_id: 1,
+            },
+            {
+              tipo: data.tipo,
+              descripcion: data.descripcion,
+              fecha_inicio: data.fecha_inicio,
+              fecha_fin: data.fecha_fin,
+            }
+          );
+          setModalVisible(false);
+        }}
       />
+
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f3f4f6' },
-  header: { backgroundColor: '#f97316', paddingHorizontal: 16, paddingVertical: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  headerText: { color: 'white', fontSize: 24, fontWeight: 'bold' },
-  btnAgregar: { backgroundColor: 'white', width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
-  btnAgregarText: { color: '#f97316', fontSize: 24, fontWeight: 'bold' },
-  searchInput: { backgroundColor: 'white', borderRadius: 12, margin: 16, paddingHorizontal: 12, paddingVertical: 8, borderWidth: 1, borderColor: '#e5e7eb' },
-  filtros: { flexDirection: 'row', marginHorizontal: 16, marginBottom: 8, gap: 8 },
-  filtroBtn: { paddingHorizontal: 16, paddingVertical: 6, borderRadius: 20, backgroundColor: '#e5e7eb' },
-  filtroBtnActivo: { backgroundColor: '#f97316' },
-  filtroTexto: { color: '#374151' },
-  filtroTextoActivo: { color: 'white', fontWeight: 'bold' },
-  sinDatos: { textAlign: 'center', color: '#9ca3af', marginTop: 40, fontSize: 16 },
+  container: {
+    flex: 1,
+    backgroundColor: '#f3f4f6',
+  },
+  header: {
+    backgroundColor: '#f97316',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  headerText: {
+    color: 'white',
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  buscadorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: 'white',
+    gap: 10,
+  },
+  buscadorContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f3f4f6',
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  buscadorIcono: {
+    fontSize: 16,
+    marginRight: 6,
+  },
+  buscadorInput: {
+    flex: 1,
+    fontSize: 14,
+    color: '#111827',
+  },
+  btnAgregar: {
+    backgroundColor: '#f97316',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  btnAgregarTexto: {
+    color: 'white',
+    fontSize: 24,
+    fontWeight: 'bold',
+    lineHeight: 28,
+  },
+  filtrosGrilla: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: 'white',
+    gap: 8,
+  },
+  filtroBadge: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
+    backgroundColor: '#f3f4f6',
+  },
+  filtroBadgeActivo: {
+    backgroundColor: '#f97316',
+  },
+  filtroTexto: {
+    color: '#374151',
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  filtroTextoActivo: {
+    color: 'white',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  lista: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+  },
+  sinResultados: {
+    textAlign: 'center',
+    color: '#9ca3af',
+    marginTop: 40,
+    fontSize: 16,
+  },
 });

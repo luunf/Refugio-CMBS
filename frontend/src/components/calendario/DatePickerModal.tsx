@@ -15,7 +15,8 @@ export default function DatePickerModal({ visible, onClose, onSelectDate, initia
   );
 
   const handleConfirm = () => {
-    const date = new Date(selectedDate);
+    const [year, month, day] = selectedDate.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
     onSelectDate(date);
     onClose();
   };
