@@ -114,13 +114,47 @@ export const api = {
     const res = await apiClient.post(`/animales/${animalId}/visitas`, data);
     return res.data;
   },
-//ANIMAL
+
+//ANIMALES
   getAnimales: async (tipo?: string, estado_id?: number) => {
-  const params: any = {};
-  if (tipo) params.tipo = tipo;
-  if (estado_id) params.estado_id = estado_id;
-  const res = await apiClient.get("/animales", { params });
-  return res.data;
-},
+    const params: any = {};
+    if (tipo) params.tipo = tipo;
+    if (estado_id) params.estado_id = estado_id;
+    const res = await apiClient.get("/animales", { params });
+    return res.data;
+  },
+  getAnimal: async (id: number) => {
+    const res = await apiClient.get(`/animales/${id}`);
+    return res.data;
+  },
+  createAnimal: async (data: any) => {
+    const res = await apiClient.post("/animales", data);
+    return res.data;
+  },
+  updateAnimal: async (id: number, data: any) => {
+    const res = await apiClient.patch(`/animales/${id}`, data);
+    return res.data;
+  },
+  deleteAnimal: async (id: number) => {
+    const res = await apiClient.delete(`/animales/${id}`);
+    return res.data;
+  },
+  getVisitasAnimal: async (animalId: number) => {
+    const res = await apiClient.get(`/animales/${animalId}/visitas`);
+    return res.data;
+  },
+
+  //ESTADOS
+  getEstados: async () => {
+    const res = await apiClient.get("/estados");
+    return res.data;
+  },
+
+  //COMPATIBILIDADES
+  getCompatibilidades: async () => {
+    const res = await apiClient.get("/compatibilidades");
+    return res.data;
+  },
+
 };
 
