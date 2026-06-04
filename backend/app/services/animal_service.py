@@ -128,6 +128,7 @@ class AnimalService:
                 "nombre": a.nombre,
                 "url_imagen": a.url_imagen,
                 "estados": [{"id_estado": e.id_estado, "nombre": e.nombre} for e in a.estados],
+                "tipo": a.tipo
             }
             for a in animales
         ]

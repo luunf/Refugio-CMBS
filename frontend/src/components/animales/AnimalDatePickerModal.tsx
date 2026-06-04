@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, View, TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { Calendar, LocaleConfig } from 'react-native-calendars';
+import { Calendar, LocaleConfig  } from 'react-native-calendars';
 
 LocaleConfig.locales['es'] = {
   monthNames: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
@@ -14,34 +14,28 @@ LocaleConfig.defaultLocale = 'es';
 interface Props {
   visible: boolean;
   onClose: () => void;
-  onSelectDate: (date: Date) => void;
-  initialDate?: Date;
+  onSelectDate: (dateString: string) => void;
+  titulo?: string;
+  fechaSeleccionada?: string;
 }
 
-export default function DatePickerModal({ visible, onClose, onSelectDate, initialDate }: Props) {
-  const [selectedDate, setSelectedDate] = useState(
-    initialDate ? initialDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
-  );
+export default function AnimalDatePickerModal({visible, onClose, onSelectDate, titulo = "Selecciona una fecha", fechaSeleccionada, }: Props) {
+  const hoy = new Date().toISOString().split('T')[0];
+  const [selected, setSelected] = useState(fechaSeleccionada ?? hoy);
 
   const handleConfirm = () => {
-    const [year, month, day] = selectedDate.split('-').map(Number);
-    const date = new Date(year, month - 1, day);
-    onSelectDate(date);
+    onSelectDate(selected); // ya viene en formato YYYY-MM-DD, compatible con PostgreSQL
     onClose();
   };
-
-  const today = new Date().toISOString().split('T')[0];
 
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.overlay}>
         <View style={styles.container}>
-          <Text style={styles.titulo}>Selecciona una fecha</Text>
-
+          <Text style={styles.titulo}>{titulo}</Text>
           <Calendar
-            current={selectedDate}
-            minDate={today}
-            onDayPress={(day) => setSelectedDate(day.dateString)}
+            current={selected}
+            onDayPress={(day) => setSelected(day.dateString)}
             theme={{
               selectedDayBackgroundColor: '#f97316',
               selectedDayTextColor: '#ffffff',
@@ -53,11 +47,10 @@ export default function DatePickerModal({ visible, onClose, onSelectDate, initia
               textDayHeaderFontWeight: '600',
             }}
             markedDates={{
-              [selectedDate]: { selected: true, selectedColor: '#f97316' },
+              [selected]: { selected: true, selectedColor: '#f97316' },
             }}
             style={styles.calendar}
           />
-
           <View style={styles.botones}>
             <TouchableOpacity onPress={onClose} style={styles.btnCancelar}>
               <Text style={styles.btnCancelarText}>Cancelar</Text>
@@ -86,32 +79,30 @@ const styles = StyleSheet.create({
     width: '90%',
     alignItems: 'center',
   },
-  titulo: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 16,
-    color: '#111827',
-  },
-  calendar: {
-    width: '100%',
-    borderRadius: 12,
-  },
-  botones: {
-    flexDirection: 'row',
-    marginTop: 20,
-    gap: 12,
+  titulo: { 
+    fontSize: 18, 
+    fontWeight: 'bold', 
+    marginBottom: 16, 
+    color: '#111827' },
+  calendar: { 
+    width: '100%', 
+    borderRadius: 12 },
+  botones: { 
+    flexDirection: 'row', 
+    marginTop: 20, 
+    gap: 12 
   },
   btnCancelar: {
-    paddingVertical: 8,
+    paddingVertical: 8, 
     paddingHorizontal: 20,
-    backgroundColor: '#e5e7eb',
+    backgroundColor: '#e5e7eb', 
     borderRadius: 20,
   },
   btnCancelarText: { color: '#374151' },
   btnConfirmar: {
-    paddingVertical: 8,
+    paddingVertical: 8, 
     paddingHorizontal: 20,
-    backgroundColor: '#f97316',
+    backgroundColor: '#f97316', 
     borderRadius: 20,
   },
   btnConfirmarText: { color: 'white', fontWeight: 'bold' },
