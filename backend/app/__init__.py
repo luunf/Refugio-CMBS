@@ -17,6 +17,7 @@ from app.routes.estado_routes import estado_bp
 from app.routes.compatibilidad_routes import compatibilidad_bp
 from app.routes.tratamiento_routes import tratamiento_bp
 from app.routes.visita_routes import visita_bp
+from app.routes.vacuna_routes import vacuna_bp
 
 def create_app():
     app = Flask(__name__)
@@ -50,6 +51,7 @@ def create_app():
     app.register_blueprint(compatibilidad_bp, url_prefix="/compatibilidades")
     app.register_blueprint(tratamiento_bp, url_prefix="/tratamientos")
     app.register_blueprint(visita_bp, url_prefix="/visitas")
+    app.register_blueprint(vacuna_bp, url_prefix="/vacunas")
     # Manejo de errores
     register_error_handlers(app)
 
