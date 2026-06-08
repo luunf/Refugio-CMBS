@@ -3,6 +3,7 @@ import {
   View, Text, TouchableOpacity, Modal,
   FlatList, StyleSheet
 } from "react-native";
+import { Colors } from '@/constants/theme';
 
 interface Estado {
   id_estado: number;
@@ -92,15 +93,15 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     backgroundColor: "white",
     borderWidth: 1,
-    borderColor: "#e5e7eb",
+    borderColor: Colors.border,
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
     marginBottom: 16,
   },
-  placeholder: { color: "#9ca3af", fontSize: 14 },
-  textoSeleccionado: { color: "#111827", fontSize: 14, flex: 1 },
-  chevron: { fontSize: 18, color: "#f97316" },
+  placeholder: { color: Colors.textFaint, fontSize: 14 },
+  textoSeleccionado: { color: Colors.text, fontSize: 14, flex: 1 },
+  chevron: { fontSize: 18, color: Colors.primary },
   overlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.3)",
@@ -108,7 +109,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
   },
   dropdown: {
-    backgroundColor: "white",
+    backgroundColor: Colors.surface,
     borderRadius: 16,
     overflow: "hidden",
     maxHeight: 300,
@@ -120,12 +121,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: "#f3f4f6",
+    borderBottomColor: Colors.borderLight,
   },
-  opcionActiva: { backgroundColor: "#fff7ed" },
-  opcionTexto: { fontSize: 15, color: "#374151" },
-  opcionTextoActivo: { color: "#f97316", fontWeight: "600" },
-  check: { color: "#f97316", fontWeight: "bold" },
-  btnListo: { backgroundColor: "#f97316", padding: 14, alignItems: "center" },
+  opcionActiva: { backgroundColor: Colors.primaryFaint },
+  opcionTexto: { fontSize: 15, color: Colors.textSoft },
+  opcionTextoActivo: { color: Colors.primary, fontWeight: "600" },
+  check: { color: Colors.primary, fontWeight: "bold" },
+  btnListo: { backgroundColor: Colors.primary, padding: 14, alignItems: "center" },
   btnListoTexto: { color: "white", fontWeight: "bold", fontSize: 15 },
 });

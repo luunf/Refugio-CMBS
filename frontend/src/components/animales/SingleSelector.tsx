@@ -3,6 +3,7 @@ import {
   View, Text, TouchableOpacity, Modal,
   FlatList, StyleSheet, TextInput
 } from "react-native";
+import { Colors } from '@/constants/theme';
 
 interface Item {
   id: number;
@@ -46,7 +47,7 @@ export default function SingleSelector({ value, onChange, items, placeholder = "
                 value={busqueda}
                 onChangeText={setBusqueda}
                 placeholder="Buscar..."
-                placeholderTextColor="#9ca3af"
+                placeholderTextColor={Colors.textFaint}
                 style={styles.buscador}
                 autoFocus
               />
@@ -59,7 +60,7 @@ export default function SingleSelector({ value, onChange, items, placeholder = "
                 return (
                   <TouchableOpacity
                     style={[styles.opcion, seleccionado && styles.opcionActiva]}
-                    onPress={() => { onChange(seleccionado ? null : item.id); setOpen(false); setBusqueda(""); }}
+                    onPress={() => { onChange(seleccionado ? null : item.id); }}
                   >
                     <Text style={[styles.opcionTexto, seleccionado && styles.opcionTextoActivo]}>
                       {item.nombre}
@@ -87,17 +88,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "white",
+    backgroundColor: Colors.surface,
     borderWidth: 1,
-    borderColor: "#e5e7eb",
+    borderColor: Colors.border,
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
     marginBottom: 16,
   },
-  placeholder: { color: "#9ca3af", fontSize: 14 },
-  textoSeleccionado: { color: "#111827", fontSize: 14, flex: 1 },
-  chevron: { fontSize: 18, color: "#f97316" },
+  placeholder: { color: Colors.textFaint, fontSize: 14 },
+  textoSeleccionado: { color: Colors.text, fontSize: 14, flex: 1 },
+  chevron: { fontSize: 18, color: Colors.primary },
   overlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.3)",
@@ -105,18 +106,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
   },
   dropdown: {
-    backgroundColor: "white",
+    backgroundColor: Colors.surface,
     borderRadius: 16,
     overflow: "hidden",
     maxHeight: 350,
   },
   buscador: {
     borderBottomWidth: 1,
-    borderBottomColor: "#e5e7eb",
+    borderBottomColor: Colors.border,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 14,
-    color: "#111827",
+    color: Colors.text,
   },
   opcion: {
     flexDirection: "row",
@@ -125,13 +126,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: "#f3f4f6",
+    borderBottomColor: Colors.borderLight,
   },
-  opcionActiva: { backgroundColor: "#fff7ed" },
-  opcionTexto: { fontSize: 15, color: "#374151" },
-  opcionTextoActivo: { color: "#f97316", fontWeight: "600" },
-  check: { color: "#f97316", fontWeight: "bold" },
-  sinResultados: { textAlign: "center", color: "#9ca3af", padding: 16 },
-  btnListo: { backgroundColor: "#f97316", padding: 14, alignItems: "center" },
-  btnListoTexto: { color: "white", fontWeight: "bold", fontSize: 15 },
+  opcionActiva: { backgroundColor: Colors.primaryFaint },
+  opcionTexto: { fontSize: 15, color: Colors.textSoft },
+  opcionTextoActivo: { color: Colors.primary, fontWeight: "600" },
+  check: { color: Colors.primary, fontWeight: "bold" },
+  sinResultados: { textAlign: "center", color: Colors.textFaint, padding: 16 },
+  btnListo: { backgroundColor: Colors.primary, padding: 14, alignItems: "center" },
+  btnListoTexto: { color: Colors.surface, fontWeight: "bold", fontSize: 15 },
 });

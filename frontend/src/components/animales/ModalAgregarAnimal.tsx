@@ -8,6 +8,7 @@ import MultiSelector from "./MultiSelector";
 import SingleSelector from "./SingleSelector";
 import EstadoSelector from "./EstadoSelector";
 import AnimalDatePickerModal from "./AnimalDatePickerModal";
+import { Colors } from '@/constants/theme';
 
 interface Estado {
   id_estado: number;
@@ -181,7 +182,7 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
               onChangeText={setNombre}
               style={styles.input}
               placeholder="Nombre del animal"
-              placeholderTextColor="#9ca3af"
+              placeholderTextColor={Colors.textFaint}
             />
 
             {/* Tipo */}
@@ -239,7 +240,7 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
               onChangeText={setRaza}
               style={styles.input}
               placeholder="Raza"
-              placeholderTextColor="#9ca3af"
+              placeholderTextColor={Colors.textFaint}
             />
 
             {/* Colores */}
@@ -249,7 +250,7 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
               onChangeText={setColores}
               style={styles.input}
               placeholder="Colores"
-              placeholderTextColor="#9ca3af"
+              placeholderTextColor={Colors.textFaint}
             />
 
             {/* Fecha de nacimiento */}
@@ -334,7 +335,7 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
               onChangeText={setComportamiento}
               style={[styles.input, styles.inputMultiline]}
               placeholder="Comportamiento"
-              placeholderTextColor="#9ca3af"
+              placeholderTextColor={Colors.textFaint}
               multiline
               numberOfLines={3}
             />
@@ -346,7 +347,7 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
               onChangeText={setInfoAdicional}
               style={[styles.input, styles.inputMultiline]}
               placeholder="Información adicional"
-              placeholderTextColor="#9ca3af"
+              placeholderTextColor={Colors.textFaint}
               multiline
               numberOfLines={3}
             />
@@ -366,15 +367,15 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
               <Switch
                 value={esterilizado}
                 onValueChange={setEsterilizado}
-                trackColor={{ false: "#e5e7eb", true: "#f97316" }}
-                thumbColor="white"
+                trackColor={{ false: Colors.border, true: Colors.primary }}
+                thumbColor={Colors.surface}
               />
             </View>
 
             {/* Botón crear */}
             <TouchableOpacity onPress={handleCrear} disabled={loading} style={styles.btnCrear}>
               {loading
-                ? <ActivityIndicator color="white" />
+                ? <ActivityIndicator color={Colors.surface} />
                 : <Text style={styles.btnCrearTexto}>Crear</Text>
               }
             </TouchableOpacity>
@@ -409,7 +410,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.4)",
   },
   container: {
-    backgroundColor: "#fff7ed",
+    backgroundColor: Colors.primaryFaint,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 24,
@@ -421,35 +422,35 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 20,
   },
-  titulo: { fontSize: 20, fontWeight: "bold", color: "#111827" },
-  cerrar: { fontSize: 22, color: "#6b7280" },
-  label: { fontWeight: "600", marginBottom: 4, color: "#111827", fontSize: 14, marginTop: 4 },
+  titulo: { fontSize: 20, fontWeight: "bold", color: Colors.text },
+  cerrar: { fontSize: 22, color: Colors.textMuted },
+  label: { fontWeight: "600", marginBottom: 4, color: Colors.text, fontSize: 14, marginTop: 4 },
   input: {
-    backgroundColor: "white",
+    backgroundColor: Colors.surface,
     borderWidth: 1,
-    borderColor: "#e5e7eb",
+    borderColor: Colors.border,
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
     marginBottom: 16,
     fontSize: 14,
-    color: "#111827",
+    color: Colors.text,
   },
   inputMultiline: { textAlignVertical: "top" },
   inputFecha: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "white",
+    backgroundColor: Colors.surface,
     borderWidth: 1,
-    borderColor: "#e5e7eb",
+    borderColor: Colors.border,
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
     marginBottom: 16,
   },
-  fechaTexto: { fontSize: 14, color: "#111827" },
-  fechaPlaceholder: { fontSize: 14, color: "#9ca3af" },
+  fechaTexto: { fontSize: 14, color: Colors.text },
+  fechaPlaceholder: { fontSize: 14, color: Colors.textFaint },
   switchRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -461,31 +462,31 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: "white",
+    backgroundColor: Colors.surface,
     borderWidth: 1,
-    borderColor: "#e5e7eb",
+    borderColor: Colors.border,
   },
-  badgeActivo: { backgroundColor: "#f97316", borderColor: "#f97316" },
-  badgeTexto: { color: "#374151", fontSize: 13, fontWeight: "500" },
-  badgeTextoActivo: { color: "white", fontSize: 13, fontWeight: "600" },
+  badgeActivo: { backgroundColor: Colors.primary, borderColor: Colors.primary },
+  badgeTexto: { color: Colors.textSoft, fontSize: 13, fontWeight: "500" },
+  badgeTextoActivo: { color: Colors.surface, fontSize: 13, fontWeight: "600" },
   btnFoto: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 8,
-    backgroundColor: "#f97316",
+    backgroundColor: Colors.primary,
     borderRadius: 20,
     paddingVertical: 14,
     marginBottom: 16,
   },
-  btnFotoTexto: { fontSize: 14, color: "white", fontWeight: "500" },
+  btnFotoTexto: { fontSize: 14, color: Colors.surface, fontWeight: "500" },
   btnCrear: {
-    backgroundColor: "#f97316",
+    backgroundColor: Colors.primary,
     paddingVertical: 14,
     borderRadius: 20,
     alignItems: "center",
     marginTop: 8,
     marginBottom: 8,
   },
-  btnCrearTexto: { color: "white", fontWeight: "bold", fontSize: 16 },
+  btnCrearTexto: { color: Colors.surface, fontWeight: "bold", fontSize: 16 },
 });

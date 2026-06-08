@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { Calendar, LocaleConfig  } from 'react-native-calendars';
+import { Colors } from '@/constants/theme';
 
 LocaleConfig.locales['es'] = {
   monthNames: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
@@ -37,17 +38,17 @@ export default function AnimalDatePickerModal({visible, onClose, onSelectDate, t
             current={selected}
             onDayPress={(day) => setSelected(day.dateString)}
             theme={{
-              selectedDayBackgroundColor: '#f97316',
-              selectedDayTextColor: '#ffffff',
-              todayTextColor: '#f97316',
-              arrowColor: '#f97316',
-              monthTextColor: '#f97316',
+              selectedDayBackgroundColor: Colors.primary,
+              selectedDayTextColor: Colors.surface,
+              todayTextColor: Colors.primary,
+              arrowColor: Colors.primary,
+              monthTextColor: Colors.primary,
               textDayFontWeight: '500',
               textMonthFontWeight: 'bold',
               textDayHeaderFontWeight: '600',
             }}
             markedDates={{
-              [selected]: { selected: true, selectedColor: '#f97316' },
+              [selected]: { selected: true, selectedColor: Colors.primary },
             }}
             style={styles.calendar}
           />
@@ -73,7 +74,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   container: {
-    backgroundColor: 'white',
+    backgroundColor: Colors.surface,
     borderRadius: 20,
     padding: 20,
     width: '90%',
@@ -83,7 +84,7 @@ const styles = StyleSheet.create({
     fontSize: 18, 
     fontWeight: 'bold', 
     marginBottom: 16, 
-    color: '#111827' },
+    color: Colors.text },
   calendar: { 
     width: '100%', 
     borderRadius: 12 },
@@ -95,14 +96,14 @@ const styles = StyleSheet.create({
   btnCancelar: {
     paddingVertical: 8, 
     paddingHorizontal: 20,
-    backgroundColor: '#e5e7eb', 
+    backgroundColor: Colors.border, 
     borderRadius: 20,
   },
-  btnCancelarText: { color: '#374151' },
+  btnCancelarText: { color: Colors.textSoft },
   btnConfirmar: {
     paddingVertical: 8, 
     paddingHorizontal: 20,
-    backgroundColor: '#f97316', 
+    backgroundColor: Colors.primary, 
     borderRadius: 20,
   },
   btnConfirmarText: { color: 'white', fontWeight: 'bold' },
