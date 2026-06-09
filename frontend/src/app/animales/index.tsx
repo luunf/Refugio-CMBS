@@ -9,6 +9,7 @@ import { api } from "@/config/api";
 import { useAuth } from "@/context/AuthContext";
 import ModalAgregarAnimal from "@/components/animales/ModalAgregarAnimal";
 import { Colors } from '@/constants/theme';
+import { router } from "expo-router";
 
 interface Animal {
   id_animal: number;
@@ -138,7 +139,7 @@ export default function AnimalesScreen() {
             <Text style={styles.sinResultados}>No hay animales</Text>
           }
           renderItem={({ item }) => (
-            <TouchableOpacity style={styles.card} onPress={() => {}}>
+            <TouchableOpacity style={styles.card} onPress={() => {router.push(`/animales/${item.id_animal}`)}}>
               <Image
                 source={
                   item.url_imagen
