@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
   View, Text, StyleSheet, TouchableOpacity,
-  ActivityIndicator, Image
+  ActivityIndicator, Alert
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
@@ -9,6 +9,10 @@ import { api } from "@/config/api";
 import { Colors } from "@/constants/theme";
 import AnimalInfo from "@/components/animales/AnimalInfo";
 import { useTranslation } from 'react-i18next';
+import { Image } from 'expo-image';
+import { ref, deleteObject } from 'firebase/storage';
+import { storage } from '@/config/firebase';
+import ModalEditarAnimal from '@/components/animales/ModalEditarAnimal';
 
 type Pestaña = "informacion" | "ficha" | "vacunas";
 
@@ -40,7 +44,8 @@ export default function AnimalDetalleScreen() {
   const [animal, setAnimal] = useState<Animal | null>(null);
   const [loading, setLoading] = useState(true);
   const [pestaña, setPestaña] = useState<Pestaña>("informacion");
-
+  const [modalEditar, setModalEditar] = useState(false);
+  
   useEffect(() => {
     const cargar = async () => {
       try {
@@ -57,6 +62,35 @@ export default function AnimalDetalleScreen() {
 
   if (loading) return <ActivityIndicator size="large" color={Colors.primary} style={{ marginTop: 80 }} />;
   if (!animal) return <Text style={styles.error}>Animal no encontrado</Text>;
+
+  const handleEliminar = () => {
+    Alert.alert(
+      t('confirmTitleEliminar'),
+      t('confirmMessageEliminar', {nombre: animal?.nombre ?? ''}),
+      [
+        { text: t('btnCancelar'), style: 'cancel' },
+        {
+          text: t('btnEliminar'),
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              // Eliminar imagen de Firebase Storage
+              if (animal?.url_imagen) {
+              const imageRef = ref(storage, animal.url_imagen);
+              await deleteObject(imageRef).catch(() => {});
+              }
+
+              //Eliminar url de la bdd
+              await api.deleteAnimal(animal!.id_animal);
+              router.back();
+            } catch (e: any) {
+              Alert.alert(t('error'), e?.response?.data?.error ?? t('errorEliminar'));
+            }
+          }
+        }
+      ]
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -76,16 +110,17 @@ export default function AnimalDetalleScreen() {
                 : require("@/assets/images/icono-gato.png")
           }
           style={styles.foto}
-          resizeMode="cover"
+          contentFit="cover"
+          cachePolicy="memory-disk"
         />
         <View style={styles.infoTopTextos}>
           <View style={styles.nombreRow}>
             <Text style={styles.nombre} numberOfLines={1}>{animal.nombre}</Text>
             <View style={styles.acciones}>
-                <TouchableOpacity onPress={() => {}}>
+                <TouchableOpacity onPress={() => setModalEditar(true)}>
                 <Text style={styles.accionIcono}>{t('iconEditar')}</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => {}}>
+                <TouchableOpacity onPress={handleEliminar}>
                 <Text style={styles.accionIcono}>{t('iconEliminar')}</Text>
                 </TouchableOpacity>
             </View>
@@ -119,6 +154,18 @@ export default function AnimalDetalleScreen() {
       {pestaña === "informacion" && <AnimalInfo animal={animal} />}
       {pestaña === "ficha" && (<Text>Próximamente</Text>)}
       {pestaña === "vacunas" && (<Text>Próximamente</Text>)}
+
+      {animal && (
+        <ModalEditarAnimal
+          visible={modalEditar}
+          onClose={() => setModalEditar(false)}
+          onEditado={() => {
+            api.getAnimal(Number(animalId)).then(setAnimal);
+          }}
+          animal={animal}
+        />
+      )}
+      
     </SafeAreaView>
   );
 }

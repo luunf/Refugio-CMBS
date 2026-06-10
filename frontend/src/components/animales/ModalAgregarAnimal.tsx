@@ -7,9 +7,14 @@ import { api } from "@/config/api";
 import MultiSelector from "./MultiSelector";
 import SingleSelector from "./SingleSelector";
 import EstadoSelector from "./EstadoSelector";
-import AnimalDatePickerModal from "./AnimalDatePickerModal";
+import AnimalDatePickerModal from "./AnimalDatePickerModal"
 import { Colors } from '@/constants/theme';
 import { useTranslation } from 'react-i18next';
+import * as ImagePicker from 'expo-image-picker';
+import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '@/config/firebase';
+import { Image } from 'expo-image';
 
 interface Estado {
   id_estado: number;
@@ -67,6 +72,10 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
   const [pickerNacimiento, setPickerNacimiento] = useState(false);
   const [pickerIngreso, setPickerIngreso] = useState(false);
 
+  const [imagen, setImagen] = useState<string | null>(null);
+  const [imagenUrl, setImagenUrl] = useState<string | null>(null);
+  const [subiendoImagen, setSubiendoImagen] = useState(false);
+
   const tieneTransito = estadoIds.some(id =>
     estados.find(e => e.id_estado === id)?.nombre === "En tránsito"
   );
@@ -114,6 +123,9 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
     setVoluntarioIds([]);
     setAdoptanteId(null);
     setHogarId(null);
+    setImagen(null);
+    setImagenUrl(null);
+    setSubiendoImagen(false);
   };
 
   const handleClose = () => {
@@ -131,6 +143,21 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
 
     setLoading(true);
     try {
+      let urlImagen = null;
+      if (imagen) {
+        const blob = await new Promise<Blob>((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.onload = () => resolve(xhr.response);
+          xhr.onerror = () => reject(new TypeError('Network request failed'));
+          xhr.responseType = 'blob';
+          xhr.open('GET', imagen, true);
+          xhr.send(null);
+        });
+        const storageRef = ref(storage, `animales/${Date.now()}.jpg`);
+        await uploadBytes(storageRef, blob);
+        urlImagen = await getDownloadURL(storageRef);
+      }
+
       await api.createAnimal({
         nombre: nombre.trim(),
         tipo,
@@ -148,6 +175,7 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
         voluntarios: voluntarioIds,
         adoptante: tieneAdoptado ? adoptanteId : null,
         hogar_transito: tieneTransito ? hogarId : null,
+        url_imagen: urlImagen ?? null,
       });
       onCreado();
       handleClose();
@@ -163,6 +191,25 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
   const voluntariosItems = voluntarios.map(p => ({ id: p.id_persona, nombre: `${p.nombre} ${p.apellido}` }));
   const adoptantesItems = adoptantes.map(p => ({ id: p.id_persona, nombre: `${p.nombre} ${p.apellido}` }));
   const hogaresItems = hogares.map(p => ({ id: p.id_persona, nombre: `${p.nombre} ${p.apellido}` }));
+
+  const handleSeleccionarImagen = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+    if (result.canceled) return;
+
+    const uri = result.assets[0].uri;
+    const img = await ImageManipulator.manipulate(uri).resize({ width: 400, height: 400 }).renderAsync();
+    const manipulada = await img.saveAsync({
+      compress: 0.8,
+      format: SaveFormat.JPEG,
+    });
+
+    setImagen(manipulada.uri);
+  };
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
@@ -325,11 +372,50 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
               </>
             )}
 
-            {/* Foto */}
-            <Text style={styles.label}>{t('labelFoto')}</Text>
-            <TouchableOpacity style={styles.btnFoto} onPress={() => {}}>
-              <Text style={styles.btnFotoTexto}>{t('btnSubirFoto')}</Text>
-            </TouchableOpacity>
+            {/* Imagen */}
+            <Text style={styles.label}>{t('labelImagen')}</Text>
+            {imagen ? (
+              <View style={styles.imagenPreviewContainer}>
+                <TouchableOpacity
+                  onPress={handleSeleccionarImagen}
+                  disabled={subiendoImagen}
+                  style={styles.imagenPreviewContainer}
+                >
+                  <Image source={{ uri: imagen }} style={styles.imagenPreview} contentFit='cover' />
+                  <View style={styles.imagenOverlay}>
+                    {subiendoImagen ? (
+                      <>
+                        <ActivityIndicator color={Colors.surface} />
+                        <Text style={styles.imagenOverlayTexto}>{t('imagenSubiendo')}</Text>
+                      </>
+                    ) : (
+                      <Text style={styles.imagenOverlayTexto}>{t('imagenCambiar')}</Text>
+                    )}
+                  </View>
+                </TouchableOpacity>
+
+                {/* Botón quitar imagen */}
+                {!subiendoImagen && (
+                  <TouchableOpacity
+                    style={styles.btnQuitarImagen}
+                    onPress={() => setImagen(null)}
+                  >
+                    <Text style={styles.btnQuitarImagenTexto}>✕</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            ) : (
+              <TouchableOpacity
+                style={[styles.btnImagen, subiendoImagen && { opacity: 0.6 }]}
+                onPress={handleSeleccionarImagen}
+                disabled={subiendoImagen}
+              >
+                {subiendoImagen
+                  ? <ActivityIndicator color={Colors.surface} />
+                  : <Text style={styles.btnImagenTexto}>{t('btnSubirFoto')}</Text>
+                }
+              </TouchableOpacity>
+            )}
             
             {/* Comportamiento */}
             <Text style={styles.label}>{t('labelComportamiento')}</Text>
@@ -472,17 +558,6 @@ const styles = StyleSheet.create({
   badgeActivo: { backgroundColor: Colors.primary, borderColor: Colors.primary },
   badgeTexto: { color: Colors.textSoft, fontSize: 13, fontWeight: "500" },
   badgeTextoActivo: { color: Colors.surface, fontSize: 13, fontWeight: "600" },
-  btnFoto: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    backgroundColor: Colors.primary,
-    borderRadius: 20,
-    paddingVertical: 14,
-    marginBottom: 16,
-  },
-  btnFotoTexto: { fontSize: 14, color: Colors.surface, fontWeight: "500" },
   btnCrear: {
     backgroundColor: Colors.primary,
     paddingVertical: 14,
@@ -492,4 +567,57 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   btnCrearTexto: { color: Colors.surface, fontWeight: "bold", fontSize: 16 },
+  imagenPreviewContainer: {
+    width: '100%',
+    height: 200,
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 16,
+  },
+  imagenPreview: {
+    width: '100%',
+    height: '100%',
+  },
+  imagenOverlay: {
+    ...StyleSheet.absoluteFill,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+  },
+  imagenOverlayTexto: {
+    color: Colors.surface,
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  btnImagen: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    backgroundColor: Colors.primary,
+    borderRadius: 20,
+    paddingVertical: 14,
+    marginBottom: 16,
+  },
+  btnImagenTexto: { 
+    fontSize: 14, 
+    color: Colors.surface, 
+    fontWeight: "500" },
+  btnQuitarImagen: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  btnQuitarImagenTexto: {
+    color: Colors.surface,
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
 });

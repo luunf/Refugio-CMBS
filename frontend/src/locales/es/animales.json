@@ -24,7 +24,7 @@
   "labelAdoptante": "Adoptante",
   "labelVoluntarios": "Voluntarios",
   "labelEstados": "Estados",
-  "labelFoto": "Foto",
+  "labelImagen": "Imagen",
   "labelNombre": "Nombre",
   "si": "Sí",
   "no": "No",
@@ -65,5 +65,15 @@
   "requiredSymbol": "*",
   "iconBuscar": "🔍",
   "iconEditar": "✏️",
-  "iconEliminar": "🗑"
+  "iconEliminar": "🗑",
+  "confirmTitleEliminar": "Eliminar animal",
+  "confirmMessageEliminar": "¿Eliminar a {{nombre}}?",
+  "btnEliminar": "Eliminar",
+  "errorEliminar": "No se pudo eliminar el animal",
+  "errorEditar": "No se pudo editar el animal",
+  "successEditar": "Animal editado correctamente",
+  "imagenSubiendo": "Subiendo...",
+  "imagenCambiar": "Cambiar imagen",
+  "titleEditarAnimal": "Editar animal",
+  "btnGuardar": "Guardar"
 }

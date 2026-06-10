@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import {
   View, Text, TouchableOpacity, ActivityIndicator,
-  StyleSheet, TextInput, FlatList, Image,
+  StyleSheet, TextInput, FlatList, 
   Modal, Pressable
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -9,8 +9,10 @@ import { api } from "@/config/api";
 import { useAuth } from "@/context/AuthContext";
 import ModalAgregarAnimal from "@/components/animales/ModalAgregarAnimal";
 import { Colors } from '@/constants/theme';
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { useTranslation } from 'react-i18next';
+import { Image } from 'expo-image';
+
 
 interface Animal {
   id_animal: number;
@@ -73,9 +75,11 @@ export default function AnimalesScreen() {
     cargarEstados();
   }, []);
 
-  useEffect(() => {
-    cargarAnimales();
-  }, [cargarAnimales]);
+  useFocusEffect(
+    useCallback(() => {
+      cargarAnimales();
+    }, [cargarAnimales])
+  );
 
   const animalesFiltrados = animales.filter((a) =>
     a.nombre?.toLowerCase().includes(busqueda.toLowerCase())
@@ -152,7 +156,8 @@ export default function AnimalesScreen() {
                       : require("@/assets/images/icono-gato.png")
                 }
                 style={[styles.cardImagen, { flex: 1 }]}
-                resizeMode="cover"
+                contentFit="cover"
+                cachePolicy="memory-disk"
               />
               <View style={styles.cardFooter}>
                 <Text style={styles.cardNombre}>{item.nombre}</Text>

@@ -244,30 +244,58 @@ class AnimalService:
 
         if "hogar_transito" in data:
             rol_id = roles["hogar_transito"]
-            AnimalPersona.query.filter_by(animal_id=animal.id_animal, rol_id=rol_id).delete()
-            if data["hogar_transito"]:
-                persona = Persona.query.get(data["hogar_transito"])
-                if not persona:
-                    raise LookupError(f"Persona con id {data['hogar_transito']} no encontrada")
-                db.session.add(AnimalPersona(animal_id=animal.id_animal, persona_id=data["hogar_transito"], rol_id=rol_id))
+            nuevo_id = data["hogar_transito"]
+            
+            actual = AnimalPersona.query.filter_by(animal_id=animal.id_animal, rol_id=rol_id).first()
+            
+            if nuevo_id:
+                if not Persona.query.get(nuevo_id):
+                    raise LookupError(f"Persona con id {nuevo_id} no encontrada")
+                
+                if not actual or actual.persona_id != nuevo_id:
+                    if actual:
+                        db.session.delete(actual)
+                    db.session.add(AnimalPersona(animal_id=animal.id_animal,persona_id=nuevo_id,rol_id=rol_id))
+            else:
+                if actual:
+                    db.session.delete(actual)
 
         if "adoptante" in data:
             rol_id = roles["adoptante"]
-            AnimalPersona.query.filter_by(animal_id=animal.id_animal, rol_id=rol_id).delete()
-            if data["adoptante"]:
-                persona = Persona.query.get(data["adoptante"])
-                if not persona:
-                    raise LookupError(f"Persona con id {data['adoptante']} no encontrada")
-                db.session.add(AnimalPersona(animal_id=animal.id_animal, persona_id=data["adoptante"], rol_id=rol_id))
-
+            nuevo_id = data["adoptante"]
+            
+            actual = AnimalPersona.query.filter_by(animal_id=animal.id_animal, rol_id=rol_id).first()
+            
+            if nuevo_id:
+                if not Persona.query.get(nuevo_id):
+                    raise LookupError(f"Persona con id {nuevo_id} no encontrada")
+                
+                if not actual or actual.persona_id != nuevo_id:
+                    if actual:
+                        db.session.delete(actual)
+                    db.session.add(AnimalPersona(animal_id=animal.id_animal,persona_id=nuevo_id,rol_id=rol_id))
+            else:
+                if actual:
+                    db.session.delete(actual)
         if "voluntarios" in data:
             rol_id = roles["voluntario"]
-            AnimalPersona.query.filter_by(animal_id=animal.id_animal, rol_id=rol_id).delete()
-            for id_persona in data["voluntarios"] or []:
-                persona = Persona.query.get(id_persona)
-                if not persona:
+            nuevos_ids = set(data["voluntarios"] or [])
+            
+            # Validar que todos existen
+            for id_persona in nuevos_ids:
+                if not Persona.query.get(id_persona):
                     raise LookupError(f"Persona con id {id_persona} no encontrada")
-                db.session.add(AnimalPersona(animal_id=animal.id_animal, persona_id=id_persona, rol_id=rol_id))
+            
+            actuales = AnimalPersona.query.filter_by(animal_id=animal.id_animal, rol_id=rol_id).all()
+            actuales_ids = {ap.persona_id for ap in actuales}
+            
+            for ap in actuales:
+                if ap.persona_id not in nuevos_ids:
+                    db.session.delete(ap)
+            
+            for id_persona in nuevos_ids:
+                if id_persona not in actuales_ids:
+                    db.session.add(AnimalPersona(animal_id=animal.id_animal,persona_id=id_persona,rol_id=rol_id))
 
         db.session.commit()
 
