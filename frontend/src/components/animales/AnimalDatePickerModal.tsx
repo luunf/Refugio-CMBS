@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Modal, View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { Calendar, LocaleConfig  } from 'react-native-calendars';
 import { Colors } from '@/constants/theme';
+import { useTranslation } from 'react-i18next';
 
 LocaleConfig.locales['es'] = {
   monthNames: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
@@ -20,7 +21,10 @@ interface Props {
   fechaSeleccionada?: string;
 }
 
-export default function AnimalDatePickerModal({visible, onClose, onSelectDate, titulo = "Selecciona una fecha", fechaSeleccionada, }: Props) {
+export default function AnimalDatePickerModal({visible, onClose, onSelectDate, titulo, fechaSeleccionada, }: Props) {
+  const { t } = useTranslation('animales');
+  const tituloFinal = titulo ?? t('placeholderSeleccionarFecha');
+  
   const hoy = new Date().toISOString().split('T')[0];
   const [selected, setSelected] = useState(fechaSeleccionada ?? hoy);
 
@@ -33,7 +37,7 @@ export default function AnimalDatePickerModal({visible, onClose, onSelectDate, t
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.overlay}>
         <View style={styles.container}>
-          <Text style={styles.titulo}>{titulo}</Text>
+          <Text style={styles.titulo}>{tituloFinal}</Text>
           <Calendar
             current={selected}
             onDayPress={(day) => setSelected(day.dateString)}
@@ -54,10 +58,10 @@ export default function AnimalDatePickerModal({visible, onClose, onSelectDate, t
           />
           <View style={styles.botones}>
             <TouchableOpacity onPress={onClose} style={styles.btnCancelar}>
-              <Text style={styles.btnCancelarText}>Cancelar</Text>
+              <Text style={styles.btnCancelarText}>{t('btnCancelar')}</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={handleConfirm} style={styles.btnConfirmar}>
-              <Text style={styles.btnConfirmarText}>Aceptar</Text>
+              <Text style={styles.btnConfirmarText}>{t('btnAceptar')}</Text>
             </TouchableOpacity>
           </View>
         </View>

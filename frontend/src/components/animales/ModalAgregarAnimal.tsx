@@ -9,6 +9,7 @@ import SingleSelector from "./SingleSelector";
 import EstadoSelector from "./EstadoSelector";
 import AnimalDatePickerModal from "./AnimalDatePickerModal";
 import { Colors } from '@/constants/theme';
+import { useTranslation } from 'react-i18next';
 
 interface Estado {
   id_estado: number;
@@ -37,6 +38,8 @@ const GENEROS = ["macho", "hembra"];
 const TAMANIOS = ["chico", "mediano", "grande"];
 
 export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props) {
+  const { t } = useTranslation('animales');
+  
   const [loading, setLoading] = useState(false);
   const [estados, setEstados] = useState<Estado[]>([]);
   const [compatibilidades, setCompatibilidades] = useState<Compatibilidad[]>([]);
@@ -119,12 +122,12 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
   };
 
   const handleCrear = async () => {
-    if (!nombre.trim()) return Alert.alert("Error", "El nombre es obligatorio");
-    if (!tipo) return Alert.alert("Error", "El tipo es obligatorio");
-    if (!genero) return Alert.alert("Error", "El género es obligatorio");
-    if (!tamanio) return Alert.alert("Error", "El tamaño es obligatorio");
-    if (!fechaIngreso) return Alert.alert("Error", "La fecha de ingreso es obligatoria");
-    if (estadoIds.length === 0) return Alert.alert("Error", "Seleccioná al menos un estado");
+    if (!nombre.trim()) return Alert.alert(t('error'), t('errorNombre'));
+    if (!tipo) return Alert.alert(t('error'), t('errorTipo'));
+    if (!genero) return Alert.alert(t('error'), t('errorGenero'));
+    if (!tamanio) return Alert.alert(t('error'), t('errorTamanio'));
+    if (!fechaIngreso) return Alert.alert(t('error'), t('errorFechaIngreso'));
+    if (estadoIds.length === 0) return Alert.alert(t('error'), t('errorEstados'));
 
     setLoading(true);
     try {
@@ -148,9 +151,9 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
       });
       onCreado();
       handleClose();
-      Alert.alert("Éxito", "Animal registrado correctamente");
+      Alert.alert(t('success'), t('successRegistrar'));
     } catch (e: any) {
-      Alert.alert("Error", e?.response?.data?.error ?? "No se pudo registrar el animal");
+      Alert.alert(t('error'), e?.response?.data?.error ?? t('errorRegistrar'));
     } finally {
       setLoading(false);
     }
@@ -167,7 +170,7 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
         <View style={styles.container}>
 
           <View style={styles.header}>
-            <Text style={styles.titulo}>Nuevo animal</Text>
+            <Text style={styles.titulo}>{t('titleNuevoAnimal')}</Text>
             <TouchableOpacity onPress={handleClose}>
               <Text style={styles.cerrar}>✕</Text>
             </TouchableOpacity>
@@ -176,17 +179,17 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
           <ScrollView showsVerticalScrollIndicator={false}>
 
             {/* Nombre */}
-            <Text style={styles.label}>Nombre*</Text>
+            <Text style={styles.label}>{t('labelNombre')}{t('requiredSymbol')}</Text>
             <TextInput
               value={nombre}
               onChangeText={setNombre}
               style={styles.input}
-              placeholder="Nombre del animal"
+              placeholder={t('placeholderNombre')}
               placeholderTextColor={Colors.textFaint}
             />
 
             {/* Tipo */}
-            <Text style={styles.label}>Tipo*</Text>
+            <Text style={styles.label}>{t('labelTipo')}{t('requiredSymbol')}</Text>
             <View style={styles.opcionesRow}>
               {TIPOS.map(t => (
                 <TouchableOpacity
@@ -202,7 +205,7 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
             </View>
 
             {/* Género */}
-            <Text style={styles.label}>Género*</Text>
+            <Text style={styles.label}>{t('labelGenero')}{t('requiredSymbol')}</Text>
             <View style={styles.opcionesRow}>
               {GENEROS.map(g => (
                 <TouchableOpacity
@@ -218,7 +221,7 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
             </View>
 
             {/* Tamaño */}
-            <Text style={styles.label}>Tamaño*</Text>
+            <Text style={styles.label}>{t('labelTamanio')}{t('requiredSymbol')}</Text>
             <View style={styles.opcionesRow}>
               {TAMANIOS.map(t => (
                 <TouchableOpacity
@@ -234,75 +237,75 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
             </View>
 
             {/* Raza */}
-            <Text style={styles.label}>Raza</Text>
+            <Text style={styles.label}>{t('labelRaza')}</Text>
             <TextInput
               value={raza}
               onChangeText={setRaza}
               style={styles.input}
-              placeholder="Raza"
+              placeholder={t('placeholderRaza')}
               placeholderTextColor={Colors.textFaint}
             />
 
             {/* Colores */}
-            <Text style={styles.label}>Colores</Text>
+            <Text style={styles.label}>{t('labelColores')}</Text>
             <TextInput
               value={colores}
               onChangeText={setColores}
               style={styles.input}
-              placeholder="Colores"
+              placeholder={t('placeholderColores')}
               placeholderTextColor={Colors.textFaint}
             />
 
             {/* Fecha de nacimiento */}
-            <Text style={styles.label}>Fecha de nacimiento</Text>
+            <Text style={styles.label}>{t('labelFechaNacimiento')}</Text>
             <TouchableOpacity
               style={styles.inputFecha}
               onPress={() => setPickerNacimiento(true)}
             >
               <Text style={fechaNacimiento ? styles.fechaTexto : styles.fechaPlaceholder}>
-                {fechaNacimiento || "Seleccionar fecha"}
+                {fechaNacimiento || t('placeholderSeleccionarFecha')}
               </Text>
             </TouchableOpacity>
 
             {/* Fecha de ingreso */}
-            <Text style={styles.label}>Fecha de ingreso*</Text>
+            <Text style={styles.label}>{t('labelFechaIngreso')}{t('requiredSymbol')}</Text>
             <TouchableOpacity
               style={styles.inputFecha}
               onPress={() => setPickerIngreso(true)}
             >
               <Text style={fechaIngreso ? styles.fechaTexto : styles.fechaPlaceholder}>
-                {fechaIngreso || "Seleccionar fecha"}
+                {fechaIngreso || t('placeholderSeleccionarFecha')}
               </Text>
             </TouchableOpacity>
 
             {/* Estados */}
-            <Text style={styles.label}>Estados*</Text>
+            <Text style={styles.label}>{t('labelEstados')}{t('requiredSymbol')}</Text>
             <EstadoSelector
               value={estadoIds}
               onChange={setEstadoIds}
               estados={estados}
-              placeholder="Seleccionar estados"
+              placeholder={t('placeholderSeleccionarEstados')}
             />
 
             {/* Voluntarios */}
-            <Text style={styles.label}>Voluntarios a cargo</Text>
+            <Text style={styles.label}>{t('labelVoluntarios')}</Text>
             <MultiSelector
               value={voluntarioIds}
               onChange={setVoluntarioIds}
               items={voluntariosItems}
-              placeholder="Seleccionar voluntarios"
+              placeholder={t('placeholderSeleccionarVoluntarios')}
               searchable
             />
 
             {/* Hogar de tránsito */}
             {tieneTransito && (
               <>
-                <Text style={styles.label}>Hogar de tránsito</Text>
+                <Text style={styles.label}>{t('labelHogarTransito')}</Text>
                 <SingleSelector
                   value={hogarId}
                   onChange={setHogarId}
                   items={hogaresItems}
-                  placeholder="Seleccionar hogar de tránsito"
+                  placeholder={t('placeholderSeleccionarHogar')}
                   searchable
                 />
               </>
@@ -311,59 +314,59 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
             {/* Adoptante */}
             {tieneAdoptado && (
               <>
-                <Text style={styles.label}>Adoptante</Text>
+                <Text style={styles.label}>{t('labelAdoptante')}</Text>
                 <SingleSelector
                   value={adoptanteId}
                   onChange={setAdoptanteId}
                   items={adoptantesItems}
-                  placeholder="Seleccionar adoptante"
+                  placeholder={t('placeholderSeleccionarAdoptante')}
                   searchable
                 />
               </>
             )}
 
             {/* Foto */}
-            <Text style={styles.label}>Foto</Text>
+            <Text style={styles.label}>{t('labelFoto')}</Text>
             <TouchableOpacity style={styles.btnFoto} onPress={() => {}}>
-              <Text style={styles.btnFotoTexto}>Subir</Text>
+              <Text style={styles.btnFotoTexto}>{t('btnSubirFoto')}</Text>
             </TouchableOpacity>
             
             {/* Comportamiento */}
-            <Text style={styles.label}>Comportamiento</Text>
+            <Text style={styles.label}>{t('labelComportamiento')}</Text>
             <TextInput
               value={comportamiento}
               onChangeText={setComportamiento}
               style={[styles.input, styles.inputMultiline]}
-              placeholder="Comportamiento"
+              placeholder={t('placeholderComportamiento')}
               placeholderTextColor={Colors.textFaint}
               multiline
               numberOfLines={3}
             />
             
             {/* Info adicional */}
-            <Text style={styles.label}>Información adicional</Text>
+            <Text style={styles.label}>{t('labelInfoAdicional')}</Text>
             <TextInput
               value={infoAdicional}
               onChangeText={setInfoAdicional}
               style={[styles.input, styles.inputMultiline]}
-              placeholder="Información adicional"
+              placeholder={t('placeholderInfoAdicional')}
               placeholderTextColor={Colors.textFaint}
               multiline
               numberOfLines={3}
             />
 
             {/* Compatibilidades */}
-            <Text style={styles.label}>Compatibilidades</Text>
+            <Text style={styles.label}>{t('labelCompatibilidades')}</Text>
             <MultiSelector
               value={compatibilidadIds}
               onChange={setCompatibilidadIds}
               items={compatibilidadesItems}
-              placeholder="Seleccionar compatibilidades"
+              placeholder={t('placeholderSeleccionarCompatibilidades')}
             />
 
             {/* Esterilizado */}
             <View style={styles.switchRow}>
-              <Text style={styles.label}>Esterilizado</Text>
+              <Text style={styles.label}>{t('labelEsterilizado')}</Text>
               <Switch
                 value={esterilizado}
                 onValueChange={setEsterilizado}
@@ -376,7 +379,7 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
             <TouchableOpacity onPress={handleCrear} disabled={loading} style={styles.btnCrear}>
               {loading
                 ? <ActivityIndicator color={Colors.surface} />
-                : <Text style={styles.btnCrearTexto}>Crear</Text>
+                : <Text style={styles.btnCrearTexto}>{t('btnCrear')}</Text>
               }
             </TouchableOpacity>
 
@@ -389,14 +392,14 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
         visible={pickerNacimiento}
         onClose={() => setPickerNacimiento(false)}
         onSelectDate={(date) => setFechaNacimiento(date)}
-        titulo="Fecha de nacimiento"
+        titulo={t('titleSeleccionarFechaNacimiento')}
         fechaSeleccionada={fechaNacimiento}
       />
       <AnimalDatePickerModal
         visible={pickerIngreso}
         onClose={() => setPickerIngreso(false)}
         onSelectDate={(date) => setFechaIngreso(date)}
-        titulo="Fecha de ingreso"
+        titulo={t('titleSeleccionarFechaIngreso')}
         fechaSeleccionada={fechaIngreso}
       />
     </Modal>

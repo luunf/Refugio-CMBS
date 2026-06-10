@@ -10,6 +10,7 @@ import { useAuth } from "@/context/AuthContext";
 import ModalAgregarAnimal from "@/components/animales/ModalAgregarAnimal";
 import { Colors } from '@/constants/theme';
 import { router } from "expo-router";
+import { useTranslation } from 'react-i18next';
 
 interface Animal {
   id_animal: number;
@@ -24,13 +25,15 @@ interface Estado {
   nombre: string;
 }
 
-const FILTROS_TIPO = [
-  { label: "Todos", valor: null },
-  { label: "Perro", valor: "perro" },
-  { label: "Gato", valor: "gato" },
-];
-
 export default function AnimalesScreen() {
+
+  const { t } = useTranslation('animales');
+
+  const FILTROS_TIPO = [
+    { label: t('optionTodos'), valor: null },
+    { label: t('optionPerro'), valor: "perro" },
+    { label: t('optionGato'), valor: "gato" },
+  ];
 
   const [animales, setAnimales] = useState<Animal[]>([]);
   const [estados, setEstados] = useState<Estado[]>([]);
@@ -82,17 +85,17 @@ export default function AnimalesScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerText}>Animales</Text>
+        <Text style={styles.headerText}>{t("title")}</Text>
       </View>
 
       {/* Buscador */}
       <View style={styles.buscadorRow}>
       <View style={styles.buscadorContainer}>
-        <Text style={styles.buscadorIcono}>🔍</Text>
+        <Text style={styles.buscadorIcono}>{t('iconBuscar')}</Text>
         <TextInput
         value={busqueda}
         onChangeText={setBusqueda}
-        placeholder="Buscar..."
+        placeholder={t('placeholderBuscar')}
         style={styles.buscadorInput}
         placeholderTextColor={Colors.textFaint}
         />
@@ -109,9 +112,9 @@ export default function AnimalesScreen() {
           onPress={() => setModalTipo(true)}
         >
           <Text style={filtroTipo ? styles.filtroTextoActivo : styles.filtroTexto}>
-            {filtroTipo ? FILTROS_TIPO.find((f) => f.valor === filtroTipo)?.label : "Tipo: Todos"}
+            {filtroTipo ? FILTROS_TIPO.find((f) => f.valor === filtroTipo)?.label : t('filterTipo')}
           </Text>
-          <Text style={filtroTipo ? styles.filtroTextoActivo : styles.filtroTexto}> ▾</Text>
+          <Text style={filtroTipo ? styles.filtroTextoActivo : styles.filtroTexto}> {t("dropdownSymbol")}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -119,9 +122,9 @@ export default function AnimalesScreen() {
           onPress={() => setModalEstado(true)}
         >
           <Text style={filtroEstado ? styles.filtroTextoActivo : styles.filtroTexto}>
-            {filtroEstado ? filtroEstado.nombre : "Estado: Todos"}
+            {filtroEstado ? filtroEstado.nombre : t('filterEstado')}
           </Text>
-          <Text style={filtroEstado ? styles.filtroTextoActivo : styles.filtroTexto}> ▾</Text>
+          <Text style={filtroEstado ? styles.filtroTextoActivo : styles.filtroTexto}> {t("dropdownSymbol")}</Text>
         </TouchableOpacity>
       </View>
 
@@ -136,7 +139,7 @@ export default function AnimalesScreen() {
           contentContainerStyle={styles.grilla}
           columnWrapperStyle={styles.columna}
           ListEmptyComponent={
-            <Text style={styles.sinResultados}>No hay animales</Text>
+            <Text style={styles.sinResultados}>{t('sinResultados')}</Text>
           }
           renderItem={({ item }) => (
             <TouchableOpacity style={styles.card} onPress={() => {router.push(`/animales/${item.id_animal}`)}}>
@@ -168,7 +171,7 @@ export default function AnimalesScreen() {
       <Modal visible={modalTipo} transparent animationType="fade">
         <Pressable style={styles.modalOverlay} onPress={() => setModalTipo(false)}>
           <View style={styles.modalContenido}>
-            <Text style={styles.modalTitulo}>Filtrar por tipo</Text>
+            <Text style={styles.modalTitulo}>{t('titleFiltrarPorTipo')}</Text>
             {FILTROS_TIPO.map((f) => (
               <TouchableOpacity
                 key={f.label}
@@ -188,14 +191,12 @@ export default function AnimalesScreen() {
       <Modal visible={modalEstado} transparent animationType="fade">
         <Pressable style={styles.modalOverlay} onPress={() => setModalEstado(false)}>
           <View style={styles.modalContenido}>
-            <Text style={styles.modalTitulo}>Filtrar por estado</Text>
+            <Text style={styles.modalTitulo}>{t('titleFiltrarPorEstado')}</Text>
             <TouchableOpacity
               style={[styles.modalOpcion, filtroEstado === null && styles.modalOpcionActiva]}
               onPress={() => { setFiltroEstado(null); setModalEstado(false); }}
             >
-              <Text style={filtroEstado === null ? styles.modalOpcionTextoActivo : styles.modalOpcionTexto}>
-                Todos
-              </Text>
+              <Text style={filtroEstado === null ? styles.modalOpcionTextoActivo : styles.modalOpcionTexto}>{t('optionTodos')}</Text>
             </TouchableOpacity>
             {estados.map((e) => (
               <TouchableOpacity

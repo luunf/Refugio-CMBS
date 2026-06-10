@@ -4,6 +4,7 @@ import {
   FlatList, StyleSheet
 } from "react-native";
 import { Colors } from '@/constants/theme';
+import { useTranslation } from 'react-i18next';
 
 interface Estado {
   id_estado: number;
@@ -24,7 +25,11 @@ const INCOMPATIBLES: Record<string, string> = {
   "En tránsito": "En refugio",
 };
 
-export default function EstadoSelector({ value, onChange, estados, placeholder = "Seleccionar estados" }: Props) {
+export default function EstadoSelector({ value, onChange, estados, placeholder }: Props) {
+  const { t } = useTranslation('animales');
+
+  const textoPlaceholder = placeholder ?? t('placeholderSeleccionarEstados');
+
   const [open, setOpen] = useState(false);
 
   const toggle = (id: number) => {
@@ -43,7 +48,7 @@ export default function EstadoSelector({ value, onChange, estados, placeholder =
   };
 
   const etiqueta = value.length === 0
-    ? placeholder
+    ? textoPlaceholder
     : estados.filter(e => value.includes(e.id_estado)).map(e => e.nombre).join(", ");
 
   return (
@@ -77,7 +82,7 @@ export default function EstadoSelector({ value, onChange, estados, placeholder =
               }}
             />
             <TouchableOpacity style={styles.btnListo} onPress={() => setOpen(false)}>
-              <Text style={styles.btnListoTexto}>Listo</Text>
+              <Text style={styles.btnListoTexto}>{t('btnListo')}</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>

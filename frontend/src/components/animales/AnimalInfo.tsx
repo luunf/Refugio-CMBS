@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { Colors } from "@/constants/theme";
+import { useTranslation } from 'react-i18next';
 
 interface Animal {
   tipo: string;
@@ -34,6 +35,8 @@ function Fila({ label, valor }: { label: string; valor?: string | null }) {
 }
 
 export default function AnimalInfo({ animal }: Props) {
+  const { t } = useTranslation('animales');
+
   const formatearFecha = (fecha?: string) => {
     if (!fecha) return null;
     const [y, m, d] = fecha.split("-");
@@ -46,20 +49,20 @@ export default function AnimalInfo({ animal }: Props) {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.card}>
-        <Fila label="Tipo" valor={capitalizar(animal.tipo)} />
-        <Fila label="Género" valor={capitalizar(animal.genero)} />
-        <Fila label="Tamaño" valor={capitalizar(animal.tamanio)} />
-        <Fila label="Raza" valor={animal.raza} />
-        <Fila label="Colores" valor={animal.colores} />
-        <Fila label="Fecha de nacimiento" valor={formatearFecha(animal.fecha_nacimiento)} />
-        <Fila label="Fecha de ingreso" valor={formatearFecha(animal.fecha_ingreso)} />
-        <Fila label="Esterilizado" valor={animal.esterilizado ? "Sí" : "No"} />
-        <Fila label="Comportamiento" valor={animal.comportamiento} />
-        <Fila label="Información adicional" valor={animal.info_adicional} />
+        <Fila label={t('labelTipo')} valor={capitalizar(animal.tipo)} />
+        <Fila label={t('labelGenero')} valor={capitalizar(animal.genero)} />
+        <Fila label={t('labelTamanio')} valor={capitalizar(animal.tamanio)} />
+        <Fila label={t('labelRaza')} valor={animal.raza} />
+        <Fila label={t('labelColores')} valor={animal.colores} />
+        <Fila label={t('labelFechaNacimiento')} valor={formatearFecha(animal.fecha_nacimiento)} />
+        <Fila label={t('labelFechaIngreso')} valor={formatearFecha(animal.fecha_ingreso)} />
+        <Fila label={t('labelEsterilizado')} valor={animal.esterilizado ? "Sí" : "No"} />
+        <Fila label={t('labelComportamiento')} valor={animal.comportamiento} />
+        <Fila label={t('labelInfoAdicional')} valor={animal.info_adicional} />
 
         {animal.compatibilidades.length > 0 && (
           <View style={styles.fila}>
-            <Text style={styles.label}>Compatibilidades</Text>
+            <Text style={styles.label}>{t('labelCompatibilidades')}</Text>
             <View style={styles.personasCol}>
             {animal.compatibilidades.map((c) => (
               <Text key={c.id_compatibilidad} style={styles.valor}>
@@ -72,19 +75,19 @@ export default function AnimalInfo({ animal }: Props) {
 
         {animal.hogar_transito && (
           <Fila
-            label="Hogar tránsito"
+            label={t('labelHogarTransito')}
             valor={`${animal.hogar_transito.nombre} ${animal.hogar_transito.apellido}`}
           />
         )}
         {animal.adoptante && (
           <Fila
-            label="Adoptante"
+            label={t('labelAdoptante')}
             valor={`${animal.adoptante.nombre} ${animal.adoptante.apellido}`}
           />
         )}
         {animal.voluntarios.length > 0 && (
           <View style={styles.fila}>
-            <Text style={styles.label}>Voluntarios</Text>
+            <Text style={styles.label}>{t('labelVoluntarios')}</Text>
             <View style={styles.personasCol}>
               {animal.voluntarios.map((v) => (
                 <Text key={v.id_persona} style={styles.valor}>

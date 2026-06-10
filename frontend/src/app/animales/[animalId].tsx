@@ -8,6 +8,7 @@ import { useLocalSearchParams, router } from "expo-router";
 import { api } from "@/config/api";
 import { Colors } from "@/constants/theme";
 import AnimalInfo from "@/components/animales/AnimalInfo";
+import { useTranslation } from 'react-i18next';
 
 type Pestaña = "informacion" | "ficha" | "vacunas";
 
@@ -33,6 +34,8 @@ interface Animal {
 }
 
 export default function AnimalDetalleScreen() {
+  const { t } = useTranslation('animales');
+  
   const { animalId } = useLocalSearchParams();
   const [animal, setAnimal] = useState<Animal | null>(null);
   const [loading, setLoading] = useState(true);
@@ -80,10 +83,10 @@ export default function AnimalDetalleScreen() {
             <Text style={styles.nombre} numberOfLines={1}>{animal.nombre}</Text>
             <View style={styles.acciones}>
                 <TouchableOpacity onPress={() => {}}>
-                <Text style={styles.accionIcono}>✏️</Text>
+                <Text style={styles.accionIcono}>{t('iconEditar')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => {}}>
-                <Text style={styles.accionIcono}>🗑</Text>
+                <Text style={styles.accionIcono}>{t('iconEliminar')}</Text>
                 </TouchableOpacity>
             </View>
             </View>
@@ -106,7 +109,7 @@ export default function AnimalDetalleScreen() {
             onPress={() => setPestaña(p)}
           >
             <Text style={[styles.pestañaTexto, pestaña === p && styles.pestañaTextoActivo]}>
-              {p === "informacion" ? "Información" : p === "ficha" ? "Ficha veterinaria" : "Vacunas"}
+              {p === "informacion" ? t('tabInformacion') : p === "ficha" ? t('tabFichaVeterinaria') : t('tabVacunas')}
             </Text>
           </TouchableOpacity>
         ))}

@@ -4,6 +4,7 @@ import {
   FlatList, StyleSheet, TextInput
 } from "react-native";
 import { Colors } from '@/constants/theme';
+import { useTranslation } from 'react-i18next';
 
 interface Item {
   id: number;
@@ -18,7 +19,10 @@ interface Props {
   searchable?: boolean;
 }
 
-export default function SingleSelector({ value, onChange, items, placeholder = "Seleccionar", searchable = false }: Props) {
+export default function SingleSelector({ value, onChange, items, placeholder, searchable = false }: Props) {
+  const { t } = useTranslation('animales');
+  const textoPlaceholder = placeholder ?? t('placeholderSeleccionar');
+
   const [open, setOpen] = useState(false);
   const [busqueda, setBusqueda] = useState("");
 
@@ -27,7 +31,7 @@ export default function SingleSelector({ value, onChange, items, placeholder = "
     : items;
 
   const etiqueta = value === null
-    ? placeholder
+    ? textoPlaceholder
     : items.find(i => i.id === value)?.nombre ?? placeholder;
 
   return (
@@ -46,7 +50,7 @@ export default function SingleSelector({ value, onChange, items, placeholder = "
               <TextInput
                 value={busqueda}
                 onChangeText={setBusqueda}
-                placeholder="Buscar..."
+                placeholder={t('placeholderBuscar')}
                 placeholderTextColor={Colors.textFaint}
                 style={styles.buscador}
                 autoFocus
@@ -70,11 +74,11 @@ export default function SingleSelector({ value, onChange, items, placeholder = "
                 );
               }}
               ListEmptyComponent={
-                <Text style={styles.sinResultados}>Sin resultados</Text>
+                <Text style={styles.sinResultados}>{t('sinResultados')}</Text>
               }
             />
             <TouchableOpacity style={styles.btnListo} onPress={() => { setOpen(false); setBusqueda(""); }}>
-              <Text style={styles.btnListoTexto}>Listo</Text>
+              <Text style={styles.btnListoTexto}>{t('btnListo')}</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>

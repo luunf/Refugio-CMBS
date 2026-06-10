@@ -3,6 +3,7 @@ import { useColorScheme } from 'react-native';
 import { Stack } from 'expo-router';
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import { AuthProvider } from '@/context/AuthContext';
+import '@/i18n';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
