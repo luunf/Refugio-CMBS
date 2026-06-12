@@ -86,3 +86,72 @@ class VacunaService:
         db.session.commit()
 
         return vacuna
+    
+    @staticmethod
+    def update_vacuna(vacuna_id, data):
+
+        vacuna = Vacuna.query.get(vacuna_id)
+
+        if not vacuna:
+            raise LookupError(
+                f"Vacuna con id {vacuna_id} no encontrada"
+            )
+
+        if "nombre" in data:
+
+            if data["nombre"] is None:
+                raise ValueError(
+                    "El nombre no puede ser null"
+                )
+
+            vacuna.nombre = data["nombre"]
+
+        if "fecha_aplicacion" in data:
+
+            vacuna.fecha_aplicacion = (
+                datetime.strptime(
+                    data["fecha_aplicacion"],
+                    "%Y-%m-%d"
+                ).date()
+                if data["fecha_aplicacion"]
+                else None
+            )
+
+        if "requiere_prox_dosis" in data:
+
+            if data["requiere_prox_dosis"] is None:
+                raise ValueError(
+                    "requiere_prox_dosis no puede ser null"
+                )
+
+            vacuna.requiere_prox_dosis = data["requiere_prox_dosis"]
+
+        if "fecha_prox_dosis" in data:
+
+            vacuna.fecha_prox_dosis = (
+                datetime.strptime(
+                    data["fecha_prox_dosis"],
+                    "%Y-%m-%d"
+                ).date()
+                if data["fecha_prox_dosis"]
+                else None
+            )
+
+        if "costo_aplicacion" in data:
+
+            vacuna.costo_aplicacion = data["costo_aplicacion"]
+
+        db.session.commit()
+
+    @staticmethod
+    def delete_vacuna(vacuna_id):
+
+        vacuna = Vacuna.query.get(vacuna_id)
+
+        if not vacuna:
+            raise LookupError(
+            f"Vacuna con id {vacuna_id} no encontrada"
+        )
+
+        db.session.delete(vacuna)
+        db.session.commit()

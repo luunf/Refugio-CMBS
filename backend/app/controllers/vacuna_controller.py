@@ -63,3 +63,64 @@ class VacunaController:
 
         except Exception as e:
             return jsonify({"error": str(e)}), 500
+        
+    @staticmethod
+    def update_vacuna(vacuna_id):
+
+        data = request.get_json()
+
+        if not data:
+            return jsonify({
+            "error": "Datos inválidos"
+        }), 400
+
+        try:
+
+            VacunaService.update_vacuna(
+            vacuna_id,
+            data
+        )
+
+            return jsonify({
+            "message":
+            "Vacuna actualizada correctamente."
+        }), 200
+
+        except ValueError as e:
+            return jsonify({
+            "error": str(e)
+        }), 400
+
+        except LookupError as e:
+            return jsonify({
+            "error": str(e)
+        }), 404
+
+        except Exception as e:
+            return jsonify({
+            "error": str(e)
+        }), 500
+
+    @staticmethod
+    def delete_vacuna(vacuna_id):
+
+        try:
+
+            VacunaService.delete_vacuna(
+            vacuna_id
+        )
+
+            return jsonify({
+            "message":
+            "Vacuna eliminada correctamente."
+        }), 200
+
+        except LookupError as e:
+            return jsonify({
+            "error": str(e)
+        }), 404
+
+        except Exception as e:
+            return jsonify({
+            "error": str(e)
+        }), 500
