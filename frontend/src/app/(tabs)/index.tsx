@@ -5,15 +5,70 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
+import {
+  MaterialCommunityIcons,
+  Feather
+} from "@expo/vector-icons";
+import { Colors } from "@/constants/theme";
 
 const BOTONES_BASE = [
-  { label: "Animales", icono: "🐾", ruta: "/animales" },
-  { label: "Calendario", icono: "🗓️", ruta: "/calendario" },
-  { label: "Tratamientos", icono: "🩺", ruta: "/tratamientos" },
-  { label: "Personas", icono: "👥", ruta: "/personas" },
+  {
+    label: "Animales",
+    icono: (
+      <MaterialCommunityIcons
+        name="paw"
+        size={48}
+        color={Colors.primary}
+      />
+    ),
+    ruta: "/animales",
+  },
+  {
+    label: "Calendario",
+    icono: (
+      <Feather
+        name="calendar"
+        size={48}
+        color={Colors.primary}
+      />
+    ),
+    ruta: "/calendario",
+  },
+  {
+    label: "Tratamientos",
+    icono: (
+      <MaterialCommunityIcons
+        name="medical-bag"
+        size={48}
+        color={Colors.primary}
+      />
+    ),
+    ruta: "/tratamientos",
+  },
+  {
+    label: "Personas",
+    icono: (
+      <Feather
+        name="users"
+        size={48}
+        color={Colors.primary}
+      />
+    ),
+    ruta: "/personas",
+  },
 ];
 
-const BOTON_USUARIOS = { label: "Usuarios", icono: "👤", ruta: "/usuarios" };
+const BOTON_USUARIOS = {
+  label: "Usuarios",
+  icono: (
+    <Feather
+      name="user"
+      size={48}
+      color={Colors.primary}
+    />
+  ),
+  ruta: "/usuarios",
+};
 
 export default function HomeScreen() {
   const { usuario, esAdmin } = useAuth();
@@ -36,7 +91,7 @@ export default function HomeScreen() {
             onPress={() => router.push(btn.ruta as any)}
             activeOpacity={0.7}
           >
-            <Text style={styles.botonIcono}>{btn.icono}</Text>
+            <View>{btn.icono}</View>
             <Text style={styles.botonLabel}>{btn.label}</Text>
           </TouchableOpacity>
         ))}
@@ -81,9 +136,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 6,
     elevation: 3,
-  },
-  botonIcono: {
-    fontSize: 48,
   },
   botonLabel: {
     fontSize: 16,

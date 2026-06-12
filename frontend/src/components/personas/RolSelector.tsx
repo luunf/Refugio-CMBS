@@ -1,9 +1,17 @@
 import React, { useEffect, useState } from "react";
 import {
-  View, Text, TouchableOpacity, Modal,
-  FlatList, StyleSheet, ActivityIndicator
+  View,
+  Text,
+  TouchableOpacity,
+  Modal,
+  FlatList,
+  StyleSheet,
+  ActivityIndicator,
 } from "react-native";
+import { useTranslation } from "react-i18next";
+
 import { api } from "@/config/api";
+import { Colors } from "@/constants/theme";
 
 interface Rol {
   id_rol: number;
@@ -11,8 +19,8 @@ interface Rol {
 }
 
 interface Props {
-  value: number[];                    // ← ahora es array
-  onChange: (ids: number[]) => void;  // ← devuelve array
+  value: number[];
+  onChange: (ids: number[]) => void;
   placeholder?: string;
   excluir?: string[];
 }
@@ -20,9 +28,11 @@ interface Props {
 export default function RolSelector({
   value,
   onChange,
-  placeholder = "Seleccionar roles",
+  placeholder,
   excluir = [],
 }: Props) {
+  const { t } = useTranslation("personas");
+
   const [roles, setRoles] = useState<Rol[]>([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -30,15 +40,20 @@ export default function RolSelector({
   useEffect(() => {
     const cargar = async () => {
       setLoading(true);
+
       try {
         const data = await api.getRoles();
-        setRoles(data.filter((r: Rol) => !excluir.includes(r.nombre)));
+
+        setRoles(
+          data.filter((r: Rol) => !excluir.includes(r.nombre))
+        );
       } catch (e) {
         console.error(e);
       } finally {
         setLoading(false);
       }
     };
+
     cargar();
   }, []);
 
@@ -50,12 +65,17 @@ export default function RolSelector({
     }
   };
 
-  const etiqueta = value.length === 0
-    ? placeholder
-    : roles
-        .filter((r) => value.includes(r.id_rol))
-        .map((r) => r.nombre.charAt(0).toUpperCase() + r.nombre.slice(1))
-        .join(", ");
+  const etiqueta =
+    value.length === 0
+      ? placeholder ?? t("seleccionarRoles")
+      : roles
+          .filter((r) => value.includes(r.id_rol))
+          .map(
+            (r) =>
+              r.nombre.charAt(0).toUpperCase() +
+              r.nombre.slice(1)
+          )
+          .join(", ");
 
   return (
     <>
@@ -65,12 +85,22 @@ export default function RolSelector({
         activeOpacity={0.7}
       >
         {loading ? (
-          <ActivityIndicator size="small" color="#f97316" />
+          <ActivityIndicator
+            size="small"
+            color={Colors.primary}
+          />
         ) : (
-          <Text style={value.length > 0 ? styles.textoSeleccionado : styles.placeholder}>
+          <Text
+            style={
+              value.length > 0
+                ? styles.textoSeleccionado
+                : styles.placeholder
+            }
+          >
             {etiqueta}
           </Text>
         )}
+
         <Text style={styles.chevron}>⌄</Text>
       </TouchableOpacity>
 
@@ -83,24 +113,53 @@ export default function RolSelector({
           <View style={styles.dropdown}>
             <FlatList
               data={roles}
-              keyExtractor={(item) => String(item.id_rol)}
+              keyExtractor={(item) =>
+                String(item.id_rol)
+              }
               renderItem={({ item }) => {
-                const seleccionado = value.includes(item.id_rol);
+                const seleccionado = value.includes(
+                  item.id_rol
+                );
+
                 return (
                   <TouchableOpacity
-                    style={[styles.opcion, seleccionado && styles.opcionActiva]}
-                    onPress={() => toggleRol(item.id_rol)}
+                    style={[
+                      styles.opcion,
+                      seleccionado &&
+                        styles.opcionActiva,
+                    ]}
+                    onPress={() =>
+                      toggleRol(item.id_rol)
+                    }
                   >
-                    <Text style={[styles.opcionTexto, seleccionado && styles.opcionTextoActivo]}>
-                      {item.nombre.charAt(0).toUpperCase() + item.nombre.slice(1)}
+                    <Text
+                      style={[
+                        styles.opcionTexto,
+                        seleccionado &&
+                          styles.opcionTextoActivo,
+                      ]}
+                    >
+                      {item.nombre.charAt(0).toUpperCase() +
+                        item.nombre.slice(1)}
                     </Text>
-                    {seleccionado && <Text style={styles.check}>✓</Text>}
+
+                    {seleccionado && (
+                      <Text style={styles.check}>
+                        ✓
+                      </Text>
+                    )}
                   </TouchableOpacity>
                 );
               }}
             />
-            <TouchableOpacity style={styles.btnListo} onPress={() => setOpen(false)}>
-              <Text style={styles.btnListoTexto}>Listo</Text>
+
+            <TouchableOpacity
+              style={styles.btnListo}
+              onPress={() => setOpen(false)}
+            >
+              <Text style={styles.btnListoTexto}>
+                {t("cerrar")}
+              </Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -114,46 +173,90 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "white",
+
+    backgroundColor: Colors.surface,
+
     borderWidth: 1,
-    borderColor: "#e5e7eb",
+    borderColor: Colors.border,
+
     borderRadius: 12,
+
     paddingHorizontal: 12,
     paddingVertical: 10,
+
     marginBottom: 16,
   },
-  placeholder: { color: "#9ca3af", fontSize: 14 },
-  textoSeleccionado: { color: "#111827", fontSize: 14, flex: 1 },
-  chevron: { fontSize: 18, color: "#f97316" },
+
+  placeholder: {
+    color: Colors.textFaint,
+    fontSize: 14,
+  },
+
+  textoSeleccionado: {
+    color: Colors.text,
+    fontSize: 14,
+    flex: 1,
+  },
+
+  chevron: {
+    fontSize: 18,
+    color: Colors.primary,
+  },
+
   overlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.3)",
     justifyContent: "center",
     paddingHorizontal: 32,
   },
+
   dropdown: {
-    backgroundColor: "white",
+    backgroundColor: Colors.surface,
     borderRadius: 16,
     overflow: "hidden",
     maxHeight: 300,
   },
+
   opcion: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+
     paddingHorizontal: 16,
     paddingVertical: 14,
+
     borderBottomWidth: 1,
-    borderBottomColor: "#f3f4f6",
+    borderBottomColor: Colors.borderLight,
   },
-  opcionActiva: { backgroundColor: "#fff7ed" },
-  opcionTexto: { fontSize: 15, color: "#374151" },
-  opcionTextoActivo: { color: "#f97316", fontWeight: "600" },
-  check: { color: "#f97316", fontWeight: "bold" },
+
+  opcionActiva: {
+    backgroundColor: Colors.primaryFaint,
+  },
+
+  opcionTexto: {
+    fontSize: 15,
+    color: Colors.textSoft,
+  },
+
+  opcionTextoActivo: {
+    color: Colors.primary,
+    fontWeight: "600",
+  },
+
+  check: {
+    color: Colors.primary,
+    fontWeight: "bold",
+  },
+
   btnListo: {
-    backgroundColor: "#f97316",
+    backgroundColor: Colors.primary,
     padding: 14,
     alignItems: "center",
   },
-  btnListoTexto: { color: "white", fontWeight: "bold", fontSize: 15 },
+
+  btnListoTexto: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 15,
+  },
 });

@@ -1,0 +1,15 @@
+{
+  "title": "Mi perfil",
+  "editar": "Editar",
+  "guardar": "Guardar",
+  "cancelar": "Cancelar",
+  "nombre": "Nombre",
+  "apellido": "Apellido",
+  "telefono": "Teléfono",
+  "direccion": "Dirección",
+  "roles": "Roles",
+  "perfilActualizado": "Perfil actualizado correctamente",
+  "camposObligatorios": "Nombre y apellido son obligatorios",
+  "errorActualizar": "No se pudo actualizar",
+  "sinDato": "—"
+}

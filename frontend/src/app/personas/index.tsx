@@ -1,24 +1,27 @@
 import React, { useEffect, useState, useCallback } from "react";
 import {
-  View, Text, ScrollView, TouchableOpacity,
-  ActivityIndicator, StyleSheet, TextInput
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  StyleSheet,
+  TextInput,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
+
 import { api } from "@/config/api";
 import { useAuth } from "@/context/AuthContext";
+
+import { Colors } from "@/constants/theme";
+
 import PersonaRow from "@/components/personas/PersonaRow";
 import ModalAgregarPersona from "@/components/personas/ModalAgregarPersona";
 import ModalEditarPersona from "@/components/personas/ModalEditarPersona";
 import ModalVerPersona from "@/components/personas/ModalVerPersona";
 import ModalCrearUsuario from "@/components/personas/ModalCrearUsuario";
-
-const FILTROS_ROL = [
-  { label: "Todos", valor: "Todos" },
-  { label: "Veterinario", valor: "veterinario" },
-  { label: "Voluntario", valor: "voluntario" },
-  { label: "Adoptante", valor: "adoptante" },
-  { label: "Hogar de tránsito", valor: "hogar_transito" },
-];
+import Feather from "@expo/vector-icons/build/Feather";
 
 interface Persona {
   id_persona: number;
@@ -32,9 +35,19 @@ interface Persona {
 
 export default function PersonasScreen() {
   const { esAdmin } = useAuth();
+  const { t } = useTranslation("personas");
+
+  const FILTROS_ROL = [
+    { label: t("filtroTodos"), valor: "Todos" },
+    { label: t("filtroVeterinario"), valor: "veterinario" },
+    { label: t("filtroVoluntario"), valor: "voluntario" },
+    { label: t("filtroAdoptante"), valor: "adoptante" },
+    { label: t("filtroHogar"), valor: "hogar_transito" },
+  ];
 
   const [personas, setPersonas] = useState<Persona[]>([]);
   const [loading, setLoading] = useState(false);
+
   const [busqueda, setBusqueda] = useState("");
   const [filtroRol, setFiltroRol] = useState("Todos");
 
@@ -42,13 +55,21 @@ export default function PersonasScreen() {
   const [modalEditar, setModalEditar] = useState(false);
   const [modalVer, setModalVer] = useState(false);
   const [modalUsuario, setModalUsuario] = useState(false);
-  const [personaSeleccionada, setPersonaSeleccionada] = useState<Persona | null>(null);
+
+  const [personaSeleccionada, setPersonaSeleccionada] =
+    useState<Persona | null>(null);
 
   const cargarPersonas = useCallback(async () => {
     setLoading(true);
+
     try {
-      const rol = filtroRol !== "Todos" ? filtroRol.toLowerCase() : undefined;
+      const rol =
+        filtroRol !== "Todos"
+          ? filtroRol.toLowerCase()
+          : undefined;
+
       const data = await api.getPersonas(rol);
+
       setPersonas(Array.isArray(data) ? data : []);
     } catch (e) {
       console.error(e);
@@ -63,6 +84,7 @@ export default function PersonasScreen() {
 
   const personasFiltradas = personas.filter((p) => {
     const texto = busqueda.toLowerCase();
+
     return (
       p.nombre?.toLowerCase().includes(texto) ||
       p.apellido?.toLowerCase().includes(texto) ||
@@ -87,23 +109,34 @@ export default function PersonasScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
+      {/* HEADER */}
+
       <View style={styles.header}>
-        <Text style={styles.headerText}>Personas</Text>
+        <Text style={styles.headerText}>
+          {t("title")}
+        </Text>
       </View>
 
-      {/* Buscador */}
+      {/* BUSCADOR */}
+
       <View style={styles.buscadorRow}>
         <View style={styles.buscadorContainer}>
-          <Text style={styles.buscadorIcono}>🔍</Text>
+          <Feather
+              name="search"
+              size={18}
+              color="#9ca3af"
+              style={{ marginRight: 6 }}
+            />
+
           <TextInput
             value={busqueda}
             onChangeText={setBusqueda}
-            placeholder="Buscar..."
+            placeholder={t("buscar")}
             style={styles.buscadorInput}
-            placeholderTextColor="#9ca3af"
+            placeholderTextColor={Colors.textFaint}
           />
         </View>
+
         <TouchableOpacity
           style={styles.btnAgregar}
           onPress={() => setModalAgregar(true)}
@@ -112,34 +145,77 @@ export default function PersonasScreen() {
         </TouchableOpacity>
       </View>
 
+      {/* FILTROS */}
+
       <View style={styles.filtrosGrilla}>
         {FILTROS_ROL.map((f) => (
           <TouchableOpacity
             key={f.valor}
             onPress={() => setFiltroRol(f.valor)}
-            style={[styles.filtroBadge, filtroRol === f.valor && styles.filtroBadgeActivo]}
+            style={[
+              styles.filtroBadge,
+              filtroRol === f.valor &&
+                styles.filtroBadgeActivo,
+            ]}
           >
-            <Text style={filtroRol === f.valor ? styles.filtroTextoActivo : styles.filtroTexto}>
+            <Text
+              style={
+                filtroRol === f.valor
+                  ? styles.filtroTextoActivo
+                  : styles.filtroTexto
+              }
+            >
               {f.label}
             </Text>
           </TouchableOpacity>
         ))}
       </View>
 
-      {/* Tabla header */}
+      {/* HEADER TABLA */}
+
       <View style={styles.tablaHeader}>
-        <Text style={[styles.tablaHeaderTexto, { width: 110 }]}>Nombre</Text>
-        <Text style={[styles.tablaHeaderTexto, { flex: 1 }]}>Email</Text>
-        <Text style={[styles.tablaHeaderTexto, { width: 80 }]}>Acción</Text>
+        <Text
+          style={[
+            styles.tablaHeaderTexto,
+            { width: 110 },
+          ]}
+        >
+          {t("nombre")}
+        </Text>
+
+        <Text
+          style={[
+            styles.tablaHeaderTexto,
+            { flex: 1 },
+          ]}
+        >
+          {t("email")}
+        </Text>
+
+        <Text
+          style={[
+            styles.tablaHeaderTexto,
+            { width: 80 },
+          ]}
+        >
+          {t("accion")}
+        </Text>
       </View>
 
-      {/* Lista */}
+      {/* LISTA */}
+
       {loading ? (
-        <ActivityIndicator size="large" color="#f97316" style={{ marginTop: 40 }} />
+        <ActivityIndicator
+          size="large"
+          color={Colors.primary}
+          style={{ marginTop: 40 }}
+        />
       ) : (
         <ScrollView style={styles.lista}>
           {personasFiltradas.length === 0 ? (
-            <Text style={styles.sinResultados}>No hay personas</Text>
+            <Text style={styles.sinResultados}>
+              {t("sinResultados")}
+            </Text>
           ) : (
             personasFiltradas.map((p) => (
               <PersonaRow
@@ -152,27 +228,32 @@ export default function PersonasScreen() {
               />
             ))
           )}
+
           <View style={{ height: 24 }} />
         </ScrollView>
       )}
 
-      {/* Modals */}
+      {/* MODALS */}
+
       <ModalAgregarPersona
         visible={modalAgregar}
         onClose={() => setModalAgregar(false)}
         onCreada={cargarPersonas}
       />
+
       <ModalEditarPersona
         visible={modalEditar}
         persona={personaSeleccionada}
         onClose={() => setModalEditar(false)}
         onActualizada={cargarPersonas}
       />
+
       <ModalVerPersona
         visible={modalVer}
         persona={personaSeleccionada}
         onClose={() => setModalVer(false)}
       />
+
       {esAdmin && (
         <ModalCrearUsuario
           visible={modalUsuario}
@@ -187,105 +268,122 @@ export default function PersonasScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f3f4f6",
+    backgroundColor: Colors.background,
   },
+
   header: {
-    backgroundColor: "#f97316",
+    backgroundColor: Colors.primary,
     paddingHorizontal: 16,
     paddingVertical: 16,
   },
+
   headerText: {
-    color: "white",
+    color: Colors.surface,
     fontSize: 24,
     fontWeight: "bold",
   },
+
   buscadorRow: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: "white",
+    backgroundColor: Colors.surface,
     gap: 10,
   },
+
   buscadorContainer: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f3f4f6",
+    backgroundColor: Colors.background,
     borderRadius: 20,
     paddingHorizontal: 12,
     paddingVertical: 8,
   },
+
   buscadorIcono: {
     fontSize: 16,
     marginRight: 6,
   },
+
   buscadorInput: {
     flex: 1,
     fontSize: 14,
-    color: "#111827",
+    color: Colors.text,
   },
+
   btnAgregar: {
-    backgroundColor: "#f97316",
+    backgroundColor: Colors.primary,
     width: 40,
     height: 40,
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
   },
+
   btnAgregarTexto: {
-    color: "white",
+    color: Colors.surface,
     fontSize: 24,
     fontWeight: "bold",
     lineHeight: 28,
   },
+
   filtrosGrilla: {
     flexDirection: "row",
     flexWrap: "wrap",
     paddingHorizontal: 16,
     paddingVertical: 10,
-    backgroundColor: "white",
+    backgroundColor: Colors.surface,
     gap: 8,
   },
+
   filtroBadge: {
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 20,
-    backgroundColor: "#f3f4f6",
+    backgroundColor: Colors.background,
   },
+
   filtroBadgeActivo: {
-    backgroundColor: "#f97316",
+    backgroundColor: Colors.primary,
   },
+
   filtroTexto: {
-    color: "#374151",
+    color: Colors.textSoft,
     fontSize: 13,
     fontWeight: "500",
   },
+
   filtroTextoActivo: {
-    color: "white",
+    color: Colors.surface,
     fontSize: 13,
     fontWeight: "600",
   },
+
   tablaHeader: {
     flexDirection: "row",
     paddingHorizontal: 16,
     paddingVertical: 10,
-    backgroundColor: "#ffedd5",
+    backgroundColor: Colors.primaryLight,
     borderBottomWidth: 1,
-    borderBottomColor: "#fed7aa",
+    borderBottomColor: Colors.border,
   },
+
   tablaHeaderTexto: {
     fontSize: 13,
     fontWeight: "700",
-    color: "#374151",
+    color: Colors.textSoft,
   },
+
   lista: {
     flex: 1,
     paddingHorizontal: 16,
   },
+
   sinResultados: {
     textAlign: "center",
-    color: "#9ca3af",
+    color: Colors.textFaint,
     marginTop: 40,
     fontSize: 16,
   },

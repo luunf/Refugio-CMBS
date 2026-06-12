@@ -1,9 +1,19 @@
 import React, { useState } from "react";
 import {
-  Modal, View, Text, TextInput, TouchableOpacity,
-  ScrollView, ActivityIndicator, StyleSheet, Alert
+  Modal,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  ActivityIndicator,
+  StyleSheet,
+  Alert,
 } from "react-native";
+import { useTranslation } from "react-i18next";
+
 import { api } from "@/config/api";
+import { Colors } from "@/constants/theme";
 
 interface Props {
   visible: boolean;
@@ -13,7 +23,13 @@ interface Props {
 
 const TIPOS = ["estandar", "admin"];
 
-export default function ModalCrearUsuario({ visible, onClose, onCreado }: Props) {
+export default function ModalCrearUsuario({
+  visible,
+  onClose,
+  onCreado,
+}: Props) {
+  const { t } = useTranslation("personas");
+
   const [email, setEmail] = useState("");
   const [firebaseUid, setFirebaseUid] = useState("");
   const [tipo, setTipo] = useState<"estandar" | "admin">("estandar");
@@ -27,22 +43,28 @@ export default function ModalCrearUsuario({ visible, onClose, onCreado }: Props)
 
   const handleCrear = async () => {
     if (!email.trim() || !firebaseUid.trim()) {
-      Alert.alert("Error", "Email y Firebase UID son obligatorios");
+      Alert.alert("Error", t("errorEmailUid"));
       return;
     }
 
     setLoading(true);
+
     try {
       await api.createUsuario({
         email: email.trim(),
         firebase_uid: firebaseUid.trim(),
         tipo,
       });
+
       onCreado();
       onClose();
       resetForm();
     } catch (e: any) {
-      Alert.alert("Error", e?.response?.data?.error ?? "No se pudo crear el usuario");
+      Alert.alert(
+        "Error",
+        e?.response?.data?.error ??
+          "No se pudo crear el usuario"
+      );
     } finally {
       setLoading(false);
     }
@@ -53,44 +75,77 @@ export default function ModalCrearUsuario({ visible, onClose, onCreado }: Props)
       <View style={styles.overlay}>
         <View style={styles.container}>
           <View style={styles.header}>
-            <Text style={styles.titulo}>Crear usuario</Text>
-            <TouchableOpacity onPress={() => { onClose(); resetForm(); }}>
+            <Text style={styles.titulo}>
+              {t("crearUsuario")}
+            </Text>
+
+            <TouchableOpacity
+              onPress={() => {
+                onClose();
+                resetForm();
+              }}
+            >
               <Text style={styles.cerrar}>✕</Text>
             </TouchableOpacity>
           </View>
 
           <ScrollView showsVerticalScrollIndicator={false}>
             <Text style={styles.label}>Email*</Text>
+
             <TextInput
               value={email}
               onChangeText={setEmail}
               style={styles.input}
               placeholder="email@ejemplo.com"
-              placeholderTextColor="#9ca3af"
+              placeholderTextColor={Colors.textFaint}
               keyboardType="email-address"
               autoCapitalize="none"
             />
 
-            <Text style={styles.label}>Firebase UID*</Text>
+            <Text style={styles.label}>
+              {t("firebaseUid")}*
+            </Text>
+
             <TextInput
               value={firebaseUid}
               onChangeText={setFirebaseUid}
               style={styles.input}
-              placeholder="UID de Firebase Auth"
-              placeholderTextColor="#9ca3af"
+              placeholder={t("uidPlaceholder")}
+              placeholderTextColor={Colors.textFaint}
               autoCapitalize="none"
             />
 
-            <Text style={styles.label}>Tipo de usuario</Text>
+            <Text style={styles.label}>
+              {t("tipoUsuario")}
+            </Text>
+
             <View style={styles.tipoRow}>
-              {TIPOS.map((t) => (
+              {TIPOS.map((tpo) => (
                 <TouchableOpacity
-                  key={t}
-                  onPress={() => setTipo(t as "estandar" | "admin")}
-                  style={[styles.tipoBtn, tipo === t && styles.tipoBtnActivo]}
+                  key={tpo}
+                  onPress={() =>
+                    setTipo(
+                      tpo as "estandar" | "admin"
+                    )
+                  }
+                  style={[
+                    styles.tipoBtn,
+                    tipo === tpo &&
+                      styles.tipoBtnActivo,
+                  ]}
                 >
-                  <Text style={tipo === t ? styles.tipoTextoActivo : styles.tipoTexto}>
-                    {t.charAt(0).toUpperCase() + t.slice(1)}
+                  <Text
+                    style={
+                      tipo === tpo
+                        ? styles.tipoTextoActivo
+                        : styles.tipoTexto
+                    }
+                  >
+                    {t(
+                      tpo as
+                        | "estandar"
+                        | "admin"
+                    )}
                   </Text>
                 </TouchableOpacity>
               ))}
@@ -98,7 +153,7 @@ export default function ModalCrearUsuario({ visible, onClose, onCreado }: Props)
 
             <View style={styles.infoBox}>
               <Text style={styles.infoTexto}>
-                ℹ️ Se creará una persona mínima con este email y rol voluntario automáticamente.
+                {t("infoCrearUsuario")}
               </Text>
             </View>
 
@@ -107,10 +162,15 @@ export default function ModalCrearUsuario({ visible, onClose, onCreado }: Props)
               disabled={loading}
               style={styles.btnCrear}
             >
-              {loading
-                ? <ActivityIndicator color="white" />
-                : <Text style={styles.btnCrearTexto}>Crear usuario</Text>
-              }
+              {loading ? (
+                <ActivityIndicator
+                  color="white"
+                />
+              ) : (
+                <Text style={styles.btnCrearTexto}>
+                  {t("crearUsuarioBtn")}
+                </Text>
+              )}
             </TouchableOpacity>
           </ScrollView>
         </View>
@@ -125,86 +185,101 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     backgroundColor: "rgba(0,0,0,0.4)",
   },
+
   container: {
-    backgroundColor: "#fff7ed",
+    backgroundColor: Colors.primaryFaint,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 24,
     maxHeight: "90%",
   },
+
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 20,
   },
+
   titulo: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#111827",
+    color: Colors.text,
   },
+
   cerrar: {
     fontSize: 22,
-    color: "#6b7280",
+    color: Colors.textMuted,
   },
+
   label: {
     fontWeight: "600",
     marginBottom: 4,
-    color: "#111827",
+    color: Colors.text,
     fontSize: 14,
   },
+
   input: {
-    backgroundColor: "white",
+    backgroundColor: Colors.surface,
     borderWidth: 1,
-    borderColor: "#e5e7eb",
+    borderColor: Colors.border,
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
     marginBottom: 16,
     fontSize: 14,
-    color: "#111827",
+    color: Colors.text,
   },
+
   tipoRow: {
     flexDirection: "row",
     gap: 8,
     marginBottom: 16,
   },
+
   tipoBtn: {
     flex: 1,
     paddingVertical: 10,
     borderRadius: 20,
     alignItems: "center",
-    backgroundColor: "#ffedd5",
+    backgroundColor: Colors.primaryLight,
   },
+
   tipoBtnActivo: {
-    backgroundColor: "#f97316",
+    backgroundColor: Colors.primary,
   },
+
   tipoTexto: {
-    color: "#f97316",
+    color: Colors.primary,
     fontWeight: "600",
   },
+
   tipoTextoActivo: {
     color: "white",
     fontWeight: "600",
   },
+
   infoBox: {
-    backgroundColor: "#fef3c7",
+    backgroundColor: Colors.primaryLight,
     borderRadius: 12,
     padding: 12,
     marginBottom: 16,
   },
+
   infoTexto: {
-    color: "#92400e",
+    color: Colors.textSoft,
     fontSize: 13,
   },
+
   btnCrear: {
-    backgroundColor: "#f97316",
+    backgroundColor: Colors.primary,
     paddingVertical: 14,
     borderRadius: 20,
     alignItems: "center",
     marginTop: 8,
     marginBottom: 8,
   },
+
   btnCrearTexto: {
     color: "white",
     fontWeight: "bold",

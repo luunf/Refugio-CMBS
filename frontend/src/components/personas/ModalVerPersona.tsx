@@ -1,8 +1,16 @@
 import React from "react";
 import {
-  Modal, View, Text, TouchableOpacity,
-  ScrollView, StyleSheet
+  Modal,
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
 } from "react-native";
+
+import { useTranslation } from "react-i18next";
+
+import { Colors } from "@/constants/theme";
 
 interface Persona {
   id_persona: number;
@@ -20,43 +28,106 @@ interface Props {
   onClose: () => void;
 }
 
-const formatearRol = (nombre: string) => {
-  const nombres: Record<string, string> = {
-    veterinario: "Veterinario",
-    voluntario: "Voluntario",
-    adoptante: "Adoptante",
-    hogar_transito: "Hogar de tránsito",
-    admin: "Admin",
-  };
-  return nombres[nombre] ?? nombre.charAt(0).toUpperCase() + nombre.slice(1);
-};
+export default function ModalVerPersona({
+  visible,
+  persona,
+  onClose,
+}: Props) {
+  const { t } = useTranslation("personas");
 
-export default function ModalVerPersona({ visible, persona, onClose }: Props) {
   if (!persona) return null;
 
-  const rolesVisibles = persona.roles.filter((r) => r.nombre !== "voluntario");
-  const nombresRoles = rolesVisibles.length > 0
-    ? rolesVisibles.map((r) => formatearRol(r.nombre)).join(", ")
-    : "Voluntario";
+  const formatearRol = (nombre: string) => {
+    const nombres: Record<string, string> = {
+      veterinario: t("filtroVeterinario"),
+      voluntario: t("filtroVoluntario"),
+      adoptante: t("filtroAdoptante"),
+      hogar_transito: t("filtroHogar"),
+      admin: "Admin",
+    };
+
+    return (
+      nombres[nombre] ??
+      nombre.charAt(0).toUpperCase() + nombre.slice(1)
+    );
+  };
+
+  const rolesVisibles = persona.roles.filter(
+    (r) => r.nombre !== "voluntario"
+  );
+
+  const nombresRoles =
+    rolesVisibles.length > 0
+      ? rolesVisibles
+          .map((r) => formatearRol(r.nombre))
+          .join(", ")
+      : t("filtroVoluntario");
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent
+    >
       <View style={styles.overlay}>
         <View style={styles.container}>
-          <ScrollView showsVerticalScrollIndicator={false}>
-            <View style={styles.rolBadge}>
-              <Text style={styles.rolTexto}>{nombresRoles}</Text>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.rolesContainer}>
+              {rolesVisibles.length > 0 ? (
+                rolesVisibles.map((rol) => (
+                  <View
+                    key={rol.id_rol}
+                    style={styles.rolBadge}
+                  >
+                    <Text style={styles.rolTexto}>
+                      {formatearRol(rol.nombre)}
+                    </Text>
+                  </View>
+                ))
+              ) : (
+                <View style={styles.rolBadge}>
+                  <Text style={styles.rolTexto}>
+                    Voluntario
+                  </Text>
+                </View>
+              )}
             </View>
 
-            <Campo label="Nombre" valor={persona.nombre} />
-            <Campo label="Apellido" valor={persona.apellido} />
-            <Campo label="Teléfono" valor={persona.telefono} />
-            <Campo label="Dirección" valor={persona.direccion} />
-            <Campo label="Email" valor={persona.email} />
+            <Campo
+              label={t("nombre")}
+              valor={persona.nombre}
+            />
+
+            <Campo
+              label={t("apellido")}
+              valor={persona.apellido}
+            />
+
+            <Campo
+              label={t("telefono")}
+              valor={persona.telefono}
+            />
+
+            <Campo
+              label={t("direccion")}
+              valor={persona.direccion}
+            />
+
+            <Campo
+              label={t("email")}
+              valor={persona.email}
+            />
           </ScrollView>
 
-          <TouchableOpacity style={styles.btnCerrar} onPress={onClose}>
-            <Text style={styles.btnCerrarTexto}>Cerrar</Text>
+          <TouchableOpacity
+            style={styles.btnCerrar}
+            onPress={onClose}
+          >
+            <Text style={styles.btnCerrarTexto}>
+              {t("cerrar")}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -64,12 +135,23 @@ export default function ModalVerPersona({ visible, persona, onClose }: Props) {
   );
 }
 
-function Campo({ label, valor }: { label: string; valor?: string | null }) {
+function Campo({
+  label,
+  valor,
+}: {
+  label: string;
+  valor?: string | null;
+}) {
   return (
     <View style={styles.campo}>
-      <Text style={styles.campoLabel}>{label}</Text>
+      <Text style={styles.campoLabel}>
+        {label}
+      </Text>
+
       <View style={styles.campoValorContainer}>
-        <Text style={styles.campoValor}>{valor || "—"}</Text>
+        <Text style={styles.campoValor}>
+          {valor || "—"}
+        </Text>
       </View>
     </View>
   );
@@ -79,55 +161,70 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     justifyContent: "flex-end",
-    backgroundColor: "rgba(0,0,0,0.4)",
+    backgroundColor:
+      "rgba(0,0,0,0.4)",
   },
+
   container: {
-    backgroundColor: "#f97316",
+    backgroundColor: Colors.primary,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 24,
     maxHeight: "80%",
   },
+
   rolBadge: {
     alignSelf: "flex-end",
-    backgroundColor: "#edcf3a",
+    backgroundColor: Colors.primaryLight,
     borderRadius: 20,
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     paddingVertical: 6,
-    marginBottom: 20,
-    maxWidth: "80%",
   },
+
   rolTexto: {
-    color: "white",
+    color: Colors.primary,
     fontWeight: "600",
-    fontSize: 14,
-    textAlign: "center",
+    fontSize: 13,
   },
+
   campo: {
     marginBottom: 16,
   },
+
   campoLabel: {
     color: "rgba(255,255,255,0.8)",
     fontSize: 13,
     marginBottom: 4,
     fontWeight: "600",
   },
+
   campoValorContainer: {
-    backgroundColor: "rgba(255,255,255,0.25)",
+    backgroundColor:
+      "rgba(255,255,255,0.25)",
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 10,
   },
+
   campoValor: {
-    color: "white",
+    color: Colors.surface,
     fontSize: 15,
   },
+
   btnCerrar: {
     marginTop: 16,
     alignItems: "center",
   },
+
   btnCerrarTexto: {
     color: "rgba(255,255,255,0.7)",
     fontSize: 15,
   },
+
+  rolesContainer: {
+  flexDirection: "row",
+  flexWrap: "wrap",
+  gap: 8,
+  marginBottom: 20,
+},
 });

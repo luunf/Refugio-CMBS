@@ -1,9 +1,20 @@
 import React, { useState, useEffect } from "react";
 import {
-  Modal, View, Text, TextInput, TouchableOpacity,
-  ScrollView, ActivityIndicator, StyleSheet, Alert
+  Modal,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  ActivityIndicator,
+  StyleSheet,
+  Alert,
 } from "react-native";
+
+import { useTranslation } from "react-i18next";
+
 import { api } from "@/config/api";
+import { Colors } from "@/constants/theme";
 import RolSelector from "./RolSelector";
 
 interface Persona {
@@ -23,7 +34,14 @@ interface Props {
   onActualizada: () => void;
 }
 
-export default function ModalEditarPersona({ visible, persona, onClose, onActualizada }: Props) {
+export default function ModalEditarPersona({
+  visible,
+  persona,
+  onClose,
+  onActualizada,
+}: Props) {
+  const { t } = useTranslation("personas");
+
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
   const [rolIds, setRolIds] = useState<number[]>([]);
@@ -33,26 +51,34 @@ export default function ModalEditarPersona({ visible, persona, onClose, onActual
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (persona) {
-      setNombre(persona.nombre ?? "");
-      setApellido(persona.apellido ?? "");
-      setTelefono(persona.telefono ?? "");
-      setDireccion(persona.direccion ?? "");
-      setEmail(persona.email ?? "");
-      // primer rol no-voluntario
-      const rolNoVoluntario = persona.roles.find((r) => r.nombre !== "voluntario");
-      setRolIds(rolNoVoluntario ? [rolNoVoluntario.id_rol] : []);
-    }
+    if (!persona) return;
+
+    setNombre(persona.nombre ?? "");
+    setApellido(persona.apellido ?? "");
+    setTelefono(persona.telefono ?? "");
+    setDireccion(persona.direccion ?? "");
+    setEmail(persona.email ?? "");
+
+    setRolIds(
+      persona.roles
+        ?.filter((r) => r.nombre !== "voluntario")
+        .map((r) => r.id_rol) ?? []
+    );
   }, [persona]);
 
   const handleEditar = async () => {
     if (!persona) return;
+
     if (!nombre.trim() || !apellido.trim()) {
-      Alert.alert("Error", "Nombre y apellido son obligatorios");
+      Alert.alert(
+        t("error"),
+        t("nombreApellidoObligatorios")
+      );
       return;
     }
 
     setLoading(true);
+
     try {
       await api.updatePersona(persona.id_persona, {
         nombre: nombre.trim(),
@@ -61,75 +87,125 @@ export default function ModalEditarPersona({ visible, persona, onClose, onActual
         direccion: direccion.trim() || null,
         roles: rolIds,
       });
+
       onActualizada();
       onClose();
     } catch (e: any) {
-      Alert.alert("Error", e?.response?.data?.error ?? "No se pudo actualizar");
+      Alert.alert(
+        t("error"),
+        e?.response?.data?.error ??
+          t("errorActualizarPersona")
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent
+    >
       <View style={styles.overlay}>
         <View style={styles.container}>
           <View style={styles.header}>
-            <Text style={styles.titulo}>Editar persona</Text>
+            <Text style={styles.titulo}>
+              {t("editar")}
+            </Text>
+
             <TouchableOpacity onPress={onClose}>
               <Text style={styles.cerrar}>✕</Text>
             </TouchableOpacity>
           </View>
 
-          <ScrollView showsVerticalScrollIndicator={false}>
-            <Text style={styles.label}>Nombre*</Text>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+          >
+            <Text style={styles.label}>
+              {t("nombre")}*
+            </Text>
+
             <TextInput
               value={nombre}
               onChangeText={setNombre}
               style={styles.input}
-              placeholderTextColor="#9ca3af"
+              placeholder={t("nombre")}
+              placeholderTextColor={
+                Colors.textFaint
+              }
             />
 
-            <Text style={styles.label}>Apellido*</Text>
+            <Text style={styles.label}>
+              {t("apellido")}*
+            </Text>
+
             <TextInput
               value={apellido}
               onChangeText={setApellido}
               style={styles.input}
-              placeholderTextColor="#9ca3af"
+              placeholder={t("apellido")}
+              placeholderTextColor={
+                Colors.textFaint
+              }
             />
 
-            <Text style={styles.label}>Rol</Text>
+            <Text style={styles.label}>
+              {t("rol")}
+            </Text>
+
             <RolSelector
               value={rolIds}
               onChange={setRolIds}
-              placeholder="Seleccionar rol"
+              excluir={["voluntario"]}
+              placeholder={t(
+                "seleccionarRol"
+              )}
             />
 
-            <Text style={styles.label}>Teléfono</Text>
+            <Text style={styles.label}>
+              {t("telefono")}
+            </Text>
+
             <TextInput
               value={telefono}
               onChangeText={setTelefono}
               style={styles.input}
               keyboardType="phone-pad"
-              placeholderTextColor="#9ca3af"
+              placeholder={t("telefono")}
+              placeholderTextColor={
+                Colors.textFaint
+              }
             />
 
-            <Text style={styles.label}>Dirección</Text>
+            <Text style={styles.label}>
+              {t("direccion")}
+            </Text>
+
             <TextInput
               value={direccion}
               onChangeText={setDireccion}
               style={styles.input}
-              placeholderTextColor="#9ca3af"
+              placeholder={t("direccion")}
+              placeholderTextColor={
+                Colors.textFaint
+              }
             />
 
-            <Text style={styles.label}>Email</Text>
+            <Text style={styles.label}>
+              {t("email")}
+            </Text>
+
             <TextInput
               value={email}
-              onChangeText={setEmail}
-              style={styles.input}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              placeholderTextColor="#9ca3af"
+              editable={false}
+              style={[
+                styles.input,
+                styles.inputDisabled,
+              ]}
+              placeholderTextColor={
+                Colors.textFaint
+              }
             />
 
             <TouchableOpacity
@@ -137,10 +213,19 @@ export default function ModalEditarPersona({ visible, persona, onClose, onActual
               disabled={loading}
               style={styles.btnEditar}
             >
-              {loading
-                ? <ActivityIndicator color="white" />
-                : <Text style={styles.btnEditarTexto}>Editar</Text>
-              }
+              {loading ? (
+                <ActivityIndicator
+                  color={Colors.surface}
+                />
+              ) : (
+                <Text
+                  style={
+                    styles.btnEditarTexto
+                  }
+                >
+                  {t("guardar")}
+                </Text>
+              )}
             </TouchableOpacity>
           </ScrollView>
         </View>
@@ -153,57 +238,76 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     justifyContent: "flex-end",
-    backgroundColor: "rgba(0,0,0,0.4)",
+    backgroundColor:
+      "rgba(0,0,0,0.4)",
   },
+
   container: {
-    backgroundColor: "#fff7ed",
+    backgroundColor:
+      Colors.primaryFaint,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 24,
     maxHeight: "90%",
   },
+
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent:
+      "space-between",
     alignItems: "center",
     marginBottom: 20,
   },
+
   titulo: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#111827",
+    color: Colors.text,
   },
+
   cerrar: {
     fontSize: 22,
-    color: "#6b7280",
+    color: Colors.textMuted,
   },
+
   label: {
     fontWeight: "600",
     marginBottom: 4,
-    color: "#111827",
+    color: Colors.text,
     fontSize: 14,
   },
+
   input: {
-    backgroundColor: "white",
+    backgroundColor:
+      Colors.surface,
     borderWidth: 1,
-    borderColor: "#e5e7eb",
+    borderColor: Colors.border,
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
     marginBottom: 16,
     fontSize: 14,
-    color: "#111827",
+    color: Colors.text,
   },
+
+  inputDisabled: {
+    backgroundColor:
+      Colors.background,
+    color: Colors.textMuted,
+  },
+
   btnEditar: {
-    backgroundColor: "#f97316",
+    backgroundColor:
+      Colors.primary,
     paddingVertical: 14,
     borderRadius: 20,
     alignItems: "center",
     marginTop: 8,
     marginBottom: 8,
   },
+
   btnEditarTexto: {
-    color: "white",
+    color: Colors.surface,
     fontWeight: "bold",
     fontSize: 16,
   },
