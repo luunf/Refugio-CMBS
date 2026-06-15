@@ -8,4 +8,6 @@ visita_bp = Blueprint('visitas', __name__)
 visita_bp.route('/animales/<int:animal_id>/visitas', methods=['GET'])
 visita_bp.route('/animales/<int:animal_id>/visitas', methods=['POST'])
 # Tratamientos de una visita
-visita_bp.route('/visitas/<int:visita_id>/tratamientos', methods=['POST'])
+@visita_bp.route('/<int:visita_id>/tratamientos', methods=['POST'])
+def create_tratamiento_visita(visita_id):
+    return create_tratamiento(visita_id)
