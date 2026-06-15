@@ -8,6 +8,7 @@ import { useLocalSearchParams, router } from "expo-router";
 import { api } from "@/config/api";
 import { Colors } from "@/constants/theme";
 import AnimalInfo from "@/components/animales/AnimalInfo";
+import AnimalVisitas from "@/components/visitas/AnimalVisitas";
 import { useTranslation } from 'react-i18next';
 import { Image } from 'expo-image';
 import { ref, deleteObject } from 'firebase/storage';
@@ -165,6 +166,7 @@ export default function AnimalDetalleScreen() {
           animal={animal}
         />
       )}
+      
       
     </SafeAreaView>
   );

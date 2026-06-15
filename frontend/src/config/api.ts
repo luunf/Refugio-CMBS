@@ -139,8 +139,10 @@ export const api = {
     const res = await apiClient.delete(`/animales/${id}`);
     return res.data;
   },
-  getVisitasAnimal: async (animalId: number) => {
-    const res = await apiClient.get(`/animales/${animalId}/visitas`);
+  getVisitasAnimal: async (animalId: number, estado?: string) => {
+    const params: any = {};
+    if (estado) params.estado = estado;
+    const res = await apiClient.get(`/animales/${animalId}/visitas`, { params });
     return res.data;
   },
 

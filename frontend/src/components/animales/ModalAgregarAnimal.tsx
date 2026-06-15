@@ -45,6 +45,8 @@ const TAMANIOS = ["chico", "mediano", "grande"];
 export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props) {
   const { t } = useTranslation('animales');
   
+  const hoy = new Date().toISOString().split('T')[0];
+  
   const [loading, setLoading] = useState(false);
   const [estados, setEstados] = useState<Estado[]>([]);
   const [compatibilidades, setCompatibilidades] = useState<Compatibilidad[]>([]);
@@ -59,7 +61,7 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
   const [raza, setRaza] = useState("");
   const [colores, setColores] = useState("");
   const [fechaNacimiento, setFechaNacimiento] = useState("");
-  const [fechaIngreso, setFechaIngreso] = useState("");
+  const [fechaIngreso, setFechaIngreso] = useState(hoy);
   const [infoAdicional, setInfoAdicional] = useState("");
   const [comportamiento, setComportamiento] = useState("");
   const [esterilizado, setEsterilizado] = useState(false);
@@ -114,7 +116,7 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
     setRaza("");
     setColores("");
     setFechaNacimiento("");
-    setFechaIngreso("");
+    setFechaIngreso(hoy);
     setInfoAdicional("");
     setComportamiento("");
     setEsterilizado(false);
