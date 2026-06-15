@@ -146,7 +146,6 @@ export default function ModalAgregarPersona({
             <RolSelector
               value={rolIds}
               onChange={setRolIds}
-              excluir={["voluntario"]}
               placeholder={t(
                 "seleccionarRol"
               )}

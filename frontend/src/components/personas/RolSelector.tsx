@@ -57,11 +57,23 @@ export default function RolSelector({
     cargar();
   }, []);
 
-  const toggleRol = (id: number) => {
-    if (value.includes(id)) {
-      onChange(value.filter((v) => v !== id));
+  const toggleRol = (rol: Rol) => {
+
+    if (rol.nombre === "voluntario") {
+      return;
+    }
+
+    if (value.includes(rol.id_rol)) {
+      onChange(
+        value.filter(
+          (v) => v !== rol.id_rol
+        )
+      );
     } else {
-      onChange([...value, id]);
+      onChange([
+        ...value,
+        rol.id_rol,
+      ]);
     }
   };
 
@@ -129,7 +141,7 @@ export default function RolSelector({
                         styles.opcionActiva,
                     ]}
                     onPress={() =>
-                      toggleRol(item.id_rol)
+                      toggleRol(item)
                     }
                   >
                     <Text

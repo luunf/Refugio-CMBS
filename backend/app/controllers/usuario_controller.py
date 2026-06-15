@@ -53,3 +53,38 @@ class UsuarioController:
             return jsonify({
                 "error": str(e)
             }), 400
+
+    @staticmethod
+    def get_usuario(usuario_id):
+
+        usuario = UsuarioService.get_usuario(usuario_id)
+
+        if not usuario:
+            return jsonify({
+                "error": "Usuario no encontrado"
+            }), 404
+
+        return jsonify(usuario), 200
+    
+    @staticmethod
+    def update_usuario(usuario_id):
+
+        data = request.get_json()
+
+        try:
+
+            usuario = UsuarioService.update_usuario(
+                usuario_id,
+                data
+            )
+
+            return jsonify({
+                "message": "Usuario actualizado correctamente",
+                "id_usuario": usuario.id_usuario
+            }), 200
+
+        except Exception as e:
+
+            return jsonify({
+                "error": str(e)
+            }), 400

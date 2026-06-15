@@ -11,6 +11,7 @@ import {
 } from "@expo/vector-icons";
 import { Colors } from "@/constants/theme";
 
+
 const BOTONES_BASE = [
   {
     label: "Animales",

@@ -24,7 +24,8 @@ class AuthController:
             "nombre": persona.nombre,
             "apellido": persona.apellido,
             "tipo": usuario.tipo,
-            "roles": roles
+            "roles": roles,
+            "persona_id": persona.id_persona
         }), 200
     
     @staticmethod

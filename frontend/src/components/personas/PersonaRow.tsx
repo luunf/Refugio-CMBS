@@ -52,9 +52,7 @@ export default function PersonaRow({
     );
   };
 
-  const rolesVisibles = persona.roles.filter(
-    (r) => r.nombre !== "voluntario"
-  );
+  const rolesVisibles = persona.roles;
 
 
   const handleEliminar = () => {

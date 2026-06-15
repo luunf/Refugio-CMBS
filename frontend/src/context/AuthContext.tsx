@@ -1,4 +1,13 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+
+import { onAuthStateChanged } from "firebase/auth";
+
+import { auth } from "@/config/firebase";
 import { api } from "@/config/api";
 
 interface UsuarioActual {
@@ -27,48 +36,142 @@ const AuthContext = createContext<AuthContextType>({
   perfilCompleto: false,
 });
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [usuario, setUsuario] = useState<UsuarioActual | null>(null);
-  const [loading, setLoading] = useState(true);
+export function AuthProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const [usuario, setUsuario] =
+    useState<UsuarioActual | null>(null);
 
-  const cargar = async () => {
-    setLoading(true);
+  const [loading, setLoading] =
+    useState(true);
 
+  const cargarUsuario = async () => {
     try {
-      // descomentar según quieran loguearse como admin o usuario estándar (o implementar firebase), para ver las vistas correspondientes
-      // ADMIN
-      const data = await api.devLogin(1);
+      const firebaseUser =
+        auth.currentUser;
 
-      // USUARIO ESTANDAR
-      // const data = await api.devLogin(2);
+      if (!firebaseUser) {
+        setUsuario(null);
+        return;
+      }
+
+      const token =
+        await firebaseUser.getIdToken(true);
+
+      const data =
+        await api.getMe(token);
 
       setUsuario(data);
 
-      // CUANDO IMPLEMENTEMOS FIREBASE:
-      // const data = await api.getMe();
-      // setUsuario(data);
+      console.log(
+        "USUARIO RECARGADO:",
+        data.email
+      );
 
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+
+      console.error(
+        "ERROR RECARGANDO USUARIO:",
+        error
+      );
+
       setUsuario(null);
-    } finally {
-      setLoading(false);
     }
   };
 
   useEffect(() => {
-    cargar();
+    const unsubscribe =
+      onAuthStateChanged(
+        auth,
+        async (firebaseUser) => {
+
+          try {
+
+            setLoading(true);
+
+            console.log(
+              "========== AUTH CHANGED =========="
+            );
+
+            if (!firebaseUser) {
+
+              console.log(
+                "SIN SESION FIREBASE"
+              );
+
+              setUsuario(null);
+              return;
+            }
+
+            console.log(
+              "FIREBASE USER:",
+              firebaseUser.email
+            );
+
+            const token =
+              await firebaseUser.getIdToken(true);
+
+            console.log(
+              "TOKEN OBTENIDO"
+            );
+
+            const data =
+              await api.getMe(token);
+
+            console.log(
+              "DATOS BACK:",
+              JSON.stringify(
+                data,
+                null,
+                2
+              )
+            );
+
+            setUsuario(data);
+
+            console.log(
+              "USUARIO GUARDADO"
+            );
+
+          } catch (error) {
+
+            console.error(
+              "ERROR AUTH CONTEXT:",
+              error
+            );
+
+            setUsuario(null);
+
+          } finally {
+
+            setLoading(false);
+
+            console.log(
+              "LOADING FALSE"
+            );
+          }
+        }
+      );
+
+    return unsubscribe;
   }, []);
 
-  const esAdmin = usuario?.tipo === "admin";
-  const perfilCompleto = !!(usuario?.nombre && usuario?.apellido);
+  const esAdmin =
+    usuario?.tipo === "admin";
+
+  const perfilCompleto = !!(
+    usuario?.nombre &&
+    usuario?.apellido
+  );
 
   return (
     <AuthContext.Provider
       value={{
         usuario,
         loading,
-        recargar: cargar,
+        recargar: cargarUsuario,
         esAdmin,
         perfilCompleto,
       }}

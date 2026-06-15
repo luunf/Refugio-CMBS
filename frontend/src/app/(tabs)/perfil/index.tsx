@@ -17,6 +17,10 @@ import { useAuth } from "@/context/AuthContext";
 import RolSelector from "@/components/personas/RolSelector";
 import { Colors } from "@/constants/theme";
 
+import { signOut } from "firebase/auth";
+import { auth } from "@/config/firebase";
+import { router } from "expo-router";
+
 export default function PerfilScreen() {
   const { usuario, recargar } = useAuth();
   const { t } = useTranslation("perfil");
@@ -115,7 +119,7 @@ export default function PerfilScreen() {
 
       setEditando(false);
 
-      Alert.alert("✓", t("perfilActualizado"));
+      Alert.alert(t("perfilActualizado"));
     } catch (e: any) {
       Alert.alert(
         "Error",
@@ -123,6 +127,23 @@ export default function PerfilScreen() {
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+
+      await signOut(auth);
+
+
+      router.replace("/login");
+    } catch (error) {
+      console.error(error);
+
+      Alert.alert(
+        "Error",
+        "No se pudo cerrar sesión"
+      );
     }
   };
 
@@ -292,7 +313,18 @@ export default function PerfilScreen() {
               </TouchableOpacity>
             </View>
           )}
-        </View>
+
+        {/* BOTON CERRAR SESION */}
+        <TouchableOpacity
+          style={styles.logoutBtn}
+          onPress={handleLogout}
+        >
+          <Text style={styles.logoutText}>
+            {t("cerrarSesion")}
+          </Text>
+        </TouchableOpacity>
+
+      </View>
 
         <View style={{ height: 32 }} />
       </ScrollView>
@@ -458,6 +490,20 @@ const styles = StyleSheet.create({
   btnGuardarTexto: {
     color: "white",
     fontWeight: "bold",
+    fontSize: 16,
+  },
+
+  logoutBtn: {
+    backgroundColor: "#dc2626",
+    marginTop: 24,
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: "center",
+  },
+
+  logoutText: {
+    color: "white",
+    fontWeight: "700",
     fontSize: 16,
   },
 });

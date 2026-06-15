@@ -52,9 +52,7 @@ export default function ModalVerPersona({
     );
   };
 
-  const rolesVisibles = persona.roles.filter(
-    (r) => r.nombre !== "voluntario"
-  );
+  const rolesVisibles = persona.roles;
 
   const nombresRoles =
     rolesVisibles.length > 0

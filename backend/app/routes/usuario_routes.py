@@ -19,3 +19,14 @@ def create_usuario():
 @token_required
 def delete_usuario(decoded_token, usuario_id):
     return UsuarioController.delete_usuario(usuario_id)
+
+@usuario_bp.route('/<int:usuario_id>', methods=['GET'])
+@token_required
+def get_usuario(decoded_token, usuario_id):
+    return UsuarioController.get_usuario(usuario_id)
+
+
+@usuario_bp.route('/<int:usuario_id>', methods=['PATCH'])
+@token_required
+def update_usuario(decoded_token, usuario_id):
+    return UsuarioController.update_usuario(usuario_id)

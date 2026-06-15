@@ -27,9 +27,21 @@ class FirebaseService:
     @staticmethod
     def verify_token(id_token):
         try:
-            decoded_token = auth.verify_id_token(id_token)
+            decoded_token = auth.verify_id_token(
+                id_token,
+                clock_skew_seconds=60
+            )
+
+            print("TOKEN VALIDO")
+            print(decoded_token)
+
             return decoded_token
+
         except Exception as e:
+            print("ERROR VERIFY TOKEN")
+            print(type(e))
+            print(str(e))
+
             return None
 
     @staticmethod

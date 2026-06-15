@@ -59,11 +59,11 @@ export default function ModalEditarPersona({
     setDireccion(persona.direccion ?? "");
     setEmail(persona.email ?? "");
 
-    setRolIds(
-      persona.roles
-        ?.filter((r) => r.nombre !== "voluntario")
-        .map((r) => r.id_rol) ?? []
-    );
+  setRolIds(
+    persona.roles?.map(
+      (r) => r.id_rol
+    ) ?? []
+  );
   }, [persona]);
 
   const handleEditar = async () => {
@@ -157,7 +157,6 @@ export default function ModalEditarPersona({
             <RolSelector
               value={rolIds}
               onChange={setRolIds}
-              excluir={["voluntario"]}
               placeholder={t(
                 "seleccionarRol"
               )}
