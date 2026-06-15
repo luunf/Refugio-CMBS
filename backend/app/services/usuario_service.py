@@ -1,7 +1,7 @@
 from app.extensions import db
 from app.models import Usuario, Persona
 from app.models.rol import Rol
-
+from firebase_admin import auth
 
 class UsuarioService:
 
@@ -50,14 +50,22 @@ class UsuarioService:
     def crear_usuario(data):
 
         email = data.get("email")
-        firebase_uid = data.get("firebase_uid")
-
+        password = data.get("password")
         tipo = data.get("tipo", "estandar")
 
-        if not email or not firebase_uid:
-
+        if not email:
             raise Exception(
-                "Faltan campos requeridos"
+                "Email obligatorio"
+            )
+
+        if not password:
+            raise Exception(
+                "Contraseña obligatoria"
+            )
+
+        if len(password) < 6:
+            raise Exception(
+                "La contraseña debe tener al menos 6 caracteres"
             )
 
         existing_usuario = Usuario.query.filter_by(
@@ -65,22 +73,15 @@ class UsuarioService:
         ).first()
 
         if existing_usuario:
-
             raise Exception(
-                "El email ya está registrado"
+                "El email ya existe"
             )
 
-        existing_persona = Persona.query.filter_by(
-            email=email
-        ).first()
+        firebase_user = auth.create_user(
+            email=email,
+            password=password
+        )
 
-        if existing_persona:
-
-            raise Exception(
-                "Ya existe una persona con ese email"
-            )
-
-        # PERSONA MINIMA
         persona = Persona(
             email=email
         )
@@ -88,18 +89,18 @@ class UsuarioService:
         db.session.add(persona)
         db.session.flush()
 
-        # ROL VOLUNTARIO AUTOMATICO
         rol_voluntario = Rol.query.filter_by(
             nombre="voluntario"
         ).first()
 
         if rol_voluntario:
-            persona.roles.append(rol_voluntario)
+            persona.roles.append(
+                rol_voluntario
+            )
 
-        # USUARIO
         usuario = Usuario(
             email=email,
-            firebase_uid=firebase_uid,
+            firebase_uid=firebase_user.uid,
             tipo=tipo,
             activo=True,
             persona_id=persona.id_persona
@@ -131,3 +132,50 @@ class UsuarioService:
     @staticmethod
     def get_usuario_by_id(usuario_id):
         return Usuario.query.get(usuario_id)
+    
+    @staticmethod
+    def get_usuario(usuario_id):
+
+        usuario = Usuario.query.get(usuario_id)
+
+        if not usuario:
+            return None
+
+        return {
+            "id_usuario": usuario.id_usuario,
+            "email": usuario.email,
+            "tipo": usuario.tipo,
+            "activo": usuario.activo,
+
+            "persona": {
+                "id_persona": usuario.persona.id_persona,
+                "nombre": usuario.persona.nombre,
+                "apellido": usuario.persona.apellido,
+                "telefono": usuario.persona.telefono,
+                "direccion": usuario.persona.direccion,
+                "email": usuario.persona.email
+            }
+        }
+    
+    @staticmethod
+    def update_usuario(usuario_id, data):
+
+        usuario = Usuario.query.get(usuario_id)
+
+        if not usuario:
+            raise Exception(
+                "Usuario no encontrado"
+            )
+
+        tipo = data.get("tipo")
+        activo = data.get("activo")
+
+        if tipo:
+            usuario.tipo = tipo
+
+        if activo is not None:
+            usuario.activo = activo
+
+        db.session.commit()
+
+        return usuario

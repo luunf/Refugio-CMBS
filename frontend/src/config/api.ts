@@ -1,4 +1,5 @@
 import axios from "axios";
+import { auth } from "@/config/firebase";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:5000";
 
@@ -7,11 +8,23 @@ const apiClient = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-apiClient.interceptors.request.use((config) => {
-  // const token = await getFirebaseToken();
-  // config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
+apiClient.interceptors.request.use(
+  async (config) => {
+
+    const user = auth.currentUser;
+
+    if (user) {
+
+      const token =
+        await user.getIdToken();
+
+      config.headers.Authorization =
+        `Bearer ${token}`;
+    }
+
+    return config;
+  }
+);
 
 export const api = {
   // PERSONAS 
@@ -81,8 +94,16 @@ export const api = {
   },
 
   //AUTH
-  getMe: async () => {
-    const res = await apiClient.get("/auth/me");
+  getMe: async (token: string) => {
+    const res = await apiClient.get(
+      "/auth/me",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
     return res.data;
   },
 

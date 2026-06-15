@@ -11,5 +11,8 @@
   "perfilActualizado": "Perfil actualizado correctamente",
   "camposObligatorios": "Nombre y apellido son obligatorios",
   "errorActualizar": "No se pudo actualizar",
-  "sinDato": "—"
+  "sinDato": "—",
+  "cerrarSesion": "Cerrar sesión",
+  "errorCerrarSesion": "No se pudo cerrar sesión",
+  "error": "Error"
 }
