@@ -130,11 +130,31 @@ export const api = {
     const res = await apiClient.delete(`/tratamientos/${id}`);
     return res.data;
   },
-  // Para crear visita (necesario para crearTratamientoCompleto)
+
+  //VISITAS
   createVisita: async (animalId: number, data: any) => {
     const res = await apiClient.post(`/animales/${animalId}/visitas`, data);
     return res.data;
   },
+  getVisita: async (visitaId: number) => {
+    const res = await apiClient.get(`/visitas/${visitaId}`);
+    return res.data;
+  },
+  updateVisita: async (visitaId: number, data: any) => {
+    const res = await apiClient.patch(`/visitas/${visitaId}`, data);
+    return res.data;
+  },
+  deleteVisita: async (visitaId: number) => {
+    const res = await apiClient.delete(`/visitas/${visitaId}`);
+    return res.data;
+  },
+  getVisitasAnimal: async (animalId: number, estado?: string) => {
+    const params: any = {};
+    if (estado) params.estado = estado;
+    const res = await apiClient.get(`/animales/${animalId}/visitas`, { params });
+    return res.data;
+  },
+
 
 //ANIMALES
   getAnimales: async (tipo?: string, estado_id?: number) => {
@@ -158,12 +178,6 @@ export const api = {
   },
   deleteAnimal: async (id: number) => {
     const res = await apiClient.delete(`/animales/${id}`);
-    return res.data;
-  },
-  getVisitasAnimal: async (animalId: number, estado?: string) => {
-    const params: any = {};
-    if (estado) params.estado = estado;
-    const res = await apiClient.get(`/animales/${animalId}/visitas`, { params });
     return res.data;
   },
 
