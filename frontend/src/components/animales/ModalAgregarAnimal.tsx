@@ -42,6 +42,12 @@ const TIPOS = ["perro", "gato"];
 const GENEROS = ["macho", "hembra"];
 const TAMANIOS = ["chico", "mediano", "grande"];
 
+const formatFecha = (fecha?: string) => {
+  if (!fecha) return "";
+  const [y, m, d] = fecha.split("-");
+  return `${d}/${m}/${y}`;
+};
+
 export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props) {
   const { t } = useTranslation('animales');
   
@@ -312,7 +318,7 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
               onPress={() => setPickerNacimiento(true)}
             >
               <Text style={fechaNacimiento ? styles.fechaTexto : styles.fechaPlaceholder}>
-                {fechaNacimiento || t('placeholderSeleccionarFecha')}
+                {fechaNacimiento ? formatFecha(fechaNacimiento) : t('placeholderSeleccionarFecha')}
               </Text>
             </TouchableOpacity>
 
@@ -323,7 +329,7 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
               onPress={() => setPickerIngreso(true)}
             >
               <Text style={fechaIngreso ? styles.fechaTexto : styles.fechaPlaceholder}>
-                {fechaIngreso || t('placeholderSeleccionarFecha')}
+                {fechaIngreso ? formatFecha(fechaIngreso) : t('placeholderSeleccionarFecha')}
               </Text>
             </TouchableOpacity>
 
@@ -414,7 +420,7 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
               >
                 {subiendoImagen
                   ? <ActivityIndicator color={Colors.surface} />
-                  : <Text style={styles.btnImagenTexto}>{t('btnSubirFoto')}</Text>
+                  : <Text style={styles.btnImagenTexto}>{t('btnAnadirImagen')}</Text>
                 }
               </TouchableOpacity>
             )}
@@ -593,19 +599,19 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   btnImagen: {
-    flexDirection: "row",
+    borderWidth: 1.5,
+    borderColor: Colors.primary,
+    borderStyle: "dashed",
+    borderRadius: 12,
+    paddingVertical: 12,
     alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    backgroundColor: Colors.primary,
-    borderRadius: 20,
-    paddingVertical: 14,
-    marginBottom: 16,
+    marginBottom: 20,
   },
   btnImagenTexto: { 
     fontSize: 14, 
-    color: Colors.surface, 
-    fontWeight: "500" },
+    color: Colors.primary, 
+    fontWeight: "600" 
+  },
   btnQuitarImagen: {
     position: 'absolute',
     top: 8,

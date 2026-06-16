@@ -12,7 +12,7 @@ class Tratamiento(db.Model):
 
     visita = db.relationship("VisitaVeterinaria", back_populates="tratamientos")
 
-    def to_dict(self):  # <-- adentro de la clase
+    def to_dict(self):
         animal_nombre = None
         especie = None
 

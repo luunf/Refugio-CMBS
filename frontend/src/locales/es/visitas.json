@@ -1,0 +1,56 @@
+{
+    "placeholderBuscarVisita": "Buscar visita veterinaria...",
+    "optionTodas": "Todas",
+    "optionProximas": "Próximas",
+    "optionRealizadas": "Realizadas",
+
+    "optionProxima": "Próxima",
+    "optionRealizada": "Realizada",
+    
+    "requiredSymbol": "*",
+
+    "labelFecha": "Fecha",
+    "labelProcedimiento":"Procedimiento",
+    "labelVeterinario": "Veterinario",
+    "labelEstado": "Estado",
+    "labelInfoAdicional": "Información adicional",
+    "labelCosto": "Costo",
+    "labelTipo": "Tipo",
+    "labelFechaInicio": "Fecha de inicio",
+    "labelFechaFin": "Fecha de fin",
+    "labelDescripcion": "Descripción",
+
+    "placeholderSeleccionarFecha": "Seleccionar fecha",
+    "placeholderProcedimiento": "Procedimiento",
+    "placeholderSeleccionarVeterinario": "Seleccionar veterinario",
+    "placeholderInfoAdicional": "Información adicional",
+    "placeholderCosto": "Ej: 20000.5",
+    "placeholderTipo": "Ej: Control general",
+    "placeholderDescripcion": "Descripción",
+
+    "error": "Error",
+    "errorFecha": "La fecha es obligatoria",
+    "errorProcedimiento": "El procedimiento es obligatorio",
+    "errorVeterinario": "Seleccione un veterinario",
+    "errorEstado": "El estado es obligatorio",
+    "errorTipo": "El tipo de tratamiento es obligatorio",
+    "errorFechaInicio": "La fecha de inicio de tratamiento es obligatoria",
+
+    "success": "Éxito",
+    "successRegistrar": "Visita registrada correctamente",
+    "errorRegistrar": "No se pudo registrar la visita",
+
+    "titleNuevaVisita": "Nueva visita veterinaria",
+
+    "titleTratamientos": "Tratamientos",
+    "subtitleTratamiento": "Tratamiento",
+    "btnAnadirTratamiento": "+ Añadir tratamiento",
+
+    "btnCrear": "Crear",
+
+    "titleSeleccionarFechaVisita": "Fecha de visita",
+    "titleSeleccionarFechaIngreso": "Fecha de ingreso",
+    "titleSeleccionarFechaInicio": "Fecha de inicio tratamiento",
+    "titleSeleccionarFechaFin": "Fecha de fin tratamiento"
+
+}

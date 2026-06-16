@@ -64,6 +64,12 @@ const TIPOS = ['perro', 'gato'];
 const GENEROS = ['macho', 'hembra'];
 const TAMANIOS = ['chico', 'mediano', 'grande'];
 
+const formatFecha = (fecha?: string) => {
+  if (!fecha) return "";
+  const [y, m, d] = fecha.split("-");
+  return `${d}/${m}/${y}`;
+};
+
 export default function ModalEditarAnimal({ visible, onClose, onEditado, animal }: Props) {
   const { t } = useTranslation('animales');
 
@@ -287,14 +293,14 @@ export default function ModalEditarAnimal({ visible, onClose, onEditado, animal 
             <Text style={styles.label}>{t('labelFechaNacimiento')}</Text>
             <TouchableOpacity style={styles.inputFecha} onPress={() => setPickerNacimiento(true)}>
               <Text style={fechaNacimiento ? styles.fechaTexto : styles.fechaPlaceholder}>
-                {fechaNacimiento || t('placeholderSeleccionarFecha')}
+                {fechaNacimiento? formatFecha(fechaNacimiento) : t('placeholderSeleccionarFecha')}
               </Text>
             </TouchableOpacity>
 
             <Text style={styles.label}>{t('labelFechaIngreso')}{t('requiredSymbol')}</Text>
             <TouchableOpacity style={styles.inputFecha} onPress={() => setPickerIngreso(true)}>
               <Text style={fechaIngreso ? styles.fechaTexto : styles.fechaPlaceholder}>
-                {fechaIngreso || t('placeholderSeleccionarFecha')}
+                {fechaIngreso ? formatFecha(fechaIngreso) : t('placeholderSeleccionarFecha')}
               </Text>
             </TouchableOpacity>
 

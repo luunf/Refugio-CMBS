@@ -34,14 +34,14 @@ function Fila({ label, valor }: { label: string; valor?: string | null }) {
   );
 }
 
+const formatFecha = (fecha?: string) => {
+  if (!fecha) return "";
+  const [y, m, d] = fecha.split("-");
+  return `${d}/${m}/${y}`;
+};
+
 export default function AnimalInfo({ animal }: Props) {
   const { t } = useTranslation('animales');
-
-  const formatearFecha = (fecha?: string) => {
-    if (!fecha) return null;
-    const [y, m, d] = fecha.split("-");
-    return `${d}/${m}/${y}`;
-  };
 
   const capitalizar = (s?: string) =>
     s ? s.charAt(0).toUpperCase() + s.slice(1) : undefined;
@@ -54,8 +54,8 @@ export default function AnimalInfo({ animal }: Props) {
         <Fila label={t('labelTamanio')} valor={capitalizar(animal.tamanio)} />
         <Fila label={t('labelRaza')} valor={animal.raza} />
         <Fila label={t('labelColores')} valor={animal.colores} />
-        <Fila label={t('labelFechaNacimiento')} valor={formatearFecha(animal.fecha_nacimiento)} />
-        <Fila label={t('labelFechaIngreso')} valor={formatearFecha(animal.fecha_ingreso)} />
+        <Fila label={t('labelFechaNacimiento')} valor={formatFecha(animal.fecha_nacimiento)} />
+        <Fila label={t('labelFechaIngreso')} valor={formatFecha(animal.fecha_ingreso)} />
         <Fila label={t('labelEsterilizado')} valor={animal.esterilizado ? "Sí" : "No"} />
         <Fila label={t('labelComportamiento')} valor={animal.comportamiento} />
         <Fila label={t('labelInfoAdicional')} valor={animal.info_adicional} />

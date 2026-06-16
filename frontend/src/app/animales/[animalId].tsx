@@ -14,6 +14,7 @@ import { Image } from 'expo-image';
 import { ref, deleteObject } from 'firebase/storage';
 import { storage } from '@/config/firebase';
 import ModalEditarAnimal from '@/components/animales/ModalEditarAnimal';
+import { MaterialIcons } from "@expo/vector-icons";
 
 type Pestaña = "informacion" | "ficha" | "vacunas";
 
@@ -119,10 +120,10 @@ export default function AnimalDetalleScreen() {
             <Text style={styles.nombre} numberOfLines={1}>{animal.nombre}</Text>
             <View style={styles.acciones}>
                 <TouchableOpacity onPress={() => setModalEditar(true)}>
-                <Text style={styles.accionIcono}>{t('iconEditar')}</Text>
+                <MaterialIcons name="edit" size={20} color={Colors.surface}/>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={handleEliminar}>
-                <Text style={styles.accionIcono}>{t('iconEliminar')}</Text>
+                <MaterialIcons name="delete-outline" size={20} color={Colors.surface}/>
                 </TouchableOpacity>
             </View>
             </View>
@@ -153,7 +154,7 @@ export default function AnimalDetalleScreen() {
 
       {/* Contenido */}
       {pestaña === "informacion" && <AnimalInfo animal={animal} />}
-      {pestaña === "ficha" && (<Text>Próximamente</Text>)}
+      {pestaña === "ficha" && <AnimalVisitas animalId={animal.id_animal} />}
       {pestaña === "vacunas" && (<Text>Próximamente</Text>)}
 
       {animal && (

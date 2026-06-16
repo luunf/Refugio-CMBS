@@ -12,6 +12,7 @@ import { Colors } from '@/constants/theme';
 import { router, useFocusEffect } from "expo-router";
 import { useTranslation } from 'react-i18next';
 import { Image } from 'expo-image';
+import Feather from "@expo/vector-icons/build/Feather";
 
 
 interface Animal {
@@ -95,11 +96,11 @@ export default function AnimalesScreen() {
       {/* Buscador */}
       <View style={styles.buscadorRow}>
       <View style={styles.buscadorContainer}>
-        <Text style={styles.buscadorIcono}>{t('iconBuscar')}</Text>
+        <Feather name="search" size={18} color={Colors.textFaint} style={{ marginRight: 6 }}/>
         <TextInput
         value={busqueda}
         onChangeText={setBusqueda}
-        placeholder={t('placeholderBuscar')}
+        placeholder={t('placeholderBuscarAnimal')}
         style={styles.buscadorInput}
         placeholderTextColor={Colors.textFaint}
         />
@@ -118,7 +119,7 @@ export default function AnimalesScreen() {
           <Text style={filtroTipo ? styles.filtroTextoActivo : styles.filtroTexto}>
             {filtroTipo ? FILTROS_TIPO.find((f) => f.valor === filtroTipo)?.label : t('filterTipo')}
           </Text>
-          <Text style={filtroTipo ? styles.filtroTextoActivo : styles.filtroTexto}> {t("dropdownSymbol")}</Text>
+          <Text style={filtroTipo ? styles.filtroTextoActivo : styles.filtroTexto}></Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -128,7 +129,7 @@ export default function AnimalesScreen() {
           <Text style={filtroEstado ? styles.filtroTextoActivo : styles.filtroTexto}>
             {filtroEstado ? filtroEstado.nombre : t('filterEstado')}
           </Text>
-          <Text style={filtroEstado ? styles.filtroTextoActivo : styles.filtroTexto}> {t("dropdownSymbol")}</Text>
+          <Text style={filtroEstado ? styles.filtroTextoActivo : styles.filtroTexto}></Text>
         </TouchableOpacity>
       </View>
 
@@ -235,30 +236,27 @@ const styles = StyleSheet.create({
   buscadorRow: {
     flexDirection: "row", alignItems: "center",
     paddingHorizontal: 16, paddingVertical: 12,
-    backgroundColor: Colors.background, gap: 10,
+    backgroundColor: Colors.surface, gap: 10,
   },
   buscadorContainer: {
     flex: 1, flexDirection: "row", alignItems: "center",
-    backgroundColor: Colors.surface, borderRadius: 25,
-    paddingHorizontal: 16, paddingVertical: 10,
-    borderWidth: 1, borderColor: Colors.border,
+    backgroundColor: Colors.background, borderRadius: 20,
+    paddingHorizontal: 12, paddingVertical: 8,
   },
   buscadorInput: { flex: 1, fontSize: 14, color: Colors.text },
-  buscadorIcono: { fontSize: 16 },
   btnAgregar: {
-    backgroundColor: Colors.primary, width: 44, height: 44,
-    borderRadius: 22, alignItems: "center", justifyContent: "center",
+    backgroundColor: Colors.primary, width: 40, height: 40,
+    borderRadius: 20, alignItems: "center", justifyContent: "center",
   },
   btnAgregarTexto: { color: Colors.surface, fontSize: 26, fontWeight: "bold", lineHeight: 30 },
-  filtrosRow: { flexDirection: "row", paddingHorizontal: 16, paddingBottom: 12, gap: 10 },
+  filtrosRow: { flexDirection: "row", paddingHorizontal: 16, paddingVertical: 10, backgroundColor: Colors.surface, gap: 8 },
   filtroBadge: {
     flexDirection: "row", alignItems: "center",
-    paddingHorizontal: 16, paddingVertical: 8,
-    borderRadius: 20, backgroundColor: Colors.surface,
-    borderWidth: 1, borderColor: Colors.border,
+    paddingHorizontal: 14, paddingVertical: 6,
+    borderRadius: 20, backgroundColor: Colors.background,
   },
   filtroBadgeActivo: { backgroundColor: Colors.primary, borderColor: Colors.primary },
-  filtroTexto: { color: Colors.textSoft, fontSize: 14, fontWeight: "600" },
+  filtroTexto: { color: Colors.textSoft, fontSize: 13, fontWeight: "600" },
   filtroTextoActivo: { color: Colors.surface, fontSize: 14, fontWeight: "600" },
   grilla: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24 },
   columna: { justifyContent: "space-between", marginBottom: 16 },

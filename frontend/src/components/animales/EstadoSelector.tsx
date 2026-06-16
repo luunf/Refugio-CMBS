@@ -5,6 +5,7 @@ import {
 } from "react-native";
 import { Colors } from '@/constants/theme';
 import { useTranslation } from 'react-i18next';
+import { Feather } from "@expo/vector-icons";
 
 interface Estado {
   id_estado: number;
@@ -57,7 +58,7 @@ export default function EstadoSelector({ value, onChange, estados, placeholder }
         <Text style={value.length > 0 ? styles.textoSeleccionado : styles.placeholder} numberOfLines={1}>
           {etiqueta}
         </Text>
-        <Text style={styles.chevron}>⌄</Text>
+        <Feather name="chevron-down" size={16} color={Colors.primary} />
       </TouchableOpacity>
 
       <Modal visible={open} transparent animationType="fade">
@@ -106,7 +107,6 @@ const styles = StyleSheet.create({
   },
   placeholder: { color: Colors.textFaint, fontSize: 14 },
   textoSeleccionado: { color: Colors.text, fontSize: 14, flex: 1 },
-  chevron: { fontSize: 18, color: Colors.primary },
   overlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.3)",
