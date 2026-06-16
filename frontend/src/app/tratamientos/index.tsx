@@ -45,7 +45,7 @@ export default function TratamientosScreen() {
         <Text style={styles.headerText}>Tratamientos</Text>
       </View>
 
-      {/* Buscador + botón agregar */}
+      {/* Buscador  */}
       <View style={styles.buscadorRow}>
         <View style={styles.buscadorContainer}>
           <Text style={styles.buscadorIcono}>🔍</Text>
@@ -57,12 +57,6 @@ export default function TratamientosScreen() {
             placeholderTextColor="#9ca3af"
           />
         </View>
-        <TouchableOpacity
-          style={styles.btnAgregar}
-          onPress={() => setModalVisible(true)}
-        >
-          <Text style={styles.btnAgregarTexto}>+</Text>
-        </TouchableOpacity>
       </View>
 
       {/* Filtros */}

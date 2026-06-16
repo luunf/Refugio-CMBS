@@ -25,6 +25,7 @@ export const Colors = {
   textFaint:      '#9ca3af',  // gris claro texto
   textMuted:      '#6b7280',  // gris medio para icono cancelar
   shadow:         '#000000',   // negro sombra
+  delete:         '#ef4444'
 } as const;
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;

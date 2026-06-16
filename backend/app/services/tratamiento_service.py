@@ -7,7 +7,7 @@ class TratamientoService:
 
     @staticmethod
     def get_all():
-        tratamientos = Tratamiento.query.all()
+        tratamientos = Tratamiento.query.order_by(Tratamiento.fecha_fin.desc()).all()
         return [t.to_dict() for t in tratamientos]
 
     @staticmethod

@@ -17,7 +17,7 @@ class VisitaService:
         if estado:
             query = query.filter_by(estado=estado)
 
-        visitas = query.all()
+        visitas = query.order_by(VisitaVeterinaria.fecha.desc()).all()
         return [
             {
                 "id_visita": v.id_visita,
@@ -79,7 +79,7 @@ class VisitaService:
                     "fecha_inicio": str(t.fecha_inicio),
                     "fecha_fin": str(t.fecha_fin) if t.fecha_fin else None,
                 }
-                for t in visita.tratamientos
+                for t in sorted(visita.tratamientos, key=lambda t: (t.fecha_fin is None, t.fecha_fin), reverse=True)
             ],
         }
 

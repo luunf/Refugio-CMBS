@@ -357,7 +357,7 @@ export default function ModalEditarAnimal({ visible, onClose, onEditado, animal 
               <TouchableOpacity style={[styles.btnImagen, subiendoImagen && { opacity: 0.6 }]} onPress={handleSeleccionarImagen} disabled={subiendoImagen}>
                 {subiendoImagen
                   ? <ActivityIndicator color={Colors.surface} />
-                  : <Text style={styles.btnImagenTexto}>{t('btnSubirFoto')}</Text>
+                  : <Text style={styles.btnImagenTexto}>{t('btnAnadirImagen')}</Text>
                 }
               </TouchableOpacity>
             )}
@@ -417,8 +417,8 @@ const styles = StyleSheet.create({
   imagenPreview: { width: '100%', height: '100%' },
   imagenOverlay: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', alignItems: 'center', gap: 8 },
   imagenOverlayTexto: { color: Colors.surface, fontSize: 14, fontWeight: '500' },
-  btnImagen: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: Colors.primary, borderRadius: 20, paddingVertical: 14, marginBottom: 16 },
-  btnImagenTexto: { fontSize: 14, color: Colors.surface, fontWeight: '500' },
+  btnImagen: {borderWidth: 1.5, borderColor: Colors.primary, borderStyle: "dashed", borderRadius: 12, paddingVertical: 12, alignItems: "center", marginBottom: 20,},
+  btnImagenTexto: { fontSize: 14, color: Colors.primary, fontWeight: "600" },
   btnQuitarImagen: { position: 'absolute', top: 8, right: 8, backgroundColor: 'rgba(0,0,0,0.6)', width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   btnQuitarImagenTexto: { color: Colors.surface, fontSize: 14, fontWeight: 'bold' },
 });

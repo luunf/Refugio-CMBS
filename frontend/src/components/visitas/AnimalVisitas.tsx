@@ -9,6 +9,7 @@ import { Colors } from "@/constants/theme";
 import Feather from "@expo/vector-icons/build/Feather";
 import ModalAgregarVisita from "@/components/visitas/ModalAgregarVisita";
 import { useTranslation } from 'react-i18next'
+import ModalDetalleVisita from "./ModalDetalleVisita";
 
 interface Visita {
   id_visita: number;
@@ -42,7 +43,8 @@ export default function AnimalVisitas({ animalId }: Props) {
   const [loading, setLoading] = useState(false);
   const [busqueda, setBusqueda] = useState("");
   const [filtro, setFiltro] = useState<FiltroEstado>("todas");
-  const [modalVisible, setModalVisible] = useState(false);
+  const [modalAgregar, setModalAgregar] = useState(false);
+  const [visitaSeleccionada, setVisitaSeleccionada] = useState<number | null>(null);
 
   const cargarVisitas = useCallback(async () => {
     setLoading(true);
@@ -70,8 +72,7 @@ export default function AnimalVisitas({ animalId }: Props) {
       v.procedimiento?.toLowerCase().includes(textoBusqueda) ||
       formatFecha(v.fecha).includes(textoBusqueda)
     );
-  }
-  );
+  });
 
   const getEstadoStyle = (estado: string) => {
     if (estado === "proxima")   return styles.badgeProxima;
@@ -108,7 +109,7 @@ export default function AnimalVisitas({ animalId }: Props) {
         </View>
         <TouchableOpacity
           style={styles.btnAgregar}
-          onPress={() => setModalVisible(true)}
+          onPress={() => setModalAgregar(true)}
         >
           <Text style={styles.btnAgregarTexto}>+</Text>
         </TouchableOpacity>
@@ -138,12 +139,12 @@ export default function AnimalVisitas({ animalId }: Props) {
           keyExtractor={(item) => item.id_visita.toString()}
           contentContainerStyle={styles.lista}
           ListEmptyComponent={
-            <Text style={styles.sinResultados}>No hay visitas registradas</Text>
+            <Text style={styles.sinResultados}>{t('textNoVisitas')}</Text>
           }
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.card}
-              onPress={() => { /* próximamente: detalle de visita */ }}
+              onPress={() => setVisitaSeleccionada(item.id_visita)}
               activeOpacity={0.75}
             >
               <View style={styles.cardLeft}>
@@ -165,11 +166,24 @@ export default function AnimalVisitas({ animalId }: Props) {
         />
       )}
 
+      {/* Modal registrar */}
       <ModalAgregarVisita
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
+        visible={modalAgregar}
+        onClose={() => setModalAgregar(false)}
         onCreada={cargarVisitas}
         animalId={animalId}
+      />
+
+      {/* Modal detalle */}
+      <ModalDetalleVisita
+        visible={visitaSeleccionada !== null}
+        onClose={() => setVisitaSeleccionada(null)}
+        visitaId={visitaSeleccionada}
+        onActualizada={cargarVisitas}
+        onEliminada={() => {
+          setVisitaSeleccionada(null);
+          cargarVisitas();
+        }}
       />
     </View>
   );
