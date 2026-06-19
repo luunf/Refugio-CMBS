@@ -24,6 +24,7 @@ def update_animal(animal_id):
 def delete_animal(animal_id):
     return AnimalController.delete_animal(animal_id)
 
+#endpoints para poder crerar un tratameinto
 @animal_bp.route('/<int:animal_id>/visitas', methods=['GET'])
 def get_visitas_animal(animal_id):
     return VisitaController.get_visitas(animal_id)

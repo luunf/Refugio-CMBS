@@ -4,21 +4,24 @@ import {
   ActivityIndicator, StyleSheet
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { useTareas } from '@/hooks/useTareas';
 import TareaCard from '@/components/calendario/TareaCard';
 import ModalNuevaTarea from '@/components/calendario/ModalNuevaTarea';
-
-const MESES = [
-  "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
-];
-const DIAS_SEMANA = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+import ModalEditarTarea from '@/components/calendario/ModalEditarTarea';
+import { Colors } from '@/constants/theme';
 
 export default function CalendarioScreen() {
+  const { t } = useTranslation('calendario');
+
+  const MESES = Object.values(t('meses', { returnObjects: true })) as string[];
+  const DIAS_SEMANA = Object.values(t('diasSemana', { returnObjects: true })) as string[];
+
   const hoy = new Date();
   const [mes, setMes] = useState(hoy.getMonth() + 1);
   const [year, setYear] = useState(hoy.getFullYear());
   const [modalVisible, setModalVisible] = useState(false);
+  const [tareaEditando, setTareaEditando] = useState<any | null>(null);
   const { tareas, loading, cargarTareas, crearTarea, actualizarTarea, eliminarTarea } = useTareas(mes, year);
 
   useEffect(() => {
@@ -35,17 +38,17 @@ export default function CalendarioScreen() {
   };
 
   const tareasPorDia: Record<number, any[]> = {};
-  tareas.forEach((t) => {
-    const dia = new Date(t.fecha + "T00:00:00").getDate();
+  tareas.forEach((tarea) => {
+    const dia = new Date(tarea.fecha + "T00:00:00").getDate();
     if (!tareasPorDia[dia]) tareasPorDia[dia] = [];
-    tareasPorDia[dia].push(t);
+    tareasPorDia[dia].push(tarea);
   });
   const diasConTareas = Object.keys(tareasPorDia).map(Number).sort((a, b) => a - b);
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerText}>Calendario</Text>
+        <Text style={styles.headerText}>{t('headerTitulo')}</Text>
       </View>
 
       <View style={styles.selectorMes}>
@@ -62,11 +65,11 @@ export default function CalendarioScreen() {
       </View>
 
       {loading ? (
-        <ActivityIndicator size="large" color="#f97316" style={{ marginTop: 40 }} />
+        <ActivityIndicator size="large" color={Colors.primary} style={{ marginTop: 40 }} />
       ) : (
         <ScrollView style={{ flex: 1, paddingHorizontal: 16, paddingTop: 8 }}>
           {diasConTareas.length === 0 ? (
-            <Text style={styles.sinTareas}>No hay tareas este mes</Text>
+            <Text style={styles.sinTareas}>{t('sinTareas')}</Text>
           ) : (
             diasConTareas.map((dia) => {
               const fechaObj = new Date(year, mes - 1, dia);
@@ -83,6 +86,7 @@ export default function CalendarioScreen() {
                       tarea={tarea}
                       onUpdate={() => actualizarTarea(tarea.id_tarea, { completada: !tarea.completada })}
                       onDelete={() => eliminarTarea(tarea.id_tarea)}
+                      onEdit={() => setTareaEditando(tarea)}
                     />
                   ))}
                 </View>
@@ -100,46 +104,53 @@ export default function CalendarioScreen() {
         mesActual={mes}
         yearActual={year}
       />
+
+      <ModalEditarTarea
+        visible={!!tareaEditando}
+        onClose={() => setTareaEditando(null)}
+        onUpdate={actualizarTarea}
+        tarea={tareaEditando}
+      />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f3f4f6" },
-  header: { backgroundColor: "#f97316", paddingHorizontal: 16, paddingVertical: 16 },
-  headerText: { color: "white", fontSize: 24, fontWeight: "bold" },
+  container: { flex: 1, backgroundColor: Colors.background },
+  header: { backgroundColor: Colors.primary, paddingHorizontal: 16, paddingVertical: 16 },
+  headerText: { color: Colors.surface, fontSize: 24, fontWeight: "bold" },
   selectorMes: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: "white",
+    backgroundColor: Colors.surface,
   },
-  chevron: { fontSize: 28, color: "#f97316" },
-  mesText: { fontSize: 18, fontWeight: "600", color: "#111827" },
+  chevron: { fontSize: 28, color: Colors.primary },
+  mesText: { fontSize: 18, fontWeight: "600", color: Colors.text },
   btnAgregar: {
-    backgroundColor: "#f97316",
+    backgroundColor: Colors.primary,
     width: 40,
     height: 40,
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
   },
-  btnAgregarText: { color: "white", fontSize: 24, fontWeight: "bold", lineHeight: 28 },
-  sinTareas: { textAlign: "center", color: "#9ca3af", marginTop: 40, fontSize: 16 },
+  btnAgregarText: { color: Colors.surface, fontSize: 24, fontWeight: "bold", lineHeight: 28 },
+  sinTareas: { textAlign: "center", color: Colors.textFaint, marginTop: 40, fontSize: 16 },
   diaCard: {
-    backgroundColor: "white",
+    backgroundColor: Colors.surface,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
-    shadowColor: "#000",
+    shadowColor: Colors.shadow,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
   },
   diaHeader: { flexDirection: "row", justifyContent: "space-between", marginBottom: 8 },
-  diaNumero: { fontSize: 32, fontWeight: "300", color: "#374151" },
-  diaNombre: { fontSize: 18, color: "#6b7280", alignSelf: "flex-end" },
+  diaNumero: { fontSize: 32, fontWeight: "300", color: Colors.textSoft },
+  diaNombre: { fontSize: 18, color: Colors.textMuted, alignSelf: "flex-end" },
 });

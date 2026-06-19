@@ -1,6 +1,8 @@
+//datepickermodal
 import React, { useState } from 'react';
 import { Modal, View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { Calendar, LocaleConfig } from 'react-native-calendars';
+import { useTranslation } from 'react-i18next';
 import { Colors } from '@/constants/theme';
 
 LocaleConfig.locales['es'] = {
@@ -20,6 +22,8 @@ interface Props {
 }
 
 export default function DatePickerModal({ visible, onClose, onSelectDate, initialDate }: Props) {
+  const { t } = useTranslation('calendario');
+
   const [selectedDate, setSelectedDate] = useState(
     initialDate ? initialDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
   );
@@ -37,7 +41,7 @@ export default function DatePickerModal({ visible, onClose, onSelectDate, initia
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.overlay}>
         <View style={styles.container}>
-          <Text style={styles.titulo}>Selecciona una fecha</Text>
+          <Text style={styles.titulo}>{t('datePicker.titulo')}</Text>
 
           <Calendar
             current={selectedDate}
@@ -61,10 +65,10 @@ export default function DatePickerModal({ visible, onClose, onSelectDate, initia
 
           <View style={styles.botones}>
             <TouchableOpacity onPress={onClose} style={styles.btnCancelar}>
-              <Text style={styles.btnCancelarText}>Cancelar</Text>
+              <Text style={styles.btnCancelarText}>{t('datePicker.cancelar')}</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={handleConfirm} style={styles.btnConfirmar}>
-              <Text style={styles.btnConfirmarText}>Aceptar</Text>
+              <Text style={styles.btnConfirmarText}>{t('datePicker.aceptar')}</Text>
             </TouchableOpacity>
           </View>
         </View>

@@ -1,13 +1,18 @@
+//tareacard
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { Colors } from '@/constants/theme';
 
 interface Props {
   tarea: any;
   onUpdate: () => Promise<void>;
   onDelete: () => Promise<void>;
+  onEdit: () => void;
 }
 
-export default function TareaCard({ tarea, onUpdate, onDelete }: Props) {
+export default function TareaCard({ tarea, onUpdate, onDelete, onEdit }: Props) {
+  const { t } = useTranslation('calendario');
   const [expandida, setExpandida] = useState(false);
 
   const toggleCompletada = async () => {
@@ -20,9 +25,9 @@ export default function TareaCard({ tarea, onUpdate, onDelete }: Props) {
 
   const hora = tarea.hora
     ? tarea.hora.substring(0, 5)
-    : tarea.es_todo_el_dia ? "Todo el día" : "";
+    : tarea.es_todo_el_dia ? t('tareaCard.todoElDia') : "";
 
-  const voluntarios = tarea.personas?.map((p: any) => p.nombre).join(", ") || "Sin asignar";
+  const voluntarios = tarea.personas?.map((p: any) => p.nombre).join(", ") || t('tareaCard.sinAsignar');
 
   return (
     <TouchableOpacity onPress={() => setExpandida(!expandida)} style={styles.container}>
@@ -34,24 +39,27 @@ export default function TareaCard({ tarea, onUpdate, onDelete }: Props) {
         <View style={styles.voluntariosBadge}>
           <Text style={styles.voluntariosText} numberOfLines={1}>{voluntarios}</Text>
         </View>
+        <TouchableOpacity onPress={(e) => { e.stopPropagation(); onEdit(); }} style={styles.btnLapiz}>
+          <Text style={styles.lapizIcono}>✎</Text>
+        </TouchableOpacity>
         <Text style={styles.chevron}>{expandida ? "▲" : "▼"}</Text>
       </View>
 
       {expandida && (
         <View style={styles.detalle}>
-          <Text style={styles.detalleTexto}><Text style={styles.bold}>Horario: </Text>{hora || "—"}</Text>
-          <Text style={styles.detalleTexto}><Text style={styles.bold}>Voluntarios: </Text>{voluntarios}</Text>
+          <Text style={styles.detalleTexto}><Text style={styles.bold}>{t('tareaCard.horarioLabel')}</Text>{hora || "—"}</Text>
+          <Text style={styles.detalleTexto}><Text style={styles.bold}>{t('tareaCard.voluntariosLabel')}</Text>{voluntarios}</Text>
           <TouchableOpacity
             onPress={toggleCompletada}
             style={[styles.btnCompletar, tarea.completada && styles.btnCompletarGris]}
           >
             <Text style={styles.btnCompletarText}>
-              {tarea.completada ? "Marcar pendiente" : "Marcar completada"}
+              {tarea.completada ? t('tareaCard.btnMarcarPendiente') : t('tareaCard.btnMarcarCompletada')}
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity onPress={handleDelete} style={styles.btnEliminar}>
-            <Text style={styles.btnEliminarText}>Eliminar tarea</Text>
+            <Text style={styles.btnEliminarText}>{t('tareaCard.btnEliminar')}</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -62,38 +70,40 @@ export default function TareaCard({ tarea, onUpdate, onDelete }: Props) {
 const styles = StyleSheet.create({
   container: { marginBottom: 8 },
   fila: { flexDirection: "row", alignItems: "center", paddingVertical: 8 },
-  nombre: { flex: 1, fontSize: 15, color: "#1f2937" },
-  completada: { textDecorationLine: "line-through", color: "#9ca3af" },
-  hora: { fontSize: 13, color: "#6b7280", marginHorizontal: 8 },
+  nombre: { flex: 1, fontSize: 15, color: Colors.text },
+  completada: { textDecorationLine: "line-through", color: Colors.textFaint },
+  hora: { fontSize: 13, color: Colors.textMuted, marginHorizontal: 8 },
   voluntariosBadge: {
-    backgroundColor: "#fff7ed",
+    backgroundColor: Colors.primaryFaint,
     borderWidth: 1,
-    borderColor: "#fed7aa",
+    borderColor: Colors.primaryLight,
     borderRadius: 20,
     paddingHorizontal: 8,
     paddingVertical: 4,
     maxWidth: 120,
   },
-  voluntariosText: { color: "#ea580c", fontSize: 12 },
-  chevron: { color: "#f97316", marginLeft: 8 },
-  detalle: { backgroundColor: "#fff7ed", borderRadius: 12, padding: 12, marginTop: 4 },
-  detalleTexto: { color: "#4b5563", fontSize: 13, marginBottom: 4 },
+  voluntariosText: { color: Colors.primary, fontSize: 12 },
+  btnLapiz: { marginLeft: 8, padding: 4 },
+  lapizIcono: { color: Colors.primary, fontSize: 16 },
+  chevron: { color: Colors.primary, marginLeft: 4 },
+  detalle: { backgroundColor: Colors.primaryFaint, borderRadius: 12, padding: 12, marginTop: 4 },
+  detalleTexto: { color: Colors.textSoft, fontSize: 13, marginBottom: 4 },
   bold: { fontWeight: "600" },
   btnCompletar: {
-    backgroundColor: "#f97316",
+    backgroundColor: Colors.primary,
     borderRadius: 20,
     paddingVertical: 8,
     alignItems: "center",
     marginTop: 8,
   },
-  btnCompletarGris: { backgroundColor: "#d1d5db" },
-  btnCompletarText: { color: "white", fontWeight: "600", fontSize: 13 },
+  btnCompletarGris: { backgroundColor: Colors.border },
+  btnCompletarText: { color: Colors.surface, fontWeight: "600", fontSize: 13 },
   btnEliminar: {
-    backgroundColor: "#ef4444",
+    backgroundColor: Colors.delete,
     borderRadius: 20,
     paddingVertical: 8,
     alignItems: "center",
     marginTop: 8,
   },
-  btnEliminarText: { color: "white", fontWeight: "600", fontSize: 13 },
+  btnEliminarText: { color: Colors.surface, fontWeight: "600", fontSize: 13 },
 });

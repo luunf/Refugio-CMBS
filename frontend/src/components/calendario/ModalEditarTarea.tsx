@@ -1,4 +1,4 @@
-// src/components/calendario/ModalNuevaTarea.tsx
+// src/components/calendario/ModalEditarTarea.tsx
 import React, { useState, useEffect } from 'react';
 import {
   Modal, View, Text, TextInput, TouchableOpacity,
@@ -12,9 +12,8 @@ import { api } from '@/config/api';
 interface Props {
   visible: boolean;
   onClose: () => void;
-  onCreate: (tarea: any) => Promise<void>;
-  mesActual: number;
-  yearActual: number;
+  onUpdate: (id: number, data: any) => Promise<void>;
+  tarea: any;
 }
 
 const formatDate = (date: Date): string => {
@@ -47,18 +46,16 @@ const esHoraPasada = (fecha: Date, hora: string): boolean => {
   return horaTarea < ahora;
 };
 
-export default function ModalNuevaTarea({ visible, onClose, onCreate, mesActual, yearActual }: Props) {
+const parseFecha = (fechaStr: string): Date => {
+  const [y, m, d] = fechaStr.split('-').map(Number);
+  return new Date(y, m - 1, d);
+};
+
+export default function ModalEditarTarea({ visible, onClose, onUpdate, tarea }: Props) {
   const { t } = useTranslation('calendario');
 
-  const hoy = new Date();
-  const fechaInicial = () => {
-    // Si el mes/año mostrado es el actual, default a hoy. Si no, día 1 del mes elegido.
-    const esMesActual = mesActual === hoy.getMonth() + 1 && yearActual === hoy.getFullYear();
-    return esMesActual ? hoy : new Date(yearActual, mesActual - 1, 1);
-  };
-
   const [nombre, setNombre] = useState('');
-  const [fecha, setFecha] = useState(fechaInicial());
+  const [fecha, setFecha] = useState(new Date());
   const [hora, setHora] = useState('');
   const [esTodoElDia, setEsTodoElDia] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -70,15 +67,24 @@ export default function ModalNuevaTarea({ visible, onClose, onCreate, mesActual,
   const [showVoluntarios, setShowVoluntarios] = useState(false);
   const [loadingVoluntarios, setLoadingVoluntarios] = useState(false);
 
+  // Precargar datos de la tarea cuando se abre el modal
   useEffect(() => {
-    if (visible) {
+    if (visible && tarea) {
+      setNombre(tarea.nombre ?? '');
+      setFecha(tarea.fecha ? parseFecha(tarea.fecha) : new Date());
+      setHora(tarea.hora ? tarea.hora.substring(0, 5) : '');
+      setEsTodoElDia(!!tarea.es_todo_el_dia);
+      setErrorHora('');
+      const idsActuales = tarea.personas?.map((p: any) => p.id_persona) ?? [];
+      setVoluntariosSeleccionados(idsActuales);
+
       setLoadingVoluntarios(true);
       api.getPersonas('voluntario')
         .then(setVoluntarios)
         .catch(console.error)
         .finally(() => setLoadingVoluntarios(false));
     }
-  }, [visible]);
+  }, [visible, tarea]);
 
   const toggleVoluntario = (id: number) => {
     setVoluntariosSeleccionados(prev =>
@@ -103,13 +109,12 @@ export default function ModalNuevaTarea({ visible, onClose, onCreate, mesActual,
 
   const handleSelectFecha = (nuevaFecha: Date) => {
     setFecha(nuevaFecha);
-    // Si cambia la fecha, re-validar la hora ya ingresada
     if (hora.length === 5 && esHoraValida(hora)) {
       setErrorHora(esHoraPasada(nuevaFecha, hora) ? t('modalNuevaTarea.errorHoraPasada') : '');
     }
   };
 
-  const puedeCrear = () => {
+  const puedeGuardar = () => {
     if (!nombre) return false;
     if (esFechaPasada(fecha)) return false;
     if (!esTodoElDia && hora) {
@@ -119,28 +124,17 @@ export default function ModalNuevaTarea({ visible, onClose, onCreate, mesActual,
     return true;
   };
 
-  const resetForm = () => {
-    setNombre('');
-    setHora('');
-    setErrorHora('');
-    setEsTodoElDia(false);
-    setFecha(fechaInicial());
-    setVoluntariosSeleccionados([]);
-  };
-
-  const handleCrear = async () => {
-    if (!puedeCrear()) return;
+  const handleGuardar = async () => {
+    if (!puedeGuardar() || !tarea) return;
     setLoading(true);
     try {
-      await onCreate({
+      await onUpdate(tarea.id_tarea, {
         nombre,
         fecha: formatDate(fecha),
         hora: esTodoElDia ? null : hora || null,
         es_todo_el_dia: esTodoElDia,
-        completada: false,
         personas_ids: voluntariosSeleccionados,
       });
-      resetForm();
       onClose();
     } catch (e) {
       console.error(e);
@@ -158,7 +152,7 @@ export default function ModalNuevaTarea({ visible, onClose, onCreate, mesActual,
         <View style={styles.overlay}>
           <View style={styles.container}>
             <View style={styles.header}>
-              <Text style={styles.titulo}>{t('modalNuevaTarea.titulo')}</Text>
+              <Text style={styles.titulo}>{t('modalEditarTarea.titulo')}</Text>
               <TouchableOpacity onPress={onClose}>
                 <Text style={styles.cerrar}>✕</Text>
               </TouchableOpacity>
@@ -216,7 +210,6 @@ export default function ModalNuevaTarea({ visible, onClose, onCreate, mesActual,
                 </>
               )}
 
-              {/* Selector de voluntarios */}
               <Text style={styles.label}>{t('modalNuevaTarea.voluntariosLabel')}</Text>
               <TouchableOpacity
                 onPress={() => setShowVoluntarios(!showVoluntarios)}
@@ -256,11 +249,11 @@ export default function ModalNuevaTarea({ visible, onClose, onCreate, mesActual,
               )}
 
               <TouchableOpacity
-                onPress={handleCrear}
-                disabled={loading || !puedeCrear()}
-                style={[styles.btnCrear, !puedeCrear() && { opacity: 0.5 }]}
+                onPress={handleGuardar}
+                disabled={loading || !puedeGuardar()}
+                style={[styles.btnCrear, !puedeGuardar() && { opacity: 0.5 }]}
               >
-                {loading ? <ActivityIndicator color={Colors.surface} /> : <Text style={styles.btnCrearTexto}>{t('modalNuevaTarea.btnCrear')}</Text>}
+                {loading ? <ActivityIndicator color={Colors.surface} /> : <Text style={styles.btnCrearTexto}>{t('modalEditarTarea.btnGuardar')}</Text>}
               </TouchableOpacity>
             </ScrollView>
           </View>

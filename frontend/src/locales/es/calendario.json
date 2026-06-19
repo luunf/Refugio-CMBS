@@ -1,0 +1,68 @@
+{
+  "headerTitulo": "Calendario",
+  "sinTareas": "No hay tareas este mes",
+  "meses": {
+    "1": "Enero",
+    "2": "Febrero",
+    "3": "Marzo",
+    "4": "Abril",
+    "5": "Mayo",
+    "6": "Junio",
+    "7": "Julio",
+    "8": "Agosto",
+    "9": "Septiembre",
+    "10": "Octubre",
+    "11": "Noviembre",
+    "12": "Diciembre"
+  },
+  "diasSemana": {
+    "0": "Dom",
+    "1": "Lun",
+    "2": "Mar",
+    "3": "Mié",
+    "4": "Jue",
+    "5": "Vie",
+    "6": "Sáb"
+  },
+  "modalNuevaTarea": {
+    "titulo": "Nueva tarea",
+    "nombreLabel": "Nombre*",
+    "nombrePlaceholder": "Ej: Limpiar caniles",
+    "fechaLabel": "Fecha*",
+    "horarioLabel": "Horario*",
+    "puntual": "Puntual",
+    "todoElDia": "Todo el día",
+    "horaLabel": "Hora (HH:MM)",
+    "horaPlaceholder": "Ej: 10:00",
+    "btnCrear": "Crear nueva tarea",
+    "errorFechaPasada": "No se pueden crear tareas en fechas pasadas",
+    "errorHoraInvalida": "Formato de hora inválido (HH:MM)",
+    "errorHoraPasada": "No se puede elegir una hora que ya pasó",
+    "voluntariosLabel": "Voluntarios asignados",
+    "seleccionarVoluntarios": "Seleccionar voluntarios...",
+    "voluntariosSeleccionados": "{{count}} voluntario(s) seleccionado(s)",
+    "cargandoVoluntarios": "Cargando...",
+    "sinVoluntarios": "Sin voluntarios registrados"
+  },
+  "tareaCard": {
+    "sinAsignar": "Sin asignar",
+    "todoElDia": "Todo el día",
+    "horarioLabel": "Horario: ",
+    "voluntariosLabel": "Voluntarios: ",
+    "btnMarcarPendiente": "Marcar pendiente",
+    "btnMarcarCompletada": "Marcar completada",
+    "btnEliminar": "Eliminar tarea"
+  },
+
+  "datePicker": {
+    "titulo": "Selecciona una fecha",
+    "cancelar": "Cancelar",
+    "aceptar": "Aceptar"
+  },
+
+  
+  "modalEditarTarea": {
+    "titulo": "Editar tarea",
+    "btnGuardar": "Guardar cambios"
+  }
+}
