@@ -18,7 +18,7 @@ class VacunaService:
 
         vacunas = Vacuna.query.filter_by(
             animal_id=animal_id
-        ).all()
+        ).order_by(Vacuna.fecha_aplicacion.desc()).all()
 
         return [
             {
