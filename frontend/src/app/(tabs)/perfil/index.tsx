@@ -20,6 +20,10 @@ import { Colors } from "@/constants/theme";
 import { signOut } from "firebase/auth";
 import { auth } from "@/config/firebase";
 import { router } from "expo-router";
+import {
+  sendPasswordResetEmail,
+} from "firebase/auth";
+
 
 export default function PerfilScreen() {
   const { usuario, recargar } = useAuth();
@@ -130,6 +134,40 @@ export default function PerfilScreen() {
     }
   };
 
+  const handleCambiarPassword =
+    async () => {
+
+      if (!usuario?.email) return;
+
+      try {
+
+        await sendPasswordResetEmail(
+          auth,
+          usuario.email
+        );
+        console.log(
+          "Firebase Project:",
+          auth.app.options.projectId
+        );
+
+        console.log(
+          "Email:",
+          usuario.email
+        );
+
+        Alert.alert(
+          t("exito"),
+          t("passwordResetOk")
+        );
+
+      } catch {
+
+        Alert.alert(
+          t("error"),
+          t("passwordResetError")
+        );
+      }
+    };
   const handleLogout = async () => {
     try {
 
@@ -141,8 +179,8 @@ export default function PerfilScreen() {
       console.error(error);
 
       Alert.alert(
-        "Error",
-        "No se pudo cerrar sesión"
+        t("error"),
+        t("logoutError")
       );
     }
   };
@@ -275,7 +313,7 @@ export default function PerfilScreen() {
               value={rolIds}
               onChange={setRolIds}
               excluir={["voluntario"]}
-              placeholder="Seleccionar roles"
+              placeholder={t("seleccionarRoles")}
             />
           ) : (
             <View style={styles.valorContainer}>
@@ -321,6 +359,16 @@ export default function PerfilScreen() {
         >
           <Text style={styles.logoutText}>
             {t("cerrarSesion")}
+          </Text>
+        </TouchableOpacity>
+
+        {/* BOTON CAMBIAR CONTRASEÑA */}
+        <TouchableOpacity
+          style={styles.passwordBtn}
+          onPress={handleCambiarPassword}
+        >
+          <Text style={styles.passwordText}>
+            {t("cambiarContrasena")}
           </Text>
         </TouchableOpacity>
 
@@ -502,6 +550,20 @@ const styles = StyleSheet.create({
   },
 
   logoutText: {
+    color: "white",
+    fontWeight: "700",
+    fontSize: 16,
+  },
+
+  passwordBtn: {
+    backgroundColor: Colors.primary,
+    marginTop: 16,
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: "center",
+  },
+
+  passwordText: {
     color: "white",
     fontWeight: "700",
     fontSize: 16,

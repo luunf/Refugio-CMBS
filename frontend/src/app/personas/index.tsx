@@ -20,7 +20,6 @@ import PersonaRow from "@/components/personas/PersonaRow";
 import ModalAgregarPersona from "@/components/personas/ModalAgregarPersona";
 import ModalEditarPersona from "@/components/personas/ModalEditarPersona";
 import ModalVerPersona from "@/components/personas/ModalVerPersona";
-import ModalCrearUsuario from "@/components/personas/ModalCrearUsuario";
 import Feather from "@expo/vector-icons/build/Feather";
 
 interface Persona {
@@ -253,14 +252,6 @@ export default function PersonasScreen() {
         persona={personaSeleccionada}
         onClose={() => setModalVer(false)}
       />
-
-      {esAdmin && (
-        <ModalCrearUsuario
-          visible={modalUsuario}
-          onClose={() => setModalUsuario(false)}
-          onCreado={cargarPersonas}
-        />
-      )}
     </SafeAreaView>
   );
 }

@@ -195,11 +195,27 @@ class PersonaService:
             persona.direccion = data["direccion"]
 
         if "roles" in data:
+
             persona.roles = []
 
+            rol_voluntario = Rol.query.filter_by(
+                nombre="voluntario"
+            ).first()
+
+            if rol_voluntario:
+                persona.roles.append(
+                    rol_voluntario
+                )
+
             for rol_id in data["roles"]:
+
                 rol = Rol.query.get(rol_id)
-                if rol and rol not in persona.roles:
+
+                if (
+                    rol
+                    and rol.nombre != "voluntario"
+                    and rol not in persona.roles
+                ):
                     persona.roles.append(rol)
 
             # si quedo sin roles, poner voluntario
@@ -234,3 +250,24 @@ class PersonaService:
         db.session.commit()
 
         return True
+    @staticmethod
+    def buscar_por_email(email):
+
+        if not email:
+            return None
+
+        persona = Persona.query.filter_by(
+            email=email
+        ).first()
+
+        if not persona:
+            return None
+
+        return {
+            "id_persona": persona.id_persona,
+            "nombre": persona.nombre,
+            "apellido": persona.apellido,
+            "email": persona.email,
+            "telefono": persona.telefono,
+            "direccion": persona.direccion
+        }

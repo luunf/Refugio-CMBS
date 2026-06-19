@@ -40,7 +40,7 @@ export default function RootLayout() {
 
           <Stack.Screen name="personas" />
 
-          {/* <Stack.Screen name="usuarios" /> */}
+          <Stack.Screen name="usuarios" />
 
           <Stack.Screen name="calendario" />
 

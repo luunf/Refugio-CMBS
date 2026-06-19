@@ -33,3 +33,6 @@ def update_persona(persona_id):
 #def delete_persona(decoded_token, persona_id):
 def delete_persona(persona_id):
     return PersonaController.delete_persona(persona_id)
+@persona_bp.route('/buscar-por-email', methods=['GET'])
+def buscar_persona_por_email():
+    return PersonaController.buscar_por_email()

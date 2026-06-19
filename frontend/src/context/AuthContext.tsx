@@ -18,6 +18,7 @@ interface UsuarioActual {
   tipo: "admin" | "estandar";
   roles: string[];
   persona_id: number;
+  perfil_completo: boolean;
 }
 
 interface AuthContextType {
@@ -161,10 +162,8 @@ export function AuthProvider({
   const esAdmin =
     usuario?.tipo === "admin";
 
-  const perfilCompleto = !!(
-    usuario?.nombre &&
-    usuario?.apellido
-  );
+  const perfilCompleto =
+  usuario?.perfil_completo ?? false;
 
   return (
     <AuthContext.Provider

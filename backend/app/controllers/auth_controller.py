@@ -17,6 +17,11 @@ class AuthController:
         persona = usuario.persona
 
         roles = [rol.nombre for rol in persona.roles]
+        
+        perfil_completo = bool(
+            persona.nombre and
+            persona.apellido
+        ) 
 
         return jsonify({
             "id_usuario": usuario.id_usuario,
@@ -25,7 +30,8 @@ class AuthController:
             "apellido": persona.apellido,
             "tipo": usuario.tipo,
             "roles": roles,
-            "persona_id": persona.id_persona
+            "persona_id": persona.id_persona,
+            "perfil_completo": perfil_completo
         }), 200
     
     @staticmethod
@@ -50,4 +56,4 @@ class AuthController:
             "tipo": usuario.tipo,
             "roles": roles,
             "persona_id": persona.id_persona
-        }), 200
+        }), 200 

@@ -14,5 +14,11 @@
   "sinDato": "—",
   "cerrarSesion": "Cerrar sesión",
   "errorCerrarSesion": "No se pudo cerrar sesión",
-  "error": "Error"
+  "error": "Error",
+  "cambiarContrasena": "Cambiar contraseña",
+  "exito": "Éxito",
+  "passwordResetOk": "Se envió un correo para cambiar tu contraseña. Revisá tu bandeja de entrada o spam.",
+  "passwordResetError": "No se pudo enviar el correo de recuperación.",
+  "logoutError": "No se pudo cerrar sesión",
+  "seleccionarRoles": "Seleccionar roles"
 }

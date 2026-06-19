@@ -1,0 +1,26 @@
+{
+  "title": "Usuarios",
+  "buscar": "Buscar usuario",
+  "crearUsuario": "Crear usuario",
+  "editarUsuario": "Editar usuario",
+
+  "tipo": "Tipo",
+  "estado": "Estado",
+
+  "activo": "Activo",
+  "inactivo": "Inactivo",
+
+  "admin": "Administrador",
+  "estandar": "Estándar",
+
+  "guardar": "Guardar",
+  "crear": "Crear",
+  "cancelar": "Cancelar",
+
+  "emailObligatorio": "El email es obligatorio",
+  "errorCrear": "No se pudo crear el usuario",
+
+  "personaExisteTitulo": "Persona encontrada",
+  "usarPersona": "Usar persona existente",
+  "crearOtro": "Cancelar"
+}

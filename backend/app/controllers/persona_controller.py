@@ -163,3 +163,17 @@ class PersonaController:
             return jsonify({
                 "error": str(e)
             }), 500
+        
+    @staticmethod
+    def buscar_por_email():
+
+        email = request.args.get("email")
+
+        persona = PersonaService.buscar_por_email(
+            email
+        )
+
+        if not persona:
+            return jsonify(None), 200
+
+        return jsonify(persona), 200

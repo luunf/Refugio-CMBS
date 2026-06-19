@@ -51,6 +51,13 @@ export const api = {
   },
 
   //USUARIOS
+  getUsuario: async (id: number) => {
+    const res = await apiClient.get(
+      `/usuarios/${id}`
+    );
+
+    return res.data;
+  },
   getUsuarios: async () => {
     const res = await apiClient.get("/usuarios");
     return res.data;
@@ -61,6 +68,30 @@ export const api = {
   },
   deleteUsuario: async (id: number) => {
     const res = await apiClient.delete(`/usuarios/${id}`);
+    return res.data;
+  },
+  updateUsuario: async (
+    id: number,
+    data: any
+  ) => {
+    const res = await apiClient.patch(
+      `/usuarios/${id}`,
+      data
+    );
+
+    return res.data;
+  },
+  buscarPersonaPorEmail: async (
+    email: string
+  ) => {
+
+    const res = await apiClient.get(
+      `/personas/buscar-por-email`,
+      {
+        params: { email },
+      }
+    );
+
     return res.data;
   },
 

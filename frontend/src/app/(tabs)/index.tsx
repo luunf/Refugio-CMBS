@@ -3,14 +3,17 @@ import {
   View, Text, TouchableOpacity, StyleSheet, ScrollView
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
+//import { router } from "expo-router";
 import { useAuth } from "@/context/AuthContext";
 import {
   MaterialCommunityIcons,
   Feather
 } from "@expo/vector-icons";
 import { Colors } from "@/constants/theme";
-
+import {
+  Redirect,
+  router,
+} from "expo-router";
 
 const BOTONES_BASE = [
   {
@@ -71,29 +74,53 @@ const BOTON_USUARIOS = {
   ruta: "/usuarios",
 };
 
-export default function HomeScreen() {
-  const { usuario, esAdmin } = useAuth();
 
-  const botones = esAdmin ? [...BOTONES_BASE, BOTON_USUARIOS] : BOTONES_BASE;
+export default function HomeScreen() {
+  const {
+    usuario,
+    esAdmin,
+    perfilCompleto,
+  } = useAuth();
+
+  // Si el usuario todavía no completó el perfil
+  if (
+    usuario &&
+    !perfilCompleto
+  ) {
+    return (
+      <Redirect href="/(tabs)/perfil" />
+    );
+  }
+
+  const botones = esAdmin
+    ? [...BOTONES_BASE, BOTON_USUARIOS]
+    : BOTONES_BASE;
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTexto}>Opciones:</Text>
+        <Text style={styles.headerTexto}>
+          Opciones:
+        </Text>
       </View>
 
-      {/* Grilla */}
-      <ScrollView contentContainerStyle={styles.grilla}>
+      <ScrollView
+        contentContainerStyle={styles.grilla}
+      >
         {botones.map((btn) => (
           <TouchableOpacity
             key={btn.label}
             style={styles.boton}
-            onPress={() => router.push(btn.ruta as any)}
+            onPress={() =>
+              router.push(btn.ruta as any)
+            }
             activeOpacity={0.7}
           >
             <View>{btn.icono}</View>
-            <Text style={styles.botonLabel}>{btn.label}</Text>
+
+            <Text style={styles.botonLabel}>
+              {btn.label}
+            </Text>
           </TouchableOpacity>
         ))}
       </ScrollView>

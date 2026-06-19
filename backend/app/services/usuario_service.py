@@ -52,6 +52,7 @@ class UsuarioService:
         email = data.get("email")
         password = data.get("password")
         tipo = data.get("tipo", "estandar")
+        persona_id = data.get("persona_id")
 
         if not email:
             raise Exception(
@@ -82,21 +83,47 @@ class UsuarioService:
             password=password
         )
 
-        persona = Persona(
-            email=email
-        )
+        # PERSONA EXISTENTE
 
-        db.session.add(persona)
-        db.session.flush()
+        if persona_id:
 
-        rol_voluntario = Rol.query.filter_by(
-            nombre="voluntario"
-        ).first()
-
-        if rol_voluntario:
-            persona.roles.append(
-                rol_voluntario
+            persona = Persona.query.get(
+                persona_id
             )
+
+            if not persona:
+                raise Exception(
+                    "Persona no encontrada"
+                )
+
+            usuario_existente = Usuario.query.filter_by(
+                persona_id=persona.id_persona
+            ).first()
+
+            if usuario_existente:
+                raise Exception(
+                    "La persona ya tiene usuario"
+                )
+
+        # PERSONA NUEVA
+
+        else:
+
+            persona = Persona(
+                email=email
+            )
+
+            db.session.add(persona)
+            db.session.flush()
+
+            rol_voluntario = Rol.query.filter_by(
+                nombre="voluntario"
+            ).first()
+
+            if rol_voluntario:
+                persona.roles.append(
+                    rol_voluntario
+                )
 
         usuario = Usuario(
             email=email,
