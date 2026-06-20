@@ -280,15 +280,10 @@ export default function UsuariosScreen() {
             usuariosFiltrados.map(
               (usuario) => (
                 <UsuarioRow
-                  key={
-                    usuario.id_usuario
-                  }
-                  usuario={
-                    usuario
-                  }
-                  onEditar={
-                    abrirEditar
-                  }
+                  key={usuario.id_usuario}
+                  usuario={usuario}
+                  onEditar={abrirEditar}
+                  onActualizado={cargarUsuarios}
                 />
               )
             )

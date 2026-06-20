@@ -22,5 +22,17 @@
 
   "personaExisteTitulo": "Persona encontrada",
   "usarPersona": "Usar persona existente",
-  "crearOtro": "Cancelar"
+  "crearOtro": "Cancelar",
+
+  "eliminarUsuario": "Eliminar usuario",
+
+  "eliminarUsuarioMensaje": "¿Qué deseas hacer con este usuario?",
+
+  "conservarPersona": "Eliminar usuario y conservar persona",
+
+  "eliminarPersonaTambien": "Eliminar usuario y persona",
+
+  "usuarioEliminado": "Usuario eliminado correctamente",
+
+  "errorEliminarUsuario": "No se pudo eliminar el usuario"
 }

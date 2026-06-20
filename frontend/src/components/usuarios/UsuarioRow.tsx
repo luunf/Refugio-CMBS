@@ -1,68 +1,169 @@
 import React from "react";
 
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
+View,
+Text,
+TouchableOpacity,
+StyleSheet,
+Alert,
 } from "react-native";
 
 import {
-  MaterialIcons,
+MaterialIcons,
 } from "@expo/vector-icons";
 
+import { useTranslation } from "react-i18next";
+
+import { api } from "@/config/api";
 import { Colors } from "@/constants/theme";
 
 interface Props {
-  usuario: any;
-  onEditar: (u:any) => void;
+usuario: any;
+onEditar: (u: any) => void;
+onActualizado: () => void;
 }
 
 export default function UsuarioRow({
-  usuario,
-  onEditar,
+usuario,
+onEditar,
+onActualizado,
 }: Props) {
 
-  return (
-    <View style={styles.row}>
+const { t } =
+useTranslation("usuarios");
 
-      <View style={styles.info}>
+const confirmarEliminar =
+() => {
 
-        <Text style={styles.nombre}>
-          {usuario.persona?.nombre || "Sin nombre"}{" "}
-          {usuario.persona?.apellido || ""}
-        </Text>
+  Alert.alert(
+    t("eliminarUsuario"),
 
-        <Text style={styles.email}>
-          {usuario.email}
-        </Text>
+    `${t("eliminarUsuarioMensaje")}\n\n${usuario.email}`,
 
-      </View>
+    [
+      {
+        text:
+          t("cancelar"),
+        style:
+          "cancel",
+      },
 
-      <View style={styles.badges}>
+      {
+        text:
+          t("conservarPersona"),
 
-        <View
-          style={[
-            styles.badge,
-            usuario.activo
-              ? styles.activo
-              : styles.inactivo,
-          ]}
+        onPress:
+          () =>
+            eliminarUsuario(
+              false
+            ),
+      },
+
+      {
+        text:
+          t(
+            "eliminarPersonaTambien"
+          ),
+
+        style:
+          "destructive",
+
+        onPress:
+          () =>
+            eliminarUsuario(
+              true
+            ),
+      },
+    ]
+  );
+};
+
+
+const eliminarUsuario =
+async (
+eliminarPersona: boolean
+) => {
+
+  try {
+
+    await api.deleteUsuario(
+      usuario.id_usuario,
+      eliminarPersona
+    );
+
+    onActualizado();
+
+  } catch (error) {
+
+    console.error(error);
+
+    Alert.alert(
+      t("error"),
+      t(
+        "errorEliminarUsuario"
+      )
+    );
+  }
+};
+
+  return ( <View style={styles.row}>
+
+    <View style={styles.info}>
+
+      <Text style={styles.nombre}>
+        {usuario.persona?.nombre ||
+          t("sinNombre")}{" "}
+        {usuario.persona?.apellido ||
+          ""}
+      </Text>
+
+      <Text style={styles.email}>
+        {usuario.email}
+      </Text>
+
+    </View>
+
+    <View style={styles.badges}>
+
+      <View
+        style={[
+          styles.badge,
+
+          usuario.activo
+            ? styles.activo
+            : styles.inactivo,
+        ]}
+      >
+        <Text
+          style={
+            styles.badgeTexto
+          }
         >
-          <Text>
-            {usuario.activo
-              ? "Activo"
-              : "Inactivo"}
-          </Text>
-        </View>
-
-        <View style={styles.badge}>
-          <Text>
-            {usuario.tipo}
-          </Text>
-        </View>
-
+          {usuario.activo
+            ? t("activo")
+            : t(
+                "inactivo"
+              )}
+        </Text>
       </View>
+
+      <View
+        style={styles.badge}
+      >
+        <Text
+          style={
+            styles.badgeTexto
+          }
+        >
+          {usuario.tipo}
+        </Text>
+      </View>
+
+    </View>
+
+    <View
+      style={styles.actions}
+    >
 
       <TouchableOpacity
         onPress={() =>
@@ -72,53 +173,104 @@ export default function UsuarioRow({
         <MaterialIcons
           name="edit"
           size={22}
-          color={Colors.primary}
+          color={
+            Colors.primary
+          }
+        />
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        onPress={
+          confirmarEliminar
+        }
+      >
+        <MaterialIcons
+          name="delete"
+          size={22}
+          color={
+            Colors.delete
+          }
         />
       </TouchableOpacity>
 
     </View>
+
+  </View>
+
   );
 }
 
-const styles = StyleSheet.create({
-  row:{
-    flexDirection:"row",
-    alignItems:"center",
-    paddingVertical:12,
-    borderBottomWidth:1,
-    borderBottomColor:"#eee",
-  },
+const styles =
+StyleSheet.create({
 
-  info:{
-    flex:1,
-  },
+row: {
+  flexDirection:
+    "row",
+  alignItems:
+    "center",
+  paddingVertical: 12,
+  borderBottomWidth: 1,
+  borderBottomColor:
+    Colors.border,
+},
 
-  nombre:{
-    fontWeight:"600",
-  },
+info: {
+  flex: 1,
+},
 
-  email:{
-    color:"#666",
-    fontSize:12,
-  },
+nombre: {
+  fontWeight: "600",
+  color:
+    Colors.text,
+  fontSize: 14,
+},
 
-  badges:{
-    marginRight:12,
-    gap:4,
-  },
+email: {
+  color:
+    Colors.textMuted,
+  fontSize: 12,
+  marginTop: 2,
+},
 
-  badge:{
-    paddingHorizontal:8,
-    paddingVertical:3,
-    borderRadius:10,
-    backgroundColor:"#eee",
-  },
+badges: {
+  marginRight: 12,
+  gap: 4,
+},
 
-  activo:{
-    backgroundColor:"#dcfce7",
-  },
+badge: {
+  paddingHorizontal: 8,
+  paddingVertical: 3,
+  borderRadius: 10,
+  backgroundColor:
+    Colors.background,
+  alignItems:
+    "center",
+},
 
-  inactivo:{
-    backgroundColor:"#fee2e2",
-  },
+badgeTexto: {
+  color:
+    Colors.textSoft,
+  fontSize: 12,
+  fontWeight: "600",
+},
+
+activo: {
+  backgroundColor:
+    "#dcfce7",
+},
+
+inactivo: {
+  backgroundColor:
+    "#fee2e2",
+},
+
+actions: {
+  flexDirection:
+    "row",
+  alignItems:
+    "center",
+  gap: 10,
+},
+
+
 });

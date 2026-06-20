@@ -42,10 +42,23 @@ class UsuarioController:
 
         try:
 
-            UsuarioService.eliminar_usuario(usuario_id)
+            data = request.get_json(
+                silent=True
+            ) or {}
+
+            eliminar_persona = data.get(
+                "eliminar_persona",
+                False
+            )
+
+            UsuarioService.eliminar_usuario(
+                usuario_id,
+                eliminar_persona
+            )
 
             return jsonify({
-                "message": "Usuario eliminado correctamente"
+                "message":
+                    "Usuario eliminado correctamente"
             }), 200
 
         except Exception as e:

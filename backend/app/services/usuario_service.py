@@ -140,21 +140,55 @@ class UsuarioService:
         return usuario
 
     @staticmethod
-    def eliminar_usuario(usuario_id):
+    def eliminar_usuario(
+        usuario_id,
+        eliminar_persona=False
+    ):
 
-        usuario = Usuario.query.get(usuario_id)
+        usuario = Usuario.query.get(
+            usuario_id
+        )
 
         if not usuario:
-
             raise Exception(
                 "Usuario no encontrado"
             )
 
+        # borrar en Firebase
+        try:
+
+            auth.delete_user(
+                usuario.firebase_uid
+            )
+
+        except Exception as e:
+
+            raise Exception(
+                f"Firebase: {str(e)}"
+            )
+        persona = usuario.persona
+
         db.session.delete(usuario)
+
+        db.session.flush()
+
+        if eliminar_persona and persona:
+            print(
+                "ELIMINANDO PERSONA:",
+                persona.id_persona
+            )
+            try:
+                db.session.delete(persona)
+            except Exception as e:
+                print(
+                    "ERROR ELIMINANDO PERSONA:",
+                    e
+                )
 
         db.session.commit()
 
         return True
+
     
     @staticmethod
     def get_usuario_by_id(usuario_id):

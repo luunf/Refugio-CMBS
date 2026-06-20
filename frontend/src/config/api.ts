@@ -66,10 +66,22 @@ export const api = {
     const res = await apiClient.post("/usuarios", data);
     return res.data;
   },
-  deleteUsuario: async (id: number) => {
-    const res = await apiClient.delete(`/usuarios/${id}`);
+  
+  deleteUsuario: async (id: number,eliminarPersona = false) => {
+    const res =
+      await apiClient.delete(
+        `/usuarios/${id}`,
+        {
+          data: {
+            eliminar_persona:
+              eliminarPersona,
+          },
+        }
+      );
+
     return res.data;
   },
+
   updateUsuario: async (
     id: number,
     data: any
