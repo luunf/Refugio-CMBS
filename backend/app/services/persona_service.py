@@ -142,16 +142,17 @@ class PersonaService:
         db.session.add(persona)
         db.session.flush()
 
-        #rol automatico de voluntario
-        rol_voluntario = Rol.query.filter_by(nombre="voluntario").first()
-        if rol_voluntario:
-            persona.roles.append(rol_voluntario)
-
-        #demas roles
         roles_ids = data.get("roles", [])
+
+        if len(roles_ids) == 0:
+            raise Exception(
+                "Debe seleccionar al menos un rol"
+            )
+
         for rol_id in roles_ids:
             rol = Rol.query.get(rol_id)
-            if rol and rol.nombre != "voluntario": 
+
+            if rol:
                 persona.roles.append(rol)
 
         db.session.commit()

@@ -20,5 +20,17 @@
   "passwordResetOk": "Se envió un correo para cambiar tu contraseña. Revisá tu bandeja de entrada o spam.",
   "passwordResetError": "No se pudo enviar el correo de recuperación.",
   "logoutError": "No se pudo cerrar sesión",
-  "seleccionarRoles": "Seleccionar roles"
+  "seleccionarRoles": "Seleccionar roles",
+
+  "nombreObligatorio": "El nombre es obligatorio",
+  "nombreInvalido": "El nombre debe tener al menos 2 caracteres",
+
+  "apellidoObligatorio": "El apellido es obligatorio",
+  "apellidoInvalido": "El apellido debe tener al menos 2 caracteres",
+
+  "telefonoInvalido": "El teléfono no es válido",
+
+  "direccionInvalida": "La dirección debe tener al menos 5 caracteres",
+
+  "confirmarLogout": "¿Está seguro que desea cerrar sesión?"
 }

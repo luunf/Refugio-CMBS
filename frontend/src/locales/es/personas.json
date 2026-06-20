@@ -53,5 +53,17 @@
   "admin": "Admin",
   "crearUsuarioBtn": "Crear usuario",
   "infoCrearUsuario": "Se creará una persona mínima con este email y rol voluntario automáticamente.",
-  "errorEmailUid": "Email y Firebase UID son obligatorios"
+  "errorEmailUid": "Email y Firebase UID son obligatorios",
+
+  "nombreObligatorio": "El nombre es obligatorio",
+  "nombreInvalido": "El nombre debe tener al menos 2 caracteres",
+
+  "apellidoObligatorio": "El apellido es obligatorio",
+  "apellidoInvalido": "El apellido debe tener al menos 2 caracteres",
+
+  "rolObligatorio": "Debe seleccionar al menos un rol",
+
+  "emailInvalido": "El correo electrónico no es válido",
+  "telefonoInvalido": "El teléfono no es válido"
+
 }
