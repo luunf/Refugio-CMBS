@@ -101,3 +101,22 @@ class UsuarioController:
             return jsonify({
                 "error": str(e)
             }), 400
+    @staticmethod
+    def reenviar_verificacion(usuario_id):
+
+        try:
+
+            UsuarioService.reenviar_verificacion(
+                usuario_id
+            )
+
+            return jsonify({
+                "message":
+                    "Correo enviado"
+            }), 200
+
+        except Exception as e:
+
+            return jsonify({
+                "error": str(e)
+            }), 400

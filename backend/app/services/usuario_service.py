@@ -3,6 +3,9 @@ from app.models import Usuario, Persona
 from app.models.rol import Rol
 from firebase_admin import auth
 
+from app.utils.email import enviar_email_verificacion
+
+
 class UsuarioService:
 
     @staticmethod
@@ -83,6 +86,28 @@ class UsuarioService:
             password=password
         )
 
+        if tipo == "admin":
+
+            auth.update_user(
+                firebase_user.uid,
+                email_verified=True
+            )
+
+        else:
+
+            auth.update_user(
+                firebase_user.uid,
+                email_verified=False
+            )
+
+            link = auth.generate_email_verification_link(
+                email
+            )
+
+            enviar_email_verificacion(
+                email,
+                link
+            )
         # PERSONA EXISTENTE
 
         if persona_id:
@@ -240,3 +265,35 @@ class UsuarioService:
         db.session.commit()
 
         return usuario
+    @staticmethod
+    def reenviar_verificacion(usuario_id):
+
+        usuario = Usuario.query.get(
+            usuario_id
+        )
+
+        if not usuario:
+            raise Exception(
+                "Usuario no encontrado"
+            )
+
+        firebase_user = auth.get_user(
+            usuario.firebase_uid
+        )
+
+        if firebase_user.email_verified:
+
+            raise Exception(
+                "El email ya fue verificado"
+            )
+
+        link = auth.generate_email_verification_link(
+            usuario.email
+        )
+
+        enviar_email_verificacion(
+            usuario.email,
+            link
+        )
+
+        return True

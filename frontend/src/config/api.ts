@@ -66,7 +66,7 @@ export const api = {
     const res = await apiClient.post("/usuarios", data);
     return res.data;
   },
-  
+
   deleteUsuario: async (id: number,eliminarPersona = false) => {
     const res =
       await apiClient.delete(
@@ -103,6 +103,17 @@ export const api = {
         params: { email },
       }
     );
+
+    return res.data;
+  },
+
+  reenviarVerificacionUsuario:
+  async (id: number) => {
+
+    const res =
+      await apiClient.post(
+        `/usuarios/${id}/reenviar-verificacion`
+      );
 
     return res.data;
   },

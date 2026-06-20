@@ -34,5 +34,7 @@
 
   "usuarioEliminado": "Usuario eliminado correctamente",
 
-  "errorEliminarUsuario": "No se pudo eliminar el usuario"
+  "errorEliminarUsuario": "No se pudo eliminar el usuario",
+  "verificacionReenviada":
+    "Se envió nuevamente el correo de verificación."
 }

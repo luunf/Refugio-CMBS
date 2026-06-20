@@ -180,6 +180,36 @@ eliminarPersona: boolean
       </TouchableOpacity>
 
       <TouchableOpacity
+        onPress={async () => {
+
+          try {
+
+            await api.reenviarVerificacionUsuario(
+              usuario.id_usuario
+            );
+
+            Alert.alert(
+              t("exito"),
+              t("verificacionReenviada")
+            );
+
+          } catch (e:any) {
+
+            Alert.alert(
+              t("error"),
+              e?.response?.data?.error
+            );
+          }
+        }}
+      >
+        <MaterialIcons
+          name="mail-outline"
+          size={22}
+          color={Colors.primary}
+        />
+      </TouchableOpacity>
+
+      <TouchableOpacity
         onPress={
           confirmarEliminar
         }

@@ -30,3 +30,18 @@ def enviar_email_modificacion(persona, tarea):
         )
     )
     mail.send(msg)
+
+def enviar_email_verificacion(email, link):
+
+    msg = Message(
+        subject="Verificá tu cuenta",
+        recipients=[email],
+        body=(
+            "Hola.\n\n"
+            "Para activar tu cuenta hacé click en el siguiente enlace:\n\n"
+            f"{link}\n\n"
+            "Refugio Corazones Vagabundos"
+        )
+    )
+
+    mail.send(msg)

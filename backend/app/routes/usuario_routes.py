@@ -30,3 +30,15 @@ def get_usuario(decoded_token, usuario_id):
 @token_required
 def update_usuario(decoded_token, usuario_id):
     return UsuarioController.update_usuario(usuario_id)
+@usuario_bp.route(
+    '/<int:usuario_id>/reenviar-verificacion',
+    methods=['POST']
+)
+@token_required
+def reenviar_verificacion(
+    decoded_token,
+    usuario_id
+):
+    return UsuarioController.reenviar_verificacion(
+        usuario_id
+    )

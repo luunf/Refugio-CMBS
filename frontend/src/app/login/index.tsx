@@ -48,13 +48,26 @@ export default function LoginScreen() {
     }
 
     try {
-      setLoading(true);
+      const cred =
+        await signInWithEmailAndPassword(
+          auth,
+          email.trim(),
+          password
+        );
 
-      await signInWithEmailAndPassword(
-        auth,
-        email.trim(),
-        password
-      );
+      await cred.user.reload();
+
+      if (!cred.user.emailVerified) {
+
+        Alert.alert(
+          t("error"),
+          t("emailNoVerificado")
+        );
+
+        await auth.signOut();
+
+        return;
+      }
 
       router.replace("/(tabs)");
 
