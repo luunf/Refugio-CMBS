@@ -58,15 +58,6 @@ class TratamientoService:
         TratamientoService.sincronizar_estado_tratamiento(visita_id)
 
     @staticmethod
-    def delete(id_tratamiento):
-        tratamiento = Tratamiento.query.get_or_404(id_tratamiento)
-        visita_id = tratamiento.visita_id
-        db.session.delete(tratamiento)
-        db.session.commit()
-
-        TratamientoService.sincronizar_estado_tratamiento(visita_id)
-
-    @staticmethod
     def sincronizar_estado_tratamiento(visita_id):
         visita = VisitaVeterinaria.query.get(visita_id)
         if not visita:
