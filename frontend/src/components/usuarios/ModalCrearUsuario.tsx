@@ -15,6 +15,7 @@ import { useTranslation } from "react-i18next";
 
 import { api } from "@/config/api";
 import { Colors } from "@/constants/theme";
+import { isEmailValid } from "@/utils/validators";
 
 interface Props {
   visible: boolean;
@@ -50,7 +51,7 @@ export default function ModalCrearUsuario({
     setEmail("");
 
     setPassword(
-      "Temporal123!"
+      "cont123tem"
     );
 
     setTipo("estandar");
@@ -63,11 +64,35 @@ export default function ModalCrearUsuario({
   const crear = async () => {
 
     if (!email.trim()) {
-        Alert.alert(
+      Alert.alert(
         t("error"),
         t("emailObligatorio")
-        );
-        return;
+      );
+      return;
+    }
+
+    if (!isEmailValid(email)) {
+      Alert.alert(
+        t("error"),
+        t("emailInvalido")
+      );
+      return;
+    }
+
+    if (!password.trim()) {
+      Alert.alert(
+        t("error"),
+        t("passwordObligatoria")
+      );
+      return;
+    }
+
+    if (password.length < 8) {
+      Alert.alert(
+        t("error"),
+        t("passwordMinima")
+      );
+      return;
     }
 
     setLoading(true);

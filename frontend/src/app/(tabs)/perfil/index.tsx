@@ -14,7 +14,6 @@ import { useTranslation } from "react-i18next";
 
 import { api } from "@/config/api";
 import { useAuth } from "@/context/AuthContext";
-import RolSelector from "@/components/personas/RolSelector";
 import { Colors } from "@/constants/theme";
 
 import { signOut } from "firebase/auth";
@@ -23,6 +22,7 @@ import { router } from "expo-router";
 import {
   sendPasswordResetEmail,
 } from "firebase/auth";
+import { isEmailValid, isPhoneValid } from "@/utils/validators";
 
 
 export default function PerfilScreen() {
@@ -33,7 +33,6 @@ export default function PerfilScreen() {
   const [apellido, setApellido] = useState("");
   const [telefono, setTelefono] = useState("");
   const [direccion, setDireccion] = useState("");
-  const [rolIds, setRolIds] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingDatos, setLoadingDatos] = useState(true);
   const [editando, setEditando] = useState(false);
@@ -43,7 +42,6 @@ export default function PerfilScreen() {
     apellido: "",
     telefono: "",
     direccion: "",
-    rolIds: [] as number[],
   });
 
   useEffect(() => {
@@ -61,17 +59,12 @@ export default function PerfilScreen() {
           apellido: data.apellido ?? "",
           telefono: data.telefono ?? "",
           direccion: data.direccion ?? "",
-          rolIds:
-            data.roles
-              ?.filter((r: any) => r.nombre !== "voluntario")
-              .map((r: any) => r.id_rol) ?? [],
         };
 
         setNombre(valores.nombre);
         setApellido(valores.apellido);
         setTelefono(valores.telefono);
         setDireccion(valores.direccion);
-        setRolIds(valores.rolIds);
         setOriginal(valores);
       } catch (e) {
         console.error(e);
@@ -88,13 +81,50 @@ export default function PerfilScreen() {
     setApellido(original.apellido);
     setTelefono(original.telefono);
     setDireccion(original.direccion);
-    setRolIds(original.rolIds);
     setEditando(false);
   };
 
   const handleGuardar = async () => {
-    if (!nombre.trim() || !apellido.trim()) {
-      Alert.alert("Error", t("camposObligatorios"));
+    if (!nombre.trim()) {
+      Alert.alert(
+        t("error"),
+        t("nombreObligatorio")
+      );
+      return;
+    }
+
+    if (nombre.trim().length < 2) {
+      Alert.alert(
+        t("error"),
+        t("nombreInvalido")
+      );
+      return;
+    }
+
+    if (!apellido.trim()) {
+      Alert.alert(
+        t("error"),
+        t("apellidoObligatorio")
+      );
+      return;
+    }
+
+    if (apellido.trim().length < 2) {
+      Alert.alert(
+        t("error"),
+        t("apellidoInvalido")
+      );
+      return;
+    }
+
+    if (
+      telefono.trim() &&
+      !isPhoneValid(telefono)
+    ) {
+      Alert.alert(
+        t("error"),
+        t("telefonoInvalido")
+      );
       return;
     }
 
@@ -107,8 +137,7 @@ export default function PerfilScreen() {
         nombre: nombre.trim(),
         apellido: apellido.trim(),
         telefono: telefono.trim() || null,
-        direccion: direccion.trim() || null,
-        roles: rolIds,
+        direccion: direccion.trim() || null
       });
 
       await recargar();
@@ -118,7 +147,6 @@ export default function PerfilScreen() {
         apellido,
         telefono,
         direccion,
-        rolIds,
       });
 
       setEditando(false);
@@ -306,24 +334,17 @@ export default function PerfilScreen() {
             </View>
           )}
 
-          <Text style={styles.label}>{t("roles")}</Text>
+          <Text style={styles.label}>
+            {t("roles")}
+          </Text>
 
-          {editando ? (
-            <RolSelector
-              value={rolIds}
-              onChange={setRolIds}
-              excluir={["voluntario"]}
-              placeholder={t("seleccionarRoles")}
-            />
-          ) : (
-            <View style={styles.valorContainer}>
-              <Text style={styles.valorTexto}>
-                {usuario?.roles
-                  ?.filter((r) => r !== "voluntario")
-                  .join(", ") || t("sinDato")}
-              </Text>
-            </View>
-          )}
+          <View style={styles.valorContainer}>
+            <Text style={styles.valorTexto}>
+              {usuario?.roles?.length
+                ? usuario.roles.join(", ")
+                : t("sinDato")}
+            </Text>
+          </View>
 
           {editando && (
             <View style={styles.botonesRow}>

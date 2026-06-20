@@ -36,5 +36,12 @@
 
   "errorEliminarUsuario": "No se pudo eliminar el usuario",
   "verificacionReenviada":
-    "Se envió nuevamente el correo de verificación."
+    "Se envió nuevamente el correo de verificación.",
+
+  "emailInvalido": "El correo electrónico no es válido",
+
+  "passwordObligatoria": "La contraseña es obligatoria",
+  "passwordMinima": "La contraseña debe tener al menos 8 caracteres",
+
+  "error": "Error"
 }

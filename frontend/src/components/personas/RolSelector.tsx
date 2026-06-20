@@ -59,10 +59,6 @@ export default function RolSelector({
 
   const toggleRol = (rol: Rol) => {
 
-    if (rol.nombre === "voluntario") {
-      return;
-    }
-
     if (value.includes(rol.id_rol)) {
       onChange(
         value.filter(

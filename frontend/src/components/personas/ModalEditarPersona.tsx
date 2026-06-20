@@ -16,7 +16,8 @@ import { useTranslation } from "react-i18next";
 import { api } from "@/config/api";
 import { Colors } from "@/constants/theme";
 import RolSelector from "./RolSelector";
-
+import { isPhoneValid } from "@/utils/validators";
+import { isEmailValid } from "@/utils/validators";
 interface Persona {
   id_persona: number;
   nombre: string;
@@ -78,6 +79,67 @@ export default function ModalEditarPersona({
     }
 
     setLoading(true);
+      if (!nombre.trim()) {
+        Alert.alert(
+          t("error"),
+          t("nombreObligatorio")
+        );
+        return;
+      }
+
+      if (nombre.trim().length < 2) {
+        Alert.alert(
+          t("error"),
+          t("nombreInvalido")
+        );
+        return;
+      }
+
+      if (!apellido.trim()) {
+        Alert.alert(
+          t("error"),
+          t("apellidoObligatorio")
+        );
+        return;
+      }
+
+      if (apellido.trim().length < 2) {
+        Alert.alert(
+          t("error"),
+          t("apellidoInvalido")
+        );
+        return;
+      }
+
+      if (rolIds.length === 0) {
+        Alert.alert(
+          t("error"),
+          t("rolObligatorio")
+        );
+        return;
+      }
+
+      if (
+        email.trim() &&
+        !isEmailValid(email)
+      ) {
+        Alert.alert(
+          t("error"),
+          t("emailInvalido")
+        );
+        return;
+      }
+
+      if (
+        telefono.trim() &&
+        !isPhoneValid(telefono)
+      ) {
+        Alert.alert(
+          t("error"),
+          t("telefonoInvalido")
+        );
+        return;
+      }
 
     try {
       await api.updatePersona(persona.id_persona, {
