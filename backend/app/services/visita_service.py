@@ -3,6 +3,7 @@ from app.extensions import db
 from app.models.visita_veterinaria import VisitaVeterinaria
 from app.models.animal import Animal
 from app.models.persona import Persona
+from app.models.tarea import Tarea
 
 
 class VisitaService:
@@ -23,6 +24,7 @@ class VisitaService:
                 "id_visita": v.id_visita,
                 "procedimiento": v.procedimiento,
                 "fecha": str(v.fecha),
+                "hora": str(v.hora) if v.hora else None,
                 "estado": v.estado,
             }
             for v in visitas
@@ -40,6 +42,7 @@ class VisitaService:
         
         visita = VisitaVeterinaria(
             fecha=datetime.strptime(data["fecha"], "%Y-%m-%d").date(),
+            hora=datetime.strptime(data["hora"], "%H:%M").time() if data.get("hora") else None,
             estado=data.get("estado", "realizada"),
             procedimiento=data["procedimiento"],
             info_adicional=data.get("info_adicional"),
@@ -48,6 +51,18 @@ class VisitaService:
             veterinario_id=data["veterinario_id"],
         )
         db.session.add(visita)
+        db.session.flush()
+
+        if visita.estado == "proxima":
+            tarea = Tarea(
+                nombre=f"Visita veterinaria {animal.nombre}",
+                fecha=visita.fecha,
+                hora=visita.hora,
+                es_todo_el_dia=visita.hora is None,
+                visita_id=visita.id_visita,
+            )
+            db.session.add(tarea)
+
         db.session.commit()
         return visita
     
@@ -61,6 +76,7 @@ class VisitaService:
         return {
             "id_visita": visita.id_visita,
             "fecha": str(visita.fecha),
+            "hora": str(visita.hora) if visita.hora else None,
             "estado": visita.estado,
             "procedimiento": visita.procedimiento,
             "info_adicional": visita.info_adicional,
@@ -97,6 +113,8 @@ class VisitaService:
 
         if "fecha" in data:
             visita.fecha = datetime.strptime(data["fecha"], "%Y-%m-%d").date()
+        if "hora" in data:
+            visita.hora = datetime.strptime(data["hora"], "%H:%M").time() if data["hora"] else None
         if "estado" in data:
             visita.estado = data["estado"]
         if "procedimiento" in data:
@@ -108,6 +126,8 @@ class VisitaService:
 
         db.session.commit()
 
+        VisitaService.sincronizar_tarea(visita)
+
     @staticmethod
     def delete_visita(visita_id):
         visita = VisitaVeterinaria.query.get(visita_id)
@@ -116,6 +136,33 @@ class VisitaService:
 
         db.session.delete(visita)
         db.session.commit()
+    
+    @staticmethod
+    def sincronizar_tarea(visita):
+        tarea = visita.tarea
+
+        if visita.estado == "realizada":
+            if tarea:
+                db.session.delete(tarea)
+                db.session.commit()
+            return
+
+        if visita.estado == "proxima":
+            if tarea:
+                tarea.fecha = visita.fecha
+                tarea.hora = visita.hora
+                tarea.es_todo_el_dia = visita.hora is None
+                tarea.nombre = f"Visita veterinaria {visita.animal.nombre}"
+            else:
+                tarea = Tarea(
+                    nombre=f"Visita veterinaria {visita.animal.nombre}",
+                    fecha=visita.fecha,
+                    hora=visita.hora,
+                    es_todo_el_dia=visita.hora is None,
+                    visita_id=visita.id_visita,
+                )
+                db.session.add(tarea)
+            db.session.commit()
     
 
 

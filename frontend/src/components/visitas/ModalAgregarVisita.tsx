@@ -40,6 +40,10 @@ function formatFecha(fechaStr: string): string {
   return `${parseInt(day)}/${parseInt(month)}/${year}`;
 }
 
+const esHoraValida = (hora: string): boolean => {
+  return /^([01]\d|2[0-3]):([0-5]\d)$/.test(hora);
+};
+
 export default function ModalRegistrarVisita({ visible, onClose, onCreada, animalId }: Props) {
   const { t } = useTranslation('visitas');
 
@@ -52,6 +56,7 @@ export default function ModalRegistrarVisita({ visible, onClose, onCreada, anima
   const [veterinarios, setVeterinarios] = useState<Persona[]>([]);
 
   const [fecha, setFecha]                   = useState(hoy);
+  const [hora, setHora]                     = useState("");
   const [procedimiento, setProcedimiento]   = useState("");
   const [veterinarioId, setVeterinarioId]   = useState<number | null>(null);
   const [estado, setEstado]                 = useState<string | null>(null);
@@ -77,6 +82,7 @@ export default function ModalRegistrarVisita({ visible, onClose, onCreada, anima
 
   const resetForm = () => {
     setFecha(hoy);
+    setHora("");
     setProcedimiento("");
     setVeterinarioId(null);
     setEstado(null);
@@ -113,6 +119,7 @@ export default function ModalRegistrarVisita({ visible, onClose, onCreada, anima
 
   const handleCrear = async () => {
     if (!fecha) return Alert.alert(t('error'), t('errorFecha'));
+    if (hora && !esHoraValida(hora)) return Alert.alert(t('error'), t('errorHoraInvalida'));
     if (!procedimiento.trim()) return Alert.alert(t('error'), t('errorProcedimiento'));
     if (!veterinarioId) return Alert.alert(t('error'), t('errorVeterinario'));
     if (!estado) return Alert.alert(t('error'), t('errorEstado'));
@@ -127,6 +134,7 @@ export default function ModalRegistrarVisita({ visible, onClose, onCreada, anima
       // Crear visita
       const visita = await api.createVisita(animalId, {
         fecha,
+        hora: hora || null,
         procedimiento: procedimiento.trim(),
         veterinario_id: veterinarioId,
         estado,
@@ -181,6 +189,17 @@ export default function ModalRegistrarVisita({ visible, onClose, onCreada, anima
                 {fecha ? formatFecha(fecha) : t('placeholderSeleccionarFecha')}
               </Text>
             </TouchableOpacity>
+
+            <Text style={styles.label}>{t('labelHora')}</Text>
+              <TextInput
+                value={hora}
+                onChangeText={setHora}
+                style={styles.input}
+                placeholder={t('placeholderHora')}
+                placeholderTextColor={Colors.textFaint}
+                keyboardType="numbers-and-punctuation"
+                maxLength={5}
+              />
 
             {/* Procedimiento */}
             <Text style={styles.label}>{t('labelProcedimiento')}{t('requiredSymbol')}</Text>

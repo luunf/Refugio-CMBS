@@ -15,6 +15,7 @@ interface Visita {
   id_visita: number;
   procedimiento: string;
   fecha: string;
+  hora?: string | null;
   estado: string;
 }
 
@@ -153,7 +154,7 @@ export default function AnimalVisitas({ animalId, onCambioVisitas }: Props) {
                 <Text style={styles.cardProcedimiento} numberOfLines={1}>
                   {item.procedimiento}
                 </Text>
-                <Text style={styles.cardFecha}>{formatFecha(item.fecha)}</Text>
+                <Text style={styles.cardFecha}>{formatFecha(item.fecha)}{item.hora ? ` - ${item.hora.slice(0, 5)}` : ''}</Text>
               </View>
               <View style={styles.cardRight}>
                 <View style={[styles.estadoBadge, getEstadoStyle(item.estado)]}>

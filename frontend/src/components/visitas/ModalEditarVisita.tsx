@@ -38,6 +38,7 @@ interface TratamientoForm {
 interface Visita {
   id_visita: number;
   fecha: string;
+  hora?: string | null;
   estado: string;
   procedimiento: string;
   info_adicional?: string | null;
@@ -63,6 +64,10 @@ function formatFecha(fechaStr: string): string {
   return `${parseInt(day)}/${parseInt(month)}/${year}`;
 }
 
+const esHoraValida = (hora: string): boolean => {
+  return /^([01]\d|2[0-3]):([0-5]\d)$/.test(hora);
+};
+
 export default function ModalEditarVisita({ visible, onClose, onEditada, visita }: Props) {
   const { t } = useTranslation('visitas');
 
@@ -75,6 +80,7 @@ export default function ModalEditarVisita({ visible, onClose, onEditada, visita 
   const [veterinarios, setVeterinarios] = useState<Persona[]>([]);
 
   const [fecha, setFecha] = useState(visita.fecha);
+  const [hora, setHora] = useState(visita.hora ?? "");
   const [procedimiento, setProcedimiento] = useState(visita.procedimiento);
   const [veterinarioId, setVeterinarioId] = useState<number | null>(visita.veterinario.id_persona);
   const [estado, setEstado] = useState<string | null>(visita.estado);
@@ -92,6 +98,7 @@ export default function ModalEditarVisita({ visible, onClose, onEditada, visita 
 
   const precargarDatos = () => {
     setFecha(visita.fecha);
+    setHora(visita.hora ?? "");
     setProcedimiento(visita.procedimiento);
     setVeterinarioId(visita.veterinario.id_persona);
     setEstado(visita.estado);
@@ -156,6 +163,7 @@ export default function ModalEditarVisita({ visible, onClose, onEditada, visita 
     if (!procedimiento.trim()) return Alert.alert(t('error'), t('errorProcedimiento'));
     if (!veterinarioId) return Alert.alert(t('error'), t('errorVeterinario'));
     if (!estado) return Alert.alert(t('error'), t('errorEstado'));
+    if (hora && !esHoraValida(hora)) return Alert.alert(t('error'), t('errorHoraInvalida'));
 
     const tratamientosActivos = tratamientos.filter((t) => !t.eliminado);
     for (const tratamiento of tratamientosActivos) {
@@ -168,6 +176,7 @@ export default function ModalEditarVisita({ visible, onClose, onEditada, visita 
       // Actualizar visita
       await api.updateVisita(visita.id_visita, {
         fecha,
+        hora: hora || null,
         procedimiento: procedimiento.trim(),
         veterinario_id: veterinarioId,
         estado,
@@ -239,6 +248,17 @@ export default function ModalEditarVisita({ visible, onClose, onEditada, visita 
                 {fecha ? formatFecha(fecha) : t('placeholderSeleccionarFecha')}
               </Text>
             </TouchableOpacity>
+
+            <Text style={styles.label}>{t('labelHora')}</Text>
+              <TextInput
+                value={hora}
+                onChangeText={setHora}
+                style={styles.input}
+                placeholder={t('placeholderHora')}
+                placeholderTextColor={Colors.textFaint}
+                keyboardType="numbers-and-punctuation"
+                maxLength={5}
+              />
 
             <Text style={styles.label}>{t('labelProcedimiento')}{t('requiredSymbol')}</Text>
             <TextInput

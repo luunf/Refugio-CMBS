@@ -20,6 +20,7 @@ interface Tratamiento {
 interface DetalleVisita {
   id_visita: number;
   fecha: string;
+  hora?: string | null;
   estado: string;
   procedimiento: string;
   info_adicional: string | null;
@@ -148,6 +149,17 @@ export default function ModalDetalleVisita({ visible, onClose, visitaId, onActua
                   <Text style={styles.filaLabel}>{t('labelFecha')}</Text>
                   <Text style={styles.filaValor}>{formatFecha(visita.fecha)}</Text>
                 </View>
+
+                <View style={styles.separador} />
+
+                {visita.hora && (
+                  <>
+                    <View style={styles.fila}>
+                      <Text style={styles.filaLabel}>{t('labelHora')}</Text>
+                      <Text style={styles.filaValor}>{visita.hora}</Text>
+                    </View>
+                  </>
+                )}
 
                 <View style={styles.separador} />
 
