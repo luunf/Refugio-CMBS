@@ -22,6 +22,7 @@ type FiltroEstado = "todas" | "proxima" | "realizada";
 
 interface Props {
   animalId: number;
+  onCambioVisitas?: () => void;
 }
 
 function formatFecha(fechaStr: string): string {
@@ -30,7 +31,7 @@ function formatFecha(fechaStr: string): string {
   return `${parseInt(day)}/${parseInt(month)}/${year}`;
 }
 
-export default function AnimalVisitas({ animalId }: Props) {
+export default function AnimalVisitas({ animalId, onCambioVisitas }: Props) {
   const { t } = useTranslation('visitas')
 
   const FILTROS: { label: string; valor: FiltroEstado }[] = [
@@ -57,7 +58,8 @@ export default function AnimalVisitas({ animalId }: Props) {
     } finally {
       setLoading(false);
     }
-  }, [animalId, filtro]);
+    onCambioVisitas?.();
+  }, [animalId, filtro, onCambioVisitas]);
 
   useFocusEffect(
     useCallback(() => {

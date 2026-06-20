@@ -33,6 +33,8 @@ export default function EstadoSelector({ value, onChange, estados, placeholder }
 
   const [open, setOpen] = useState(false);
 
+  const estadosSeleccionables = estados.filter(e => e.nombre !== "En tratamiento");
+
   const toggle = (id: number) => {
     const nombreEstado = estados.find(e => e.id_estado === id)?.nombre ?? "";
     const nombreIncompatible = INCOMPATIBLES[nombreEstado];
@@ -65,7 +67,7 @@ export default function EstadoSelector({ value, onChange, estados, placeholder }
         <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={() => setOpen(false)}>
           <View style={styles.dropdown}>
             <FlatList
-              data={estados}
+              data={estadosSeleccionables}
               keyExtractor={item => String(item.id_estado)}
               renderItem={({ item }) => {
                 const seleccionado = value.includes(item.id_estado);

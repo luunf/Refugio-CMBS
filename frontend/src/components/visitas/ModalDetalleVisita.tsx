@@ -52,9 +52,17 @@ function getEstadoLabel(estado: string): string {
   return estado;
 }
 
+function esVencido(fechaFin: string | null): boolean {
+  if (!fechaFin) return false;
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  const fin = new Date(fechaFin + 'T00:00:00');
+  return fin < hoy;
+}
+
 export default function ModalDetalleVisita({ visible, onClose, visitaId, onActualizada, onEliminada }: Props) {
   const { t } = useTranslation('visitas');
-
+  
   const [visita, setVisita]   = useState<DetalleVisita | null>(null);
   const [loading, setLoading] = useState(false);
   const [modalEditar, setModalEditar] = useState(false);
@@ -225,27 +233,32 @@ export default function ModalDetalleVisita({ visible, onClose, visitaId, onActua
 
 function TratamientoCard({ tratamiento }: { tratamiento: Tratamiento }) {
   const { t } = useTranslation('visitas');
+  const vencido = esVencido(tratamiento.fecha_fin);
   return (
-    <View style={tratStyles.container}>
+    <View style={[tratStyles.container, vencido && tratStyles.containerVencido]}>
+
+      {vencido && (
+        <Text style={tratStyles.etiquetaVencido}>{t('labelVencido')}</Text>
+      )}
 
       <View style={tratStyles.fila}>
-        <Text style={tratStyles.label}>{t('labelTipo2')}</Text>
-        <View style={tratStyles.badge}>
-          <Text style={tratStyles.badgeTexto}>{tratamiento.tipo}</Text>
+        <Text style={[tratStyles.label, vencido && tratStyles.textoVencido]}>{t('labelTipo2')}</Text>
+        <View style={[tratStyles.badge, vencido && tratStyles.badgeVencido]}>
+          <Text style={[tratStyles.badgeText, vencido && tratStyles.badgeTextVencido]}>{tratamiento.tipo}</Text>
         </View>
       </View>
 
       <View style={tratStyles.fila}>
-        <Text style={tratStyles.label}>{t('labelFechaInicio2')}</Text>
-        <View style={tratStyles.badge}>
-          <Text style={tratStyles.badgeTexto}>{formatFecha(tratamiento.fecha_inicio)}</Text>
+        <Text style={[tratStyles.label, vencido && tratStyles.textoVencido]}>{t('labelFechaInicio2')}</Text>
+        <View style={[tratStyles.badge, vencido && tratStyles.badgeVencido]}>
+          <Text style={[tratStyles.badgeText, vencido && tratStyles.badgeTextVencido]}>{formatFecha(tratamiento.fecha_inicio)}</Text>
         </View>
       </View>
 
       <View style={tratStyles.fila}>
-        <Text style={tratStyles.label}>{t('labelFechaFin2')}</Text>
-        <View style={tratStyles.badge}>
-          <Text style={tratStyles.badgeTexto}>
+        <Text style={[tratStyles.label, vencido && tratStyles.textoVencido]}>{t('labelFechaFin2')}</Text>
+        <View style={[tratStyles.badge, vencido && tratStyles.badgeVencido]}>
+          <Text style={[tratStyles.badgeText, vencido && tratStyles.badgeTextVencido]}>
             {tratamiento.fecha_fin ? formatFecha(tratamiento.fecha_fin) : "—"}
           </Text>
         </View>
@@ -253,14 +266,14 @@ function TratamientoCard({ tratamiento }: { tratamiento: Tratamiento }) {
 
       {tratamiento.descripcion ? (
         <View style={tratStyles.fila}>
-          <Text style={tratStyles.label}>{t('labelDescripcion2')}</Text>
-          <View style={[tratStyles.badge, tratStyles.badgeWide]}>
-            <Text style={tratStyles.badgeTexto}>{tratamiento.descripcion}</Text>
+          <Text style={[tratStyles.label, vencido && tratStyles.textoVencido]}>{t('labelDescripcion2')}</Text>
+          <View style={[tratStyles.badge, tratStyles.badgeWide, vencido && tratStyles.badgeVencido]}>
+            <Text style={[tratStyles.badgeText, vencido && tratStyles.badgeTextVencido]}>{tratamiento.descripcion}</Text>
           </View>
         </View>
       ) : null}
 
-    </View>
+    </View>  
   );
 }
 
@@ -351,6 +364,18 @@ const tratStyles = StyleSheet.create({
     padding: 16,
     marginBottom: 12,
   },
+  containerVencido: {
+    backgroundColor: Colors.borderLight,
+    borderColor: Colors.border,
+  },
+  etiquetaVencido: {
+    color: Colors.textFaint,
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 8,
+    textTransform: 'uppercase',
+  },
+  textoVencido: { color: Colors.textFaint },
   fila: {
     flexDirection: "row",
     alignItems: "flex-start",
@@ -365,12 +390,19 @@ const tratStyles = StyleSheet.create({
     marginTop: 3,
   },
   badge: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.surface,
+    borderWidth: 1,
+    borderColor: Colors.primaryLight,
     borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 3,
-    flexShrink: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    flex:1,
+  },
+  badgeVencido: {
+    backgroundColor: Colors.surface,
+    borderColor: Colors.border,
   },
   badgeWide:  { borderRadius: 10, flex: 1 },
-  badgeTexto: { color: Colors.surface, fontSize: 13 },
+  badgeText: { color: Colors.primary, fontSize: 13 },
+  badgeTextVencido: { color: Colors.textMuted },
 });

@@ -56,5 +56,6 @@
     "btnEliminar": "Eliminar",
     "errorEliminar": "No se pudo eliminar la visita",
     "titleVisita": "Visita",
-    "sinTratamientos": "No hay tratamientos asociados"
+    "sinTratamientos": "No hay tratamientos asociados",
+    "labelVencido": "Vencido"
 }

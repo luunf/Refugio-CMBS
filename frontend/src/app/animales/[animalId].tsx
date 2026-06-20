@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View, Text, StyleSheet, TouchableOpacity,
   ActivityIndicator, Alert
@@ -48,19 +48,20 @@ export default function AnimalDetalleScreen() {
   const [pestaña, setPestaña] = useState<Pestaña>("informacion");
   const [modalEditar, setModalEditar] = useState(false);
   
-  useEffect(() => {
-    const cargar = async () => {
-      try {
-        const data = await api.getAnimal(Number(animalId));
-        setAnimal(data);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
-    };
-    cargar();
+  const cargarAnimal = useCallback(async () => {
+    try {
+      const data = await api.getAnimal(Number(animalId));
+      setAnimal(data);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
   }, [animalId]);
+
+  useEffect(() => {
+    cargarAnimal();
+  }, [cargarAnimal]);
 
   if (loading) return <ActivityIndicator size="large" color={Colors.primary} style={{ marginTop: 80 }} />;
   if (!animal) return <Text style={styles.error}>Animal no encontrado</Text>;
@@ -154,7 +155,7 @@ export default function AnimalDetalleScreen() {
 
       {/* Contenido */}
       {pestaña === "informacion" && <AnimalInfo animal={animal} />}
-      {pestaña === "ficha" && <AnimalVisitas animalId={animal.id_animal} />}
+      {pestaña === "ficha" && <AnimalVisitas animalId={animal.id_animal} onCambioVisitas={cargarAnimal}/>}
       {pestaña === "vacunas" && (<Text>Próximamente</Text>)}
 
       {animal && (
