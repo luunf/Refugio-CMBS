@@ -1,0 +1,48 @@
+{
+  "headerTitulo": "Tratamientos",
+  "buscadorPlaceholder": "Buscar animal en tratamiento...",
+  "sinResultados": "No hay tratamientos registrados",
+  "filtros": {
+    "todos": "Todos",
+    "perros": "Perros",
+    "gatos": "Gatos"
+  },
+  "card": {
+    "tipoLabel": "Tipo de tratamiento:",
+    "fechaInicioLabel": "Fecha de inicio:",
+    "fechaFinLabel": "Fecha de fin:",
+    "descripcionLabel": "Descripción:",
+    "btnAgendar": "+ Agendar en calendario",
+    "btnEliminar": "Eliminar tratamiento",
+    "animalSinNombre": "—",
+    "vencido": "Finalizado"
+  },
+  "modalNuevo": {
+    "titulo": "Tratamiento",
+    "especieLabel": "Especie*",
+    "perro": "Perro",
+    "gato": "Gato",
+    "animalLabel": "Animal*",
+    "cargandoAnimales": "Cargando...",
+    "seleccionarAnimal": "Seleccionar animal...",
+    "sinAnimales": "Sin {{especie}}s registrados",
+    "tipoLabel": "Tipo de tratamiento*",
+    "tipoPlaceholder": "Ej: Medicación",
+    "fechaInicioLabel": "Fecha de inicio*",
+    "fechaFinLabel": "Fecha de fin",
+    "seleccionarFecha": "Seleccionar fecha...",
+    "descripcionLabel": "Descripcion",
+    "descripcionPlaceholder": "Ej: Administrar antiinflamatorio...",
+    "btnCargar": "cargar"
+  },
+  "modalEditar": {
+    "titulo": "Editar tratamiento",
+    "tipoLabel": "Tipo *",
+    "fechaInicioLabel": "Fecha inicio *",
+    "fechaInicioPlaceholder": "YYYY-MM-DD",
+    "fechaFinLabel": "Fecha fin",
+    "fechaFinPlaceholder": "YYYY-MM-DD",
+    "descripcionLabel": "Descripción",
+    "btnGuardar": "Guardar cambios"
+  }
+}

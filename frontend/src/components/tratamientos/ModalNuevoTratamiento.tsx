@@ -1,9 +1,12 @@
+//ModalNuevoTratamiento
 import React, { useEffect, useState } from 'react';
 import {
   Modal, View, Text, TextInput, TouchableOpacity,
   ScrollView, ActivityIndicator, StyleSheet,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import DatePickerModal from '../calendario/DatePickerModal';
+import { Colors } from '@/constants/theme';
 import { api } from '@/config/api';
 
 interface Props {
@@ -22,6 +25,8 @@ const formatDate = (date: Date): string => {
 const TIPOS_ANIMAL = ['perro', 'gato'];
 
 export default function ModalNuevoTratamiento({ visible, onClose, onCrear }: Props) {
+  const { t } = useTranslation('tratamientos');
+
   const hoy = new Date();
   const [tipo, setTipo] = useState('');
   const [descripcion, setDescripcion] = useState('');
@@ -87,7 +92,7 @@ export default function ModalNuevoTratamiento({ visible, onClose, onCrear }: Pro
         <View style={styles.overlay}>
           <View style={styles.container}>
             <View style={styles.header}>
-              <Text style={styles.titulo}>Tratamiento</Text>
+              <Text style={styles.titulo}>{t('modalNuevo.titulo')}</Text>
               <TouchableOpacity onPress={onClose}>
                 <Text style={styles.cerrar}>✕</Text>
               </TouchableOpacity>
@@ -96,28 +101,28 @@ export default function ModalNuevoTratamiento({ visible, onClose, onCrear }: Pro
             <ScrollView showsVerticalScrollIndicator={false}>
 
               {/* Selector especie */}
-              <Text style={styles.label}>Especie*</Text>
+              <Text style={styles.label}>{t('modalNuevo.especieLabel')}</Text>
               <View style={styles.especieRow}>
-                {TIPOS_ANIMAL.map(t => (
+                {TIPOS_ANIMAL.map(especie => (
                   <TouchableOpacity
-                    key={t}
+                    key={especie}
                     onPress={() => {
-                      setEspecieSeleccionada(t);
+                      setEspecieSeleccionada(especie);
                       setShowAnimales(false);
                     }}
                     style={[
                       styles.especieBtn,
-                      especieSeleccionada === t && styles.especieBtnActivo,
+                      especieSeleccionada === especie && styles.especieBtnActivo,
                     ]}
                   >
                     <Text style={styles.especieIcono}>
-                      {t === 'perro' ? '🐶' : '🐱'}
+                      {especie === 'perro' ? '🐶' : '🐱'}
                     </Text>
                     <Text style={[
                       styles.especieTexto,
-                      especieSeleccionada === t && styles.especieTextoActivo,
+                      especieSeleccionada === especie && styles.especieTextoActivo,
                     ]}>
-                      {t.charAt(0).toUpperCase() + t.slice(1)}
+                      {especie === 'perro' ? t('modalNuevo.perro') : t('modalNuevo.gato')}
                     </Text>
                   </TouchableOpacity>
                 ))}
@@ -126,15 +131,15 @@ export default function ModalNuevoTratamiento({ visible, onClose, onCrear }: Pro
               {/* Selector animal */}
               {especieSeleccionada && (
                 <>
-                  <Text style={styles.label}>Animal*</Text>
+                  <Text style={styles.label}>{t('modalNuevo.animalLabel')}</Text>
                   <TouchableOpacity
                     onPress={() => setShowAnimales(!showAnimales)}
                     style={styles.inputBtn}
                   >
-                    <Text style={[styles.inputBtnText, !animalNombre && { color: '#9ca3af' }]}>
+                    <Text style={[styles.inputBtnText, !animalNombre && { color: Colors.textFaint }]}>
                       {loadingAnimales
-                        ? 'Cargando...'
-                        : animalNombre || 'Seleccionar animal...'}
+                        ? t('modalNuevo.cargandoAnimales')
+                        : animalNombre || t('modalNuevo.seleccionarAnimal')}
                     </Text>
                     <Text style={styles.chevron}>{showAnimales ? '▲' : '▼'}</Text>
                   </TouchableOpacity>
@@ -143,7 +148,7 @@ export default function ModalNuevoTratamiento({ visible, onClose, onCrear }: Pro
                       <ScrollView nestedScrollEnabled style={{ maxHeight: 160 }}>
                         {animales.length === 0 ? (
                           <Text style={styles.dropdownVacio}>
-                            Sin {especieSeleccionada}s registrados
+                            {t('modalNuevo.sinAnimales', { especie: especieSeleccionada })}
                           </Text>
                         ) : (
                           animales.map(a => (
@@ -173,36 +178,36 @@ export default function ModalNuevoTratamiento({ visible, onClose, onCrear }: Pro
               )}
 
               {/* Tipo de tratamiento */}
-              <Text style={styles.label}>Tipo de tratamiento*</Text>
+              <Text style={styles.label}>{t('modalNuevo.tipoLabel')}</Text>
               <TextInput
                 value={tipo}
                 onChangeText={setTipo}
-                placeholder="Ej: Medicación"
+                placeholder={t('modalNuevo.tipoPlaceholder')}
                 style={styles.input}
               />
 
               {/* Fecha inicio */}
-              <Text style={styles.label}>Fecha de inicio*</Text>
+              <Text style={styles.label}>{t('modalNuevo.fechaInicioLabel')}</Text>
               <TouchableOpacity onPress={() => setShowPickerInicio(true)} style={styles.inputBtn}>
                 <Text style={styles.inputBtnText}>{formatDate(fechaInicio)}</Text>
                 <Text style={styles.calIcon}>📅</Text>
               </TouchableOpacity>
 
               {/* Fecha fin */}
-              <Text style={styles.label}>Fecha de fin</Text>
+              <Text style={styles.label}>{t('modalNuevo.fechaFinLabel')}</Text>
               <TouchableOpacity onPress={() => setShowPickerFin(true)} style={styles.inputBtn}>
-                <Text style={[styles.inputBtnText, !fechaFin && { color: '#9ca3af' }]}>
-                  {fechaFin ? formatDate(fechaFin) : 'Seleccionar fecha...'}
+                <Text style={[styles.inputBtnText, !fechaFin && { color: Colors.textFaint }]}>
+                  {fechaFin ? formatDate(fechaFin) : t('modalNuevo.seleccionarFecha')}
                 </Text>
                 <Text style={styles.calIcon}>📅</Text>
               </TouchableOpacity>
 
               {/* Descripcion */}
-              <Text style={styles.label}>Descripcion</Text>
+              <Text style={styles.label}>{t('modalNuevo.descripcionLabel')}</Text>
               <TextInput
                 value={descripcion}
                 onChangeText={setDescripcion}
-                placeholder="Ej: Administrar antiinflamatorio..."
+                placeholder={t('modalNuevo.descripcionPlaceholder')}
                 style={[styles.input, styles.textArea]}
                 multiline
                 numberOfLines={3}
@@ -214,8 +219,8 @@ export default function ModalNuevoTratamiento({ visible, onClose, onCrear }: Pro
                 style={[styles.btnCrear, (!tipo || !animalId) && { opacity: 0.5 }]}
               >
                 {loading
-                  ? <ActivityIndicator color="white" />
-                  : <Text style={styles.btnCrearTexto}>cargar</Text>
+                  ? <ActivityIndicator color={Colors.surface} />
+                  : <Text style={styles.btnCrearTexto}>{t('modalNuevo.btnCargar')}</Text>
                 }
               </TouchableOpacity>
 
@@ -243,13 +248,13 @@ export default function ModalNuevoTratamiento({ visible, onClose, onCrear }: Pro
 const styles = StyleSheet.create({
   overlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.4)' },
   container: {
-    backgroundColor: '#fff7ed',
+    backgroundColor: Colors.primaryFaint,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 24,
     maxHeight: '90%',
     borderWidth: 2,
-    borderColor: '#f97316',
+    borderColor: Colors.primary,
   },
   header: {
     flexDirection: 'row',
@@ -257,9 +262,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
   },
-  titulo: { fontSize: 22, fontWeight: 'bold', color: '#111827' },
-  cerrar: { fontSize: 22, color: '#6b7280' },
-  label: { fontWeight: '600', marginBottom: 4, color: '#111827', marginTop: 12 },
+  titulo: { fontSize: 22, fontWeight: 'bold', color: Colors.text },
+  cerrar: { fontSize: 22, color: Colors.textMuted },
+  label: { fontWeight: '600', marginBottom: 4, color: Colors.text, marginTop: 12 },
   especieRow: {
     flexDirection: 'row',
     gap: 10,
@@ -273,21 +278,21 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingVertical: 10,
     borderRadius: 12,
-    backgroundColor: 'white',
+    backgroundColor: Colors.surface,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: Colors.border,
   },
   especieBtnActivo: {
-    backgroundColor: '#f97316',
-    borderColor: '#f97316',
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
   },
   especieIcono: { fontSize: 18 },
-  especieTexto: { fontSize: 14, fontWeight: '600', color: '#374151' },
-  especieTextoActivo: { color: 'white' },
+  especieTexto: { fontSize: 14, fontWeight: '600', color: Colors.textSoft },
+  especieTextoActivo: { color: Colors.surface },
   input: {
-    backgroundColor: 'white',
+    backgroundColor: Colors.surface,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: Colors.border,
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
@@ -296,9 +301,9 @@ const styles = StyleSheet.create({
   },
   textArea: { height: 80, textAlignVertical: 'top' },
   inputBtn: {
-    backgroundColor: 'white',
+    backgroundColor: Colors.surface,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: Colors.border,
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
@@ -308,17 +313,17 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   inputBtnText: {
-    color: '#111827',
+    color: Colors.text,
     fontSize: 14,
     flex: 1,
     marginRight: 8,
   },
-  chevron: { color: '#f97316', fontSize: 14 },
+  chevron: { color: Colors.primary, fontSize: 14 },
   calIcon: { fontSize: 18 },
   dropdown: {
-    backgroundColor: 'white',
+    backgroundColor: Colors.surface,
     borderWidth: 1,
-    borderColor: '#e5e7eb',
+    borderColor: Colors.border,
     borderRadius: 12,
     marginBottom: 8,
     overflow: 'hidden',
@@ -330,26 +335,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
+    borderBottomColor: Colors.borderLight,
   },
   dropdownItemActivo: {
-    backgroundColor: '#fff7ed',
+    backgroundColor: Colors.primaryFaint,
   },
-  dropdownText: { fontSize: 14, color: '#111827' },
-  dropdownCheck: { color: '#f97316', fontWeight: 'bold' },
+  dropdownText: { fontSize: 14, color: Colors.text },
+  dropdownCheck: { color: Colors.primary, fontWeight: 'bold' },
   dropdownVacio: {
     textAlign: 'center',
-    color: '#9ca3af',
+    color: Colors.textFaint,
     padding: 16,
     fontSize: 14,
   },
   btnCrear: {
-    backgroundColor: '#f97316',
+    backgroundColor: Colors.primary,
     paddingVertical: 14,
     borderRadius: 20,
     alignItems: 'center',
     marginTop: 20,
     marginBottom: 16,
   },
-  btnCrearTexto: { color: 'white', fontWeight: 'bold', fontSize: 16 },
+  btnCrearTexto: { color: Colors.surface, fontWeight: 'bold', fontSize: 16 },
 });

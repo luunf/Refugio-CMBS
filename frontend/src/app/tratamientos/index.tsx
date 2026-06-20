@@ -1,37 +1,46 @@
+//index.tsx
 import React, { useEffect, useState } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
   ActivityIndicator, StyleSheet, TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
+import Feather from "@expo/vector-icons/build/Feather";
 import { useTratamientos } from '../../hooks/useTratamientos';
 import TratamientoCard from '../../components/tratamientos/TratamientoCard';
 import ModalNuevoTratamiento from '../../components/tratamientos/ModalNuevoTratamiento';
-
-const FILTROS_ESPECIE = [
-  { label: 'Todos', valor: 'Todos' },
-  { label: 'Perros', valor: 'perro' },
-  { label: 'Gatos', valor: 'gato' },
-];
+import ModalEditarTratamiento from '../../components/tratamientos/ModalEditarTratamiento';
+import { Colors } from '@/constants/theme';
 
 export default function TratamientosScreen() {
+  const { t } = useTranslation('tratamientos');
+
   const {
     tratamientos,
     loading,
     cargarTratamientos,
     crearTratamientoCompleto,
+    actualizarTratamiento,
     eliminarTratamiento,
   } = useTratamientos();
 
   const [busqueda, setBusqueda] = useState('');
   const [filtro, setFiltro] = useState('Todos');
   const [modalVisible, setModalVisible] = useState(false);
+  const [tratamientoEditando, setTratamientoEditando] = useState<any | null>(null);
+
+  const FILTROS_ESPECIE = [
+    { label: t('filtros.todos'), valor: 'Todos' },
+    { label: t('filtros.perros'), valor: 'perro' },
+    { label: t('filtros.gatos'), valor: 'gato' },
+  ];
 
   useEffect(() => { cargarTratamientos(); }, []);
 
-  const filtrados = tratamientos.filter(t => {
-    const animal = (t.animal_nombre ?? '').toLowerCase();
-    const especie = (t.especie ?? '').toLowerCase();
+  const filtrados = tratamientos.filter(tr => {
+    const animal = (tr.animal_nombre ?? '').toLowerCase();
+    const especie = (tr.especie ?? '').toLowerCase();
     const matchBusqueda = animal.includes(busqueda.toLowerCase());
     const matchFiltro = filtro === 'Todos' || especie === filtro;
     return matchBusqueda && matchFiltro;
@@ -42,19 +51,19 @@ export default function TratamientosScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerText}>Tratamientos</Text>
+        <Text style={styles.headerText}>{t('headerTitulo')}</Text>
       </View>
 
-      {/* Buscador  */}
+      {/* Buscador */}
       <View style={styles.buscadorRow}>
         <View style={styles.buscadorContainer}>
-          <Text style={styles.buscadorIcono}>🔍</Text>
+          <Feather name="search" size={18} color={Colors.textFaint} style={{ marginRight: 6 }} />
           <TextInput
             value={busqueda}
             onChangeText={setBusqueda}
-            placeholder="Buscar animal en tratamiento..."
+            placeholder={t('buscadorPlaceholder')}
             style={styles.buscadorInput}
-            placeholderTextColor="#9ca3af"
+            placeholderTextColor={Colors.textFaint}
           />
         </View>
       </View>
@@ -76,18 +85,19 @@ export default function TratamientosScreen() {
 
       {/* Lista */}
       {loading ? (
-        <ActivityIndicator size="large" color="#f97316" style={{ marginTop: 40 }} />
+        <ActivityIndicator size="large" color={Colors.primary} style={{ marginTop: 40 }} />
       ) : (
         <ScrollView style={styles.lista}>
           {filtrados.length === 0 ? (
-            <Text style={styles.sinResultados}>No hay tratamientos registrados</Text>
+            <Text style={styles.sinResultados}>{t('sinResultados')}</Text>
           ) : (
-            filtrados.map(t => (
+            filtrados.map(tr => (
               <TratamientoCard
-                key={t.id}
-                tratamiento={t}
+                key={tr.id}
+                tratamiento={tr}
                 onDelete={eliminarTratamiento}
-                onAgendar={(t) => console.log('Agendar:', t)}
+                onAgendar={(item) => console.log('Agendar:', item)}
+                onEdit={() => setTratamientoEditando(tr)}
               />
             ))
           )}
@@ -118,6 +128,13 @@ export default function TratamientosScreen() {
         }}
       />
 
+      <ModalEditarTratamiento
+        visible={!!tratamientoEditando}
+        onClose={() => setTratamientoEditando(null)}
+        tratamiento={tratamientoEditando}
+        onSave={actualizarTratamiento}
+      />
+
     </SafeAreaView>
   );
 }
@@ -125,15 +142,15 @@ export default function TratamientosScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f3f4f6',
+    backgroundColor: Colors.background,
   },
   header: {
-    backgroundColor: '#f97316',
+    backgroundColor: Colors.primary,
     paddingHorizontal: 16,
     paddingVertical: 16,
   },
   headerText: {
-    color: 'white',
+    color: Colors.surface,
     fontSize: 24,
     fontWeight: 'bold',
   },
@@ -142,65 +159,47 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: 'white',
+    backgroundColor: Colors.surface,
     gap: 10,
   },
   buscadorContainer: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f3f4f6',
+    backgroundColor: Colors.background,
     borderRadius: 20,
     paddingHorizontal: 12,
     paddingVertical: 8,
   },
-  buscadorIcono: {
-    fontSize: 16,
-    marginRight: 6,
-  },
   buscadorInput: {
     flex: 1,
     fontSize: 14,
-    color: '#111827',
-  },
-  btnAgregar: {
-    backgroundColor: '#f97316',
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  btnAgregarTexto: {
-    color: 'white',
-    fontSize: 24,
-    fontWeight: 'bold',
-    lineHeight: 28,
+    color: Colors.text,
   },
   filtrosGrilla: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     paddingHorizontal: 16,
     paddingVertical: 10,
-    backgroundColor: 'white',
+    backgroundColor: Colors.surface,
     gap: 8,
   },
   filtroBadge: {
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: 20,
-    backgroundColor: '#f3f4f6',
+    backgroundColor: Colors.background,
   },
   filtroBadgeActivo: {
-    backgroundColor: '#f97316',
+    backgroundColor: Colors.primary,
   },
   filtroTexto: {
-    color: '#374151',
+    color: Colors.textSoft,
     fontSize: 13,
     fontWeight: '500',
   },
   filtroTextoActivo: {
-    color: 'white',
+    color: Colors.surface,
     fontSize: 13,
     fontWeight: '600',
   },
@@ -211,7 +210,7 @@ const styles = StyleSheet.create({
   },
   sinResultados: {
     textAlign: 'center',
-    color: '#9ca3af',
+    color: Colors.textFaint,
     marginTop: 40,
     fontSize: 16,
   },

@@ -5,6 +5,7 @@ import authES from "./auth.json";
 import visitas from "./visitas.json";
 import calendario from "./calendario.json";
 import usuarios from "./usuarios.json";
+import tratamientos from "./tratamientos.json";
 
 export default {
   animales,
@@ -14,4 +15,5 @@ export default {
   visitas,
   calendario,
   usuarios,
+  tratamientos,
 };
