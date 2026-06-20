@@ -40,6 +40,26 @@ class TareaController:
             return jsonify({"error": str(e)}), 400
 
     @staticmethod
+    def create_tareas_desde_tratamiento():
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "Datos inválidos"}), 400
+        required = ["nombre", "fecha_inicio"]
+        for field in required:
+            if field not in data:
+                return jsonify({"error": f"Falta el campo requerido: {field}"}), 400
+        try:
+            tareas = TareaService.crear_tareas_desde_tratamiento(
+                nombre=data["nombre"],
+                fecha_inicio=data["fecha_inicio"],
+                fecha_fin=data.get("fecha_fin"),
+                descripcion=data.get("descripcion")
+            )
+            return jsonify(tareas), 201
+        except Exception as e:
+            return jsonify({"error": str(e)}), 400
+
+    @staticmethod
     def update_tarea(tarea_id):
         data = request.get_json()
         if not data:
@@ -72,7 +92,6 @@ class TareaController:
                 return jsonify({"error": str(e)}), 404
             return jsonify({"error": str(e)}), 500
 
-##ver si este es el endpoit que va en personal controller       
     @staticmethod
     def get_tareas_by_persona(persona_id):
         try:

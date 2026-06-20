@@ -23,12 +23,14 @@ export default function TratamientosScreen() {
     crearTratamientoCompleto,
     actualizarTratamiento,
     eliminarTratamiento,
+    agendarEnCalendario,
   } = useTratamientos();
 
   const [busqueda, setBusqueda] = useState('');
   const [filtro, setFiltro] = useState('Todos');
   const [modalVisible, setModalVisible] = useState(false);
   const [tratamientoEditando, setTratamientoEditando] = useState<any | null>(null);
+  const [agendando, setAgendando] = useState<number | null>(null);
 
   const FILTROS_ESPECIE = [
     { label: t('filtros.todos'), valor: 'Todos' },
@@ -45,6 +47,22 @@ export default function TratamientosScreen() {
     const matchFiltro = filtro === 'Todos' || especie === filtro;
     return matchBusqueda && matchFiltro;
   });
+
+  const handleAgendar = async (tratamiento: any) => {
+    if (!tratamiento.fecha_fin) {
+      // Sin fecha fin no se puede generar el rango de tareas
+      console.warn('El tratamiento no tiene fecha de fin definida');
+      return;
+    }
+    setAgendando(tratamiento.id);
+    try {
+      await agendarEnCalendario(tratamiento);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setAgendando(null);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -96,7 +114,8 @@ export default function TratamientosScreen() {
                 key={tr.id}
                 tratamiento={tr}
                 onDelete={eliminarTratamiento}
-                onAgendar={(item) => console.log('Agendar:', item)}
+                onAgendar={handleAgendar}
+                agendando={agendando === tr.id}
                 onEdit={() => setTratamientoEditando(tr)}
               />
             ))

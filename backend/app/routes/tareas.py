@@ -15,6 +15,10 @@ def get_tarea(tarea_id):
 def create_tarea():
     return TareaController.create_tarea()
 
+@tarea_bp.route('/desde-tratamiento', methods=['POST'])
+def create_tareas_desde_tratamiento():
+    return TareaController.create_tareas_desde_tratamiento()
+
 @tarea_bp.route('/<int:tarea_id>', methods=['PATCH'])
 def update_tarea(tarea_id):
     return TareaController.update_tarea(tarea_id)

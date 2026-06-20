@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Colors } from '@/constants/theme';
+import { MaterialIcons } from "@expo/vector-icons";
 
 interface Props {
   tarea: any;
@@ -39,9 +40,16 @@ export default function TareaCard({ tarea, onUpdate, onDelete, onEdit }: Props) 
         <View style={styles.voluntariosBadge}>
           <Text style={styles.voluntariosText} numberOfLines={1}>{voluntarios}</Text>
         </View>
-        <TouchableOpacity onPress={(e) => { e.stopPropagation(); onEdit(); }} style={styles.btnLapiz}>
-          <Text style={styles.lapizIcono}>✎</Text>
-        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={(e) => { e.stopPropagation(); onEdit(); }}
+          style={styles.btnLapiz}
+        >
+          <MaterialIcons
+            name="edit"
+            size={20}
+            color={Colors.primary}
+          />
+</TouchableOpacity>
         <Text style={styles.chevron}>{expandida ? "▲" : "▼"}</Text>
       </View>
 
@@ -84,7 +92,6 @@ const styles = StyleSheet.create({
   },
   voluntariosText: { color: Colors.primary, fontSize: 12 },
   btnLapiz: { marginLeft: 8, padding: 4 },
-  lapizIcono: { color: Colors.primary, fontSize: 16 },
   chevron: { color: Colors.primary, marginLeft: 4 },
   detalle: { backgroundColor: Colors.primaryFaint, borderRadius: 12, padding: 12, marginTop: 4 },
   detalleTexto: { color: Colors.textSoft, fontSize: 13, marginBottom: 4 },

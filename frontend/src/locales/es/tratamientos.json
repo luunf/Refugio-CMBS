@@ -39,10 +39,11 @@
     "titulo": "Editar tratamiento",
     "tipoLabel": "Tipo *",
     "fechaInicioLabel": "Fecha inicio *",
-    "fechaInicioPlaceholder": "YYYY-MM-DD",
+    "fechaInicioPlaceholder": "DD/MM/AAAA",
     "fechaFinLabel": "Fecha fin",
-    "fechaFinPlaceholder": "YYYY-MM-DD",
+    "fechaFinPlaceholder": "DD/MM/AAAA",
     "descripcionLabel": "Descripción",
-    "btnGuardar": "Guardar cambios"
+    "btnGuardar": "Guardar cambios",
+    "errorFechaFin": "La fecha de fin no puede ser anterior a la fecha de inicio"
   }
 }

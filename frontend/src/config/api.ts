@@ -123,7 +123,12 @@ export const api = {
     const res = await apiClient.delete(`/tareas/${id}`);
     return res.data;
   },
-
+  
+  crearTareasDesdeTratamiento: async (data: any) => {
+    const res = await apiClient.post("/tareas/desde-tratamiento", data);
+    return res.data;
+  },
+  
   //AUTH
   getMe: async (token: string) => {
     const res = await apiClient.get(

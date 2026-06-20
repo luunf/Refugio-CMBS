@@ -1,13 +1,15 @@
 //tratamientocard
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Colors } from '@/constants/theme';
+import { MaterialIcons } from "@expo/vector-icons";
 
 interface Props {
   tratamiento: any;
   onDelete: (id: number) => Promise<void>;
   onAgendar?: (tratamiento: any) => void;
+  agendando?: boolean;
   onEdit: () => void;
 }
 
@@ -18,16 +20,28 @@ const esVencido = (fechaFin: string | null): boolean => {
   const fin = new Date(fechaFin + 'T00:00:00');
   return fin < hoy;
 };
+const formatearFecha = (fecha?: string | null) => {
+  if (!fecha) return '—';
 
-export default function TratamientoCard({ tratamiento, onDelete, onAgendar, onEdit }: Props) {
+  const d = new Date(fecha);
+
+  const dia = String(d.getDate()).padStart(2, '0');
+  const mes = String(d.getMonth() + 1).padStart(2, '0');
+  const anio = d.getFullYear();
+
+  return `${dia}/${mes}/${anio}`;
+};
+
+export default function TratamientoCard({ tratamiento, onDelete, onAgendar, agendando, onEdit }: Props) {
   const { t } = useTranslation('tratamientos');
   const [expandida, setExpandida] = useState(false);
 
   const vencido = esVencido(tratamiento.fecha_fin);
 
   const animal = tratamiento.animal_nombre ?? t('card.animalSinNombre');
-  const fechaInicio = tratamiento.fecha_inicio ?? t('card.animalSinNombre');
-  const fechaFin = tratamiento.fecha_fin ?? t('card.animalSinNombre');
+  const fechaInicio = formatearFecha(tratamiento.fecha_inicio);
+  const fechaFin = formatearFecha(tratamiento.fecha_fin);
+
 
   return (
     <TouchableOpacity
@@ -35,13 +49,43 @@ export default function TratamientoCard({ tratamiento, onDelete, onAgendar, onEd
       style={[styles.container, vencido && styles.containerVencido]}
       activeOpacity={0.85}
     >
-      <View style={styles.header}>
-        <Text style={[styles.animalNombre, vencido && styles.textoVencido]}>{animal}</Text>
-        <TouchableOpacity onPress={(e) => { e.stopPropagation(); onEdit(); }} style={styles.btnLapiz}>
-          <Text style={[styles.lapizIcono, vencido && styles.iconoVencido]}>✎</Text>
-        </TouchableOpacity>
-        <Text style={[styles.chevron, vencido && styles.iconoVencido]}>{expandida ? '▲' : '▼'}</Text>
-      </View>
+
+<View style={styles.header}>
+  <Text
+    style={[
+      styles.animalNombre,
+      vencido && styles.textoVencido,
+    ]}
+  >
+    {animal}
+  </Text>
+
+  <View style={styles.accionesHeader}>
+    <TouchableOpacity
+      onPress={onEdit}
+      style={styles.btnLapiz}
+    >
+      <MaterialIcons
+        name="edit"
+        size={20}
+        color={
+          vencido
+            ? Colors.textFaint
+            : Colors.primary
+        }
+      />
+    </TouchableOpacity>
+
+    <Text
+      style={[
+        styles.chevron,
+        vencido && styles.iconoVencido,
+      ]}
+    >
+      {expandida ? "▲" : "▼"}
+    </Text>
+  </View>
+</View>
 
       {vencido && (
         <Text style={styles.etiquetaVencido}>{t('card.vencido')}</Text>
@@ -69,7 +113,7 @@ export default function TratamientoCard({ tratamiento, onDelete, onAgendar, onEd
         <View style={styles.fila}>
           <Text style={[styles.label, vencido && styles.textoVencido]}>{t('card.descripcionLabel')}</Text>
           <View style={[styles.badge, styles.badgeWide, vencido && styles.badgeVencido]}>
-            <Text style={[styles.badgeText, vencido && styles.badgeTextVencido]} numberOfLines={1}>
+            <Text style={[styles.badgeText, vencido && styles.badgeTextVencido]}>
               {tratamiento.descripcion}
             </Text>
           </View>
@@ -79,8 +123,15 @@ export default function TratamientoCard({ tratamiento, onDelete, onAgendar, onEd
       {expandida && (
         <View style={styles.acciones}>
           {onAgendar && (
-            <TouchableOpacity onPress={() => onAgendar(tratamiento)} style={styles.btnAgendar}>
-              <Text style={styles.btnAgendarText}>{t('card.btnAgendar')}</Text>
+            <TouchableOpacity
+              onPress={() => onAgendar(tratamiento)}
+              style={styles.btnAgendar}
+              disabled={agendando}
+            >
+              {agendando
+                ? <ActivityIndicator color={Colors.primary} size="small" />
+                : <Text style={styles.btnAgendarText}>{t('card.btnAgendar')}</Text>
+              }
             </TouchableOpacity>
           )}
           <TouchableOpacity onPress={() => onDelete(tratamiento.id)} style={styles.btnEliminar}>
@@ -139,15 +190,14 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: 10,
     paddingVertical: 4,
-    flexShrink: 1,
-    maxWidth: '70%',
+    flex:1,
   },
   badgeVencido: {
     backgroundColor: Colors.surface,
     borderColor: Colors.border,
   },
   badgeWide: { borderRadius: 10, flex: 1, maxWidth: undefined },
-  badgeText: { color: Colors.primary, fontSize: 13 },
+  badgeText: { color: Colors.primary, fontSize: 13},
   badgeTextVencido: { color: Colors.textMuted },
   acciones: { marginTop: 12, gap: 8 },
   btnAgendar: {
@@ -157,6 +207,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: 14,
     paddingVertical: 6,
+    minWidth: 160,
+    alignItems: 'center',
   },
   btnAgendarText: { color: Colors.primary, fontWeight: '600', fontSize: 13 },
   btnEliminar: {
@@ -166,4 +218,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   btnEliminarText: { color: Colors.surface, fontWeight: '600', fontSize: 13 },
+  accionesHeader: {
+  flexDirection: "row",
+  alignItems: "center",
+},
+
 });

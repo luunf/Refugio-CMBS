@@ -2,6 +2,7 @@ from app.extensions import db
 from app.models.tarea import Tarea
 from app.models.persona import Persona
 from app.utils.email import enviar_email_asignacion, enviar_email_modificacion
+from datetime import timedelta, datetime as dt
 
 class TareaService:
 
@@ -41,6 +42,37 @@ class TareaService:
         for persona in tarea.personas:
             enviar_email_asignacion(persona, tarea)
         return tarea.to_dict()
+
+    @staticmethod
+    def crear_tareas_desde_tratamiento(nombre, fecha_inicio, fecha_fin, descripcion=None):
+        """
+        Crea una tarea por cada día entre fecha_inicio y fecha_fin (inclusive).
+        Todas son visibles para todos los voluntarios (sin personas_ids específicas,
+        ya que es un cuidado general del refugio).
+        """
+        inicio = dt.strptime(fecha_inicio, "%Y-%m-%d").date()
+        fin = dt.strptime(fecha_fin, "%Y-%m-%d").date() if fecha_fin else inicio
+
+        if fin < inicio:
+            raise Exception("La fecha de fin no puede ser anterior a la fecha de inicio")
+
+        tareas_creadas = []
+        fecha_actual = inicio
+
+        while fecha_actual <= fin:
+            tarea = Tarea(
+                nombre=nombre,
+                fecha=fecha_actual,
+                hora=None,
+                es_todo_el_dia=True,
+                completada=False
+            )
+            db.session.add(tarea)
+            tareas_creadas.append(tarea)
+            fecha_actual += timedelta(days=1)
+
+        db.session.commit()
+        return [t.to_dict() for t in tareas_creadas]
 
     @staticmethod
     def actualizar_tarea(id, data):
