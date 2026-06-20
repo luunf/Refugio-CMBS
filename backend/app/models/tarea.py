@@ -9,8 +9,11 @@ class Tarea(db.Model):
     hora = db.Column(db.Time)
     es_todo_el_dia = db.Column(db.Boolean, nullable=False, default=False)
     completada = db.Column(db.Boolean, nullable=False, default=False)
+    visita_id = db.Column(db.Integer, db.ForeignKey("visitas_veterinarias.id_visita", ondelete="CASCADE", onupdate="CASCADE"), nullable=True)
 
     personas = db.relationship("Persona", secondary="tareas_personas", back_populates="tareas")
+    visita = db.relationship("VisitaVeterinaria", back_populates="tarea")
+    
 
     def to_dict(self):                        
         return {
