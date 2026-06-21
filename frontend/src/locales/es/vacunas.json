@@ -1,0 +1,40 @@
+{
+  "placeholderBuscarVacuna": "Buscar vacuna...",
+  "requiredSymbol": "*",
+
+  "labelNombre": "Nombre",
+  "labelFechaAplicacion": "Fecha de aplicación",
+  "labelRequiereProxDosis": "Requiere próxima dosis",
+  "labelFechaProxDosis": "Fecha próxima dosis",
+  "labelCosto": "Costo de aplicación",
+
+  "placeholderNombre": "Nombre de la vacuna",
+  "placeholderSeleccionarFecha": "Seleccionar fecha",
+  "placeholderCosto": "Ej: 20000.5",
+
+  "error": "Error",
+  "errorNombreRequerido": "El nombre de la vacuna es obligatorio",
+  "errorRegistrar": "No se pudo registrar la vacuna",
+  "errorEditar": "No se pudo editar la vacuna",
+  "errorEliminar": "No se pudo eliminar la vacuna",
+
+  "titleNuevaVacuna": "Nueva vacuna",
+  "titleDetalleVacuna": "Vacuna",
+  "titleEditarVacuna": "Editar vacuna",
+
+  "btnCrear": "Crear",
+  "btnGuardar": "Guardar",
+  "btnCancelar": "Cancelar",
+  "btnEliminar": "Eliminar",
+
+  "textNoVacunas": "No hay vacunas registradas",
+  "sinFecha": "Sin fecha",
+  "proximaDosis": "Próxima dosis",
+  "seleccionarFecha": "Seleccionar fecha",
+
+  "confirmTitleEliminar": "Eliminar vacuna",
+  "confirmMessageEliminar": "¿Desea eliminar esta vacuna?",
+
+  "si": "Sí",
+  "no": "No"
+}

@@ -1,4 +1,4 @@
-import animales from './animales.json';
+import animales from "./animales.json";
 import personas from "./personas.json";
 import perfil from "./perfil.json";
 import authES from "./auth.json";
@@ -6,6 +6,7 @@ import visitas from "./visitas.json";
 import calendario from "./calendario.json";
 import usuarios from "./usuarios.json";
 import tratamientos from "./tratamientos.json";
+import vacunas from "./vacunas.json";
 
 export default {
   animales,
@@ -16,4 +17,5 @@ export default {
   calendario,
   usuarios,
   tratamientos,
+  vacunas,
 };

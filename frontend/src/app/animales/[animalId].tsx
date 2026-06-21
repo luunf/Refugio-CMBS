@@ -1,7 +1,11 @@
 import React, { useEffect, useState, useCallback } from "react";
 import {
-  View, Text, StyleSheet, TouchableOpacity,
-  ActivityIndicator, Alert
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
@@ -9,11 +13,12 @@ import { api } from "@/config/api";
 import { Colors } from "@/constants/theme";
 import AnimalInfo from "@/components/animales/AnimalInfo";
 import AnimalVisitas from "@/components/visitas/AnimalVisitas";
-import { useTranslation } from 'react-i18next';
-import { Image } from 'expo-image';
-import { ref, deleteObject } from 'firebase/storage';
-import { storage } from '@/config/firebase';
-import ModalEditarAnimal from '@/components/animales/ModalEditarAnimal';
+import AnimalVacunas from "@/components/vacunas/AnimalVacunas";
+import { useTranslation } from "react-i18next";
+import { Image } from "expo-image";
+import { ref, deleteObject } from "firebase/storage";
+import { storage } from "@/config/firebase";
+import ModalEditarAnimal from "@/components/animales/ModalEditarAnimal";
 import { MaterialIcons } from "@expo/vector-icons";
 
 type Pestaña = "informacion" | "ficha" | "vacunas";
@@ -40,14 +45,14 @@ interface Animal {
 }
 
 export default function AnimalDetalleScreen() {
-  const { t } = useTranslation('animales');
-  
+  const { t } = useTranslation("animales");
+
   const { animalId } = useLocalSearchParams();
   const [animal, setAnimal] = useState<Animal | null>(null);
   const [loading, setLoading] = useState(true);
   const [pestaña, setPestaña] = useState<Pestaña>("informacion");
   const [modalEditar, setModalEditar] = useState(false);
-  
+
   const cargarAnimal = useCallback(async () => {
     try {
       const data = await api.getAnimal(Number(animalId));
@@ -63,35 +68,45 @@ export default function AnimalDetalleScreen() {
     cargarAnimal();
   }, [cargarAnimal]);
 
-  if (loading) return <ActivityIndicator size="large" color={Colors.primary} style={{ marginTop: 80 }} />;
+  if (loading)
+    return (
+      <ActivityIndicator
+        size="large"
+        color={Colors.primary}
+        style={{ marginTop: 80 }}
+      />
+    );
   if (!animal) return <Text style={styles.error}>Animal no encontrado</Text>;
 
   const handleEliminar = () => {
     Alert.alert(
-      t('confirmTitleEliminar'),
-      t('confirmMessageEliminar', {nombre: animal?.nombre ?? ''}),
+      t("confirmTitleEliminar"),
+      t("confirmMessageEliminar", { nombre: animal?.nombre ?? "" }),
       [
-        { text: t('btnCancelar'), style: 'cancel' },
+        { text: t("btnCancelar"), style: "cancel" },
         {
-          text: t('btnEliminar'),
-          style: 'destructive',
+          text: t("btnEliminar"),
+          style: "destructive",
           onPress: async () => {
             try {
               // Eliminar imagen de Firebase Storage
               if (animal?.url_imagen) {
-              const imageRef = ref(storage, animal.url_imagen);
-              await deleteObject(imageRef).catch(() => {});
+                const imageRef = ref(storage, animal.url_imagen);
+                await deleteObject(imageRef).catch(() => {});
               }
 
               //Eliminar url de la bdd
               await api.deleteAnimal(animal!.id_animal);
               router.back();
             } catch (e: any) {
-              Alert.alert(t('error'), e?.response?.data?.error ?? t('errorEliminar'));
+              Alert.alert(
+                t("error"),
+                e?.response?.data?.error ?? t("errorEliminar"),
+              );
             }
-          }
-        }
-      ]
+          },
+        },
+      ],
     );
   };
 
@@ -118,16 +133,22 @@ export default function AnimalDetalleScreen() {
         />
         <View style={styles.infoTopTextos}>
           <View style={styles.nombreRow}>
-            <Text style={styles.nombre} numberOfLines={1}>{animal.nombre}</Text>
+            <Text style={styles.nombre} numberOfLines={1}>
+              {animal.nombre}
+            </Text>
             <View style={styles.acciones}>
-                <TouchableOpacity onPress={() => setModalEditar(true)}>
-                <MaterialIcons name="edit" size={20} color={Colors.surface}/>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={handleEliminar}>
-                <MaterialIcons name="delete-outline" size={20} color={Colors.surface}/>
-                </TouchableOpacity>
+              <TouchableOpacity onPress={() => setModalEditar(true)}>
+                <MaterialIcons name="edit" size={20} color={Colors.surface} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleEliminar}>
+                <MaterialIcons
+                  name="delete-outline"
+                  size={20}
+                  color={Colors.surface}
+                />
+              </TouchableOpacity>
             </View>
-            </View>
+          </View>
           <View style={styles.estadosRow}>
             {animal.estados.map((e) => (
               <View key={e.id_estado} style={styles.estadoBadge}>
@@ -146,8 +167,17 @@ export default function AnimalDetalleScreen() {
             style={[styles.pestaña, pestaña === p && styles.pestañaActiva]}
             onPress={() => setPestaña(p)}
           >
-            <Text style={[styles.pestañaTexto, pestaña === p && styles.pestañaTextoActivo]}>
-              {p === "informacion" ? t('tabInformacion') : p === "ficha" ? t('tabFichaVeterinaria') : t('tabVacunas')}
+            <Text
+              style={[
+                styles.pestañaTexto,
+                pestaña === p && styles.pestañaTextoActivo,
+              ]}
+            >
+              {p === "informacion"
+                ? t("tabInformacion")
+                : p === "ficha"
+                  ? t("tabFichaVeterinaria")
+                  : t("tabVacunas")}
             </Text>
           </TouchableOpacity>
         ))}
@@ -155,8 +185,13 @@ export default function AnimalDetalleScreen() {
 
       {/* Contenido */}
       {pestaña === "informacion" && <AnimalInfo animal={animal} />}
-      {pestaña === "ficha" && <AnimalVisitas animalId={animal.id_animal} onCambioVisitas={cargarAnimal}/>}
-      {pestaña === "vacunas" && (<Text>Próximamente</Text>)}
+      {pestaña === "ficha" && (
+        <AnimalVisitas
+          animalId={animal.id_animal}
+          onCambioVisitas={cargarAnimal}
+        />
+      )}
+      {pestaña === "vacunas" && <AnimalVacunas animalId={animal.id_animal} />}
 
       {animal && (
         <ModalEditarAnimal
@@ -168,15 +203,17 @@ export default function AnimalDetalleScreen() {
           animal={animal}
         />
       )}
-      
-      
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
-  header: { backgroundColor: Colors.primary, paddingHorizontal: 16, paddingVertical: 16 },
+  header: {
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
   headerText: { color: Colors.surface, fontSize: 24, fontWeight: "bold" },
   btnVolver: { width: 36, height: 36, justifyContent: "center" },
   btnVolverTexto: { color: Colors.surface, fontSize: 24 },
@@ -199,7 +236,11 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   nombre: { color: Colors.surface, fontSize: 20, fontWeight: "bold" },
-  nombreRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  nombreRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
   acciones: { flexDirection: "row", gap: 8 },
   accionIcono: { fontSize: 18 },
   estadosRow: { flexDirection: "row", flexWrap: "wrap", gap: 6 },

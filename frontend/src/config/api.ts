@@ -8,26 +8,20 @@ const apiClient = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-apiClient.interceptors.request.use(
-  async (config) => {
+apiClient.interceptors.request.use(async (config) => {
+  const user = auth.currentUser;
 
-    const user = auth.currentUser;
+  if (user) {
+    const token = await user.getIdToken();
 
-    if (user) {
-
-      const token =
-        await user.getIdToken();
-
-      config.headers.Authorization =
-        `Bearer ${token}`;
-    }
-
-    return config;
+    config.headers.Authorization = `Bearer ${token}`;
   }
-);
+
+  return config;
+});
 
 export const api = {
-  // PERSONAS 
+  // PERSONAS
   getPersonas: async (rol?: string) => {
     const params = rol ? { rol } : {};
     const res = await apiClient.get("/personas", { params });
@@ -52,9 +46,7 @@ export const api = {
 
   //USUARIOS
   getUsuario: async (id: number) => {
-    const res = await apiClient.get(
-      `/usuarios/${id}`
-    );
+    const res = await apiClient.get(`/usuarios/${id}`);
 
     return res.data;
   },
@@ -67,53 +59,31 @@ export const api = {
     return res.data;
   },
 
-  deleteUsuario: async (id: number,eliminarPersona = false) => {
-    const res =
-      await apiClient.delete(
-        `/usuarios/${id}`,
-        {
-          data: {
-            eliminar_persona:
-              eliminarPersona,
-          },
-        }
-      );
+  deleteUsuario: async (id: number, eliminarPersona = false) => {
+    const res = await apiClient.delete(`/usuarios/${id}`, {
+      data: {
+        eliminar_persona: eliminarPersona,
+      },
+    });
 
     return res.data;
   },
 
-  updateUsuario: async (
-    id: number,
-    data: any
-  ) => {
-    const res = await apiClient.patch(
-      `/usuarios/${id}`,
-      data
-    );
+  updateUsuario: async (id: number, data: any) => {
+    const res = await apiClient.patch(`/usuarios/${id}`, data);
 
     return res.data;
   },
-  buscarPersonaPorEmail: async (
-    email: string
-  ) => {
-
-    const res = await apiClient.get(
-      `/personas/buscar-por-email`,
-      {
-        params: { email },
-      }
-    );
+  buscarPersonaPorEmail: async (email: string) => {
+    const res = await apiClient.get(`/personas/buscar-por-email`, {
+      params: { email },
+    });
 
     return res.data;
   },
 
-  reenviarVerificacionUsuario:
-  async (id: number) => {
-
-    const res =
-      await apiClient.post(
-        `/usuarios/${id}/reenviar-verificacion`
-      );
+  reenviarVerificacionUsuario: async (id: number) => {
+    const res = await apiClient.post(`/usuarios/${id}/reenviar-verificacion`);
 
     return res.data;
   },
@@ -146,22 +116,19 @@ export const api = {
     const res = await apiClient.delete(`/tareas/${id}`);
     return res.data;
   },
-  
+
   crearTareasDesdeTratamiento: async (data: any) => {
     const res = await apiClient.post("/tareas/desde-tratamiento", data);
     return res.data;
   },
-  
+
   //AUTH
   getMe: async (token: string) => {
-    const res = await apiClient.get(
-      "/auth/me",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const res = await apiClient.get("/auth/me", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     return res.data;
   },
@@ -171,8 +138,8 @@ export const api = {
     const res = await apiClient.get(`/auth/dev-login/${usuarioId}`);
     return res.data;
   },
- 
-// TRATAMIENTOS
+
+  // TRATAMIENTOS
   getTratamientos: async () => {
     const res = await apiClient.get("/tratamientos");
     return res.data;
@@ -210,12 +177,31 @@ export const api = {
   getVisitasAnimal: async (animalId: number, estado?: string) => {
     const params: any = {};
     if (estado) params.estado = estado;
-    const res = await apiClient.get(`/animales/${animalId}/visitas`, { params });
+    const res = await apiClient.get(`/animales/${animalId}/visitas`, {
+      params,
+    });
     return res.data;
   },
 
+  // VACUNAS
+  getVacunasAnimal: async (animalId: number) => {
+    const res = await apiClient.get(`/animales/${animalId}/vacunas`);
+    return res.data;
+  },
+  createVacuna: async (animalId: number, data: any) => {
+    const res = await apiClient.post(`/animales/${animalId}/vacunas`, data);
+    return res.data;
+  },
+  updateVacuna: async (vacunaId: number, data: any) => {
+    const res = await apiClient.patch(`/vacunas/${vacunaId}`, data);
+    return res.data;
+  },
+  deleteVacuna: async (vacunaId: number) => {
+    const res = await apiClient.delete(`/vacunas/${vacunaId}`);
+    return res.data;
+  },
 
-//ANIMALES
+  //ANIMALES
   getAnimales: async (tipo?: string, estado_id?: number) => {
     const params: any = {};
     if (tipo) params.tipo = tipo;
@@ -251,6 +237,4 @@ export const api = {
     const res = await apiClient.get("/compatibilidades");
     return res.data;
   },
-
 };
-
