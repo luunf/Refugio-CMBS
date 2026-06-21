@@ -24,7 +24,7 @@ class VisitaService:
                 "id_visita": v.id_visita,
                 "procedimiento": v.procedimiento,
                 "fecha": str(v.fecha),
-                "hora": str(v.hora) if v.hora else None,
+                "hora": v.hora.strftime("%H:%M") if v.hora else None,
                 "estado": v.estado,
             }
             for v in visitas
@@ -76,7 +76,7 @@ class VisitaService:
         return {
             "id_visita": visita.id_visita,
             "fecha": str(visita.fecha),
-            "hora": str(visita.hora) if visita.hora else None,
+            "hora": visita.hora.strftime("%H:%M") if visita.hora else None,
             "estado": visita.estado,
             "procedimiento": visita.procedimiento,
             "info_adicional": visita.info_adicional,
