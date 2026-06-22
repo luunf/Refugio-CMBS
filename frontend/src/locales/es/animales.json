@@ -72,5 +72,7 @@
   "imagenSubiendo": "Subiendo...",
   "imagenCambiar": "Cambiar imagen",
   "titleEditarAnimal": "Editar animal",
-  "btnGuardar": "Guardar"
+  "btnGuardar": "Guardar",
+  "errorFechaNacimientoInvalida": "La fecha de nacimiento debe ser igual o anterior a hoy y a la fecha de ingreso",
+  "errorFechaIngresoInvalida": "La fecha de ingreso debe ser igual o posterior a la fecha de nacimiento"
 }

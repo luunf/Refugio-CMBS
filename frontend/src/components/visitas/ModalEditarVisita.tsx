@@ -8,6 +8,7 @@ import { Colors } from "@/constants/theme";
 import { useTranslation } from 'react-i18next';
 import SingleSelector from "@/components/animales/SingleSelector";
 import AnimalDatePickerModal from "@/components/animales/AnimalDatePickerModal";
+import VisitaDatePickerModal from "@/components/visitas/VisitaDatePickerModal";
 
 interface Persona {
   id_persona: number;
@@ -58,6 +59,8 @@ interface Props {
   visita: Visita;
 }
 
+const hoy = new Date().toISOString().split("T")[0];
+
 function formatFecha(fechaStr: string): string {
   if (!fechaStr) return "";
   const [year, month, day] = fechaStr.split("-");
@@ -66,6 +69,36 @@ function formatFecha(fechaStr: string): string {
 
 const esHoraValida = (hora: string): boolean => {
   return /^([01]\d|2[0-3]):([0-5]\d)$/.test(hora);
+};
+
+const esHoraPasada = (fechaStr: string, hora: string): boolean => {
+  if (!esHoraValida(hora)) return false;
+  if (fechaStr !== hoy) return false;
+  const ahora = new Date();
+  const [h, m] = hora.split(':').map(Number);
+  const horaVisita = new Date();
+  horaVisita.setHours(h, m, 0, 0);
+  return horaVisita < ahora;
+};
+
+const esHoraFutura = (fechaStr: string, hora: string): boolean => {
+  if (!esHoraValida(hora)) return false;
+  if (fechaStr !== hoy) return false;
+  const ahora = new Date();
+  const [h, m] = hora.split(':').map(Number);
+  const horaVisita = new Date();
+  horaVisita.setHours(h, m, 0, 0);
+  return horaVisita > ahora;
+};
+
+const fechaInicioTratamientoInvalida = (fechaInicio: string, fechaVisita: string): boolean => {
+  if (!fechaInicio) return false;
+  return fechaInicio < fechaVisita;
+};
+
+const fechaFinTratamientoInvalida = (fechaFin: string, fechaInicio: string): boolean => {
+  if (!fechaFin) return false;
+  return fechaFin < fechaInicio;
 };
 
 export default function ModalEditarVisita({ visible, onClose, onEditada, visita }: Props) {
@@ -88,6 +121,13 @@ export default function ModalEditarVisita({ visible, onClose, onEditada, visita 
   const [costo, setCosto] = useState(visita.costo ? String(visita.costo) : "");
   const [pickerFecha, setPickerFecha] = useState(false);
   const [tratamientos, setTratamientos] = useState<TratamientoForm[]>([]);
+
+  const fechaMin = estado === "proxima" ? hoy : undefined;
+  const fechaMax = estado === "realizada" ? hoy : undefined;
+
+  const fechaInvalida = !!estado && ((estado === "proxima" && fecha < hoy) || (estado === "realizada" && fecha > hoy));
+  const horaInvalida = estado === "proxima" ? esHoraPasada(fecha, hora) : estado === "realizada" ? esHoraFutura(fecha, hora) : false;
+  const horaFormatoInvalido = hora.length > 0 && !esHoraValida(hora);
 
   useEffect(() => {
     if (visible) {
@@ -158,17 +198,45 @@ export default function ModalEditarVisita({ visible, onClose, onEditada, visita 
       prev.map((t) => (t.key === key ? { ...t, ...campo } : t))
     );
 
+  const puedeGuardar = () => {
+    if (!fecha) return false;
+    if (fechaInvalida) return false;
+    if (hora && !esHoraValida(hora)) return false;
+    if (horaInvalida) return false;
+    if (!procedimiento.trim()) return false;
+    if (!veterinarioId) return false;
+    if (!estado) return false;
+
+    const tratamientosActivos = tratamientos.filter((t) => !t.eliminado);
+    for (const tratamiento of tratamientosActivos) {
+      if (!tratamiento.tipo.trim()) return false;
+      if (!tratamiento.fecha_inicio) return false;
+      if (fechaInicioTratamientoInvalida(tratamiento.fecha_inicio, fecha)) return false;
+      if (fechaFinTratamientoInvalida(tratamiento.fecha_fin, tratamiento.fecha_inicio)) return false;
+    }
+
+    return true;
+  };
+
   const handleGuardar = async () => {
     if (!fecha) return Alert.alert(t('error'), t('errorFecha'));
+    if (fechaInvalida) {return Alert.alert(t('error'), estado === "proxima" ? t('errorFechaDebeSerFutura') : t('errorFechaDebeSerPasada'));}
+    if (hora && !esHoraValida(hora)) return Alert.alert(t('error'), t('errorHoraInvalida'));
+    if (horaInvalida) {return Alert.alert(t('error'), estado === "proxima" ? t('errorHoraDebeSerFutura') : t('errorHoraDebeSerPasada'));}
     if (!procedimiento.trim()) return Alert.alert(t('error'), t('errorProcedimiento'));
     if (!veterinarioId) return Alert.alert(t('error'), t('errorVeterinario'));
     if (!estado) return Alert.alert(t('error'), t('errorEstado'));
-    if (hora && !esHoraValida(hora)) return Alert.alert(t('error'), t('errorHoraInvalida'));
 
     const tratamientosActivos = tratamientos.filter((t) => !t.eliminado);
     for (const tratamiento of tratamientosActivos) {
       if (!tratamiento.tipo.trim()) return Alert.alert(t('error'), t('errorTipo'));
       if (!tratamiento.fecha_inicio) return Alert.alert(t('error'), t('errorFechaInicio'));
+      if (fechaInicioTratamientoInvalida(tratamiento.fecha_inicio, fecha)) {
+        return Alert.alert(t('error'), t('errorFechaInicioTratamiento'));
+      }
+      if (fechaFinTratamientoInvalida(tratamiento.fecha_fin, tratamiento.fecha_inicio)) {
+        return Alert.alert(t('error'), t('errorFechaFinTratamiento'));
+      }
     }
 
     setLoading(true);
@@ -181,7 +249,7 @@ export default function ModalEditarVisita({ visible, onClose, onEditada, visita 
         veterinario_id: veterinarioId,
         estado,
         info_adicional: infoAdicional.trim() || null,
-        costo: estado === "realizada" && costo ? parseFloat(costo) : null,
+        costo: estado === "realizada" && costo ? parseFloat(costo.replace(",", ".")) : null,
       });
 
       // Tratamientos eliminados
@@ -248,6 +316,11 @@ export default function ModalEditarVisita({ visible, onClose, onEditada, visita 
                 {fecha ? formatFecha(fecha) : t('placeholderSeleccionarFecha')}
               </Text>
             </TouchableOpacity>
+            {fechaInvalida && (
+              <Text style={styles.fechaErrorTexto}>
+                {estado === "proxima" ? t('errorFechaDebeSerFutura') : t('errorFechaDebeSerPasada')}
+              </Text>
+            )}
 
             <Text style={styles.label}>{t('labelHora')}</Text>
               <TextInput
@@ -259,6 +332,14 @@ export default function ModalEditarVisita({ visible, onClose, onEditada, visita 
                 keyboardType="numbers-and-punctuation"
                 maxLength={5}
               />
+              {horaFormatoInvalido && (
+                <Text style={styles.fechaErrorTexto}>{t('errorHoraInvalida')}</Text>
+              )}
+              {horaInvalida && (
+                <Text style={styles.fechaErrorTexto}>
+                  {estado === "proxima" ? t('errorHoraDebeSerFutura') : t('errorHoraDebeSerPasada')}
+                </Text>
+              )}
 
             <Text style={styles.label}>{t('labelProcedimiento')}{t('requiredSymbol')}</Text>
             <TextInput
@@ -326,6 +407,7 @@ export default function ModalEditarVisita({ visible, onClose, onEditada, visita 
                 key={tr.key}
                 index={idx}
                 tratamiento={tr}
+                fechaVisita={fecha} 
                 onChange={(campo) => actualizarTratamiento(tr.key, campo)}
                 onEliminar={() => eliminarTratamiento(tr.key)}
               />
@@ -335,7 +417,7 @@ export default function ModalEditarVisita({ visible, onClose, onEditada, visita 
               <Text style={styles.btnAnadirTratamientoTexto}>{t('btnAnadirTratamiento')}</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={handleGuardar} disabled={loading} style={styles.btnCrear}>
+            <TouchableOpacity onPress={handleGuardar} disabled={loading || !puedeGuardar()} style={[styles.btnCrear, !puedeGuardar() && { opacity: 0.5 }]}>
               {loading
                 ? <ActivityIndicator color={Colors.surface} />
                 : <Text style={styles.btnCrearTexto}>{t('btnGuardar')}</Text>
@@ -346,12 +428,14 @@ export default function ModalEditarVisita({ visible, onClose, onEditada, visita 
         </View>
       </View>
 
-      <AnimalDatePickerModal
+      <VisitaDatePickerModal
         visible={pickerFecha}
         onClose={() => setPickerFecha(false)}
         onSelectDate={(d) => setFecha(d)}
         titulo={t('titleSeleccionarFechaVisita')}
         fechaSeleccionada={fecha}
+        minDate={fechaMin}
+        maxDate={fechaMax}
       />
     </Modal>
   );
@@ -360,12 +444,16 @@ export default function ModalEditarVisita({ visible, onClose, onEditada, visita 
 interface TratamientoItemProps {
   index: number;
   tratamiento: TratamientoForm;
+  fechaVisita: string;
   onChange: (campo: Partial<TratamientoForm>) => void;
   onEliminar: () => void;
 }
 
-function TratamientoItem({ index, tratamiento, onChange, onEliminar }: TratamientoItemProps) {
+function TratamientoItem({ index, tratamiento, fechaVisita, onChange, onEliminar }: TratamientoItemProps) {
   const { t } = useTranslation('visitas');
+
+  const fechaInicioInvalida = fechaInicioTratamientoInvalida(tratamiento.fecha_inicio, fechaVisita);
+  const fechaFinInvalida = fechaFinTratamientoInvalida(tratamiento.fecha_fin, tratamiento.fecha_inicio);
 
   return (
     <View style={itemStyles.container}>
@@ -391,6 +479,9 @@ function TratamientoItem({ index, tratamiento, onChange, onEliminar }: Tratamien
           {tratamiento.fecha_inicio ? formatFecha(tratamiento.fecha_inicio) : t('placeholderSeleccionarFecha')}
         </Text>
       </TouchableOpacity>
+      {fechaInicioInvalida && (
+        <Text style={itemStyles.fechaErrorTexto}>{t('errorFechaInicioTratamiento')}</Text>
+      )}
 
       <Text style={itemStyles.label}>{t('labelFechaFin')}</Text>
       <TouchableOpacity style={itemStyles.inputFecha} onPress={() => onChange({ pickerFin: true })}>
@@ -398,6 +489,9 @@ function TratamientoItem({ index, tratamiento, onChange, onEliminar }: Tratamien
           {tratamiento.fecha_fin ? formatFecha(tratamiento.fecha_fin) : t('placeholderSeleccionarFecha')}
         </Text>
       </TouchableOpacity>
+      {fechaFinInvalida && (
+        <Text style={itemStyles.fechaErrorTexto}>{t('errorFechaFinTratamiento')}</Text>
+      )}
 
       <Text style={itemStyles.label}>{t('labelDescripcion')}</Text>
       <TextInput
@@ -416,13 +510,15 @@ function TratamientoItem({ index, tratamiento, onChange, onEliminar }: Tratamien
         onSelectDate={(d) => onChange({ fecha_inicio: d, pickerInicio: false })}
         titulo={t('titleSeleccionarFechaInicio')}
         fechaSeleccionada={tratamiento.fecha_inicio}
+        minDate={fechaVisita}
       />
       <AnimalDatePickerModal
         visible={tratamiento.pickerFin}
         onClose={() => onChange({ pickerFin: false })}
         onSelectDate={(d) => onChange({ fecha_fin: d, pickerFin: false })}
         titulo={t('titleSeleccionarFechaFin')}
-        fechaSeleccionada={tratamiento.fecha_fin || new Date().toISOString().split("T")[0]}
+        fechaSeleccionada={tratamiento.fecha_fin || tratamiento.fecha_inicio || fechaVisita}
+        minDate={tratamiento.fecha_inicio || fechaVisita}
       />
     </View>
   );
@@ -451,6 +547,7 @@ const styles = StyleSheet.create({
   btnAnadirTratamientoTexto: { color: Colors.primary, fontWeight: "600", fontSize: 14 },
   btnCrear: { backgroundColor: Colors.primary, paddingVertical: 14, borderRadius: 20, alignItems: "center", marginBottom: 8 },
   btnCrearTexto: { color: Colors.surface, fontWeight: "bold", fontSize: 16 },
+  fechaErrorTexto: { color: Colors.delete, fontSize: 12, marginTop: -10, marginBottom: 14,},
 });
 
 const itemStyles = StyleSheet.create({
@@ -465,4 +562,5 @@ const itemStyles = StyleSheet.create({
   inputFecha: { backgroundColor: Colors.background, borderWidth: 1, borderColor: Colors.border, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 9, marginBottom: 12 },
   fechaTexto: { fontSize: 13, color: Colors.text },
   fechaPlaceholder: { fontSize: 13, color: Colors.textFaint },
+  fechaErrorTexto: { color: Colors.delete, fontSize: 11, marginTop: -8, marginBottom: 10 },
 });

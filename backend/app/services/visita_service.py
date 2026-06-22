@@ -4,6 +4,7 @@ from app.models.visita_veterinaria import VisitaVeterinaria
 from app.models.animal import Animal
 from app.models.persona import Persona
 from app.models.tarea import Tarea
+from app.services.tratamiento_service import TratamientoService
 
 
 class VisitaService:
@@ -134,7 +135,13 @@ class VisitaService:
         if not visita:
             raise LookupError(f"Visita con id {visita_id} no encontrada")
 
+        animal = visita.animal
+
         db.session.delete(visita)
+        db.session.flush()
+        
+        TratamientoService.sincronizar_estado_tratamiento_por_animal(animal)
+
         db.session.commit()
     
     @staticmethod

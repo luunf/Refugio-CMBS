@@ -74,7 +74,7 @@ export default function ModalAgregarVacuna({
         requiere_prox_dosis: requiereProxDosis,
         fecha_prox_dosis:
           requiereProxDosis && fechaProxDosis ? fechaProxDosis : null,
-        costo_aplicacion: costo ? parseFloat(costo) : null,
+        costo_aplicacion: costo ? parseFloat(costo.replace(",", ".")) : null,
       });
       onCreada();
       handleClose();

@@ -57,12 +57,9 @@ class TratamientoService:
 
         TratamientoService.sincronizar_estado_tratamiento(visita_id)
 
+
     @staticmethod
-    def sincronizar_estado_tratamiento(visita_id):
-        visita = VisitaVeterinaria.query.get(visita_id)
-        if not visita:
-            return
-        animal = visita.animal
+    def sincronizar_estado_tratamiento_por_animal(animal):
         hoy = date.today()
 
         tiene_vigente = any(
@@ -80,4 +77,12 @@ class TratamientoService:
         elif not tiene_vigente and estado_tratamiento in animal.estados:
             animal.estados.remove(estado_tratamiento)
 
+        db.session.commit()
+
+    @staticmethod
+    def sincronizar_estado_tratamiento(visita_id):
+        visita = VisitaVeterinaria.query.get(visita_id)
+        if not visita:
+            return
+        TratamientoService.sincronizar_estado_tratamiento_por_animal(visita.animal)
         db.session.commit()
