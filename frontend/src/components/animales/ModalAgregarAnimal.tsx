@@ -48,6 +48,19 @@ const formatFecha = (fecha?: string) => {
   return `${d}/${m}/${y}`;
 };
 
+const fechaNacimientoInvalida = (fechaNacimiento: string, fechaIngreso: string, hoy: string): boolean => {
+  if (!fechaNacimiento) return false;
+  if (fechaNacimiento > hoy) return true;
+  if (fechaIngreso && fechaNacimiento > fechaIngreso) return true;
+  return false;
+};
+
+const fechaIngresoInvalida = (fechaIngreso: string, fechaNacimiento: string): boolean => {
+  if (!fechaIngreso) return false;
+  if (fechaNacimiento && fechaIngreso < fechaNacimiento) return true;
+  return false;
+};
+
 export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props) {
   const { t } = useTranslation('animales');
   
@@ -90,6 +103,12 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
   const tieneAdoptado = estadoIds.some(id =>
     estados.find(e => e.id_estado === id)?.nombre === "Adoptado"
   );
+
+  const errorFechaNacimiento = fechaNacimientoInvalida(fechaNacimiento, fechaIngreso, hoy);
+  const errorFechaIngreso = fechaIngresoInvalida(fechaIngreso, fechaNacimiento);
+
+  const maxDateNacimiento = fechaIngreso && fechaIngreso < hoy ? fechaIngreso : hoy;
+  const minDateIngreso = fechaNacimiento || undefined;
 
   useEffect(() => {
     if (visible) cargarDatos();
@@ -147,7 +166,10 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
     if (!genero) return Alert.alert(t('error'), t('errorGenero'));
     if (!tamanio) return Alert.alert(t('error'), t('errorTamanio'));
     if (!fechaIngreso) return Alert.alert(t('error'), t('errorFechaIngreso'));
+    if (errorFechaNacimiento) return Alert.alert(t('error'), t('errorFechaNacimientoInvalida'));
+    if (errorFechaIngreso) return Alert.alert(t('error'), t('errorFechaIngresoInvalida'));
     if (estadoIds.length === 0) return Alert.alert(t('error'), t('errorEstados'));
+
 
     setLoading(true);
     try {
@@ -321,6 +343,9 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
                 {fechaNacimiento ? formatFecha(fechaNacimiento) : t('placeholderSeleccionarFecha')}
               </Text>
             </TouchableOpacity>
+            {errorFechaNacimiento && (
+              <Text style={styles.fechaErrorTexto}>{t('errorFechaNacimientoInvalida')}</Text>
+            )}
 
             {/* Fecha de ingreso */}
             <Text style={styles.label}>{t('labelFechaIngreso')}{t('requiredSymbol')}</Text>
@@ -332,6 +357,9 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
                 {fechaIngreso ? formatFecha(fechaIngreso) : t('placeholderSeleccionarFecha')}
               </Text>
             </TouchableOpacity>
+            {errorFechaIngreso && (
+              <Text style={styles.fechaErrorTexto}>{t('errorFechaIngresoInvalida')}</Text>
+            )}
 
             {/* Estados */}
             <Text style={styles.label}>{t('labelEstados')}{t('requiredSymbol')}</Text>
@@ -488,6 +516,7 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
         onSelectDate={(date) => setFechaNacimiento(date)}
         titulo={t('titleSeleccionarFechaNacimiento')}
         fechaSeleccionada={fechaNacimiento}
+        maxDate={maxDateNacimiento}
       />
       <AnimalDatePickerModal
         visible={pickerIngreso}
@@ -495,6 +524,7 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
         onSelectDate={(date) => setFechaIngreso(date)}
         titulo={t('titleSeleccionarFechaIngreso')}
         fechaSeleccionada={fechaIngreso}
+        minDate={minDateIngreso}
       />
     </Modal>
   );
@@ -627,5 +657,11 @@ const styles = StyleSheet.create({
     color: Colors.surface,
     fontSize: 14,
     fontWeight: 'bold',
+  },
+  fechaErrorTexto: {
+    color: Colors.delete,
+    fontSize: 12,
+    marginTop: -10,
+    marginBottom: 14,
   },
 });

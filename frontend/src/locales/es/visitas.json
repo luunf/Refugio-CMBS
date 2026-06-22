@@ -55,10 +55,17 @@
     "errorEditar": "No se pudo editar la visita",
     "confirmTitleEliminar": "Eliminar visita",
     "confirmMessageEliminar": "¿Desea eliminar esta visita?",
+    "btnAceptar": "Aceptar",
     "btnCancelar": "Cancelar",
     "btnEliminar": "Eliminar",
     "errorEliminar": "No se pudo eliminar la visita",
     "titleVisita": "Visita",
     "sinTratamientos": "No hay tratamientos asociados",
-    "labelVencido": "Vencido"
+    "labelVencido": "Vencido",
+    "errorFechaDebeSerFutura": "La fecha debe ser hoy o posterior, ya que la visita es próxima",
+    "errorFechaDebeSerPasada": "La fecha debe ser hoy o anterior, ya que la visita es realizada",
+    "errorHoraDebeSerFutura": "La hora debe ser posterior a la hora actual",
+    "errorHoraDebeSerPasada": "La hora debe ser anterior a la hora actual",
+    "errorFechaInicioTratamiento": "La fecha de inicio debe ser igual o posterior a la fecha de la visita",
+    "errorFechaFinTratamiento": "La fecha de fin debe ser igual o posterior a la fecha de inicio del tratamiento"
 }

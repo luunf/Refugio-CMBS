@@ -82,7 +82,7 @@ export default function ModalEditarVacuna({
         requiere_prox_dosis: requiereProxDosis,
         fecha_prox_dosis:
           requiereProxDosis && fechaProxDosis ? fechaProxDosis : null,
-        costo_aplicacion: costo ? parseFloat(costo) : null,
+        costo_aplicacion: costo ? parseFloat(costo.replace(",", ".")) : null,
       });
       onEditada();
     } catch (e: any) {
