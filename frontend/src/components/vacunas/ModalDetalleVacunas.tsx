@@ -43,7 +43,6 @@ export default function ModalDetalleVacuna({
 
   const handleEliminar = () => {
     console.log("handleEliminar ejecutado");
-    Alert.alert("Test", "Mensaje de prueba");
     Alert.alert(t("confirmTitleEliminar"), t("confirmMessageEliminar"), [
       { text: t("btnCancelar"), style: "cancel" },
       {
