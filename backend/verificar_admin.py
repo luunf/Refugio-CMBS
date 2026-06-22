@@ -9,7 +9,9 @@ with app.app_context():
     FirebaseService.initialize(app)
 
     user = auth.get_user_by_email(
-        "usuario_admin@gmail.com"
+        "admin@refugiocmbs.com"
+
+        #"usuario_admin@gmail.com" # Cambiar por el mail que sea 
     )
 
     auth.update_user(

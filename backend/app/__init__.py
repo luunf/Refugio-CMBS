@@ -18,10 +18,14 @@ from app.routes.compatibilidad_routes import compatibilidad_bp
 from app.routes.tratamiento_routes import tratamiento_bp
 from app.routes.visita_routes import visita_bp
 from app.routes.vacuna_routes import vacuna_bp
+from app.services.seed_service import SeedService
+
+
+    
 
 def create_app():
     app = Flask(__name__)
-
+    
     # Configuración
     app.config.from_object(Config)
 
@@ -38,7 +42,8 @@ def create_app():
 
     # Importar modelos
     with app.app_context():
-        from app import models
+        from app.services.seed_service import SeedService
+        SeedService.run()
 
     # Blueprints
     app.register_blueprint(tarea_bp, url_prefix="/tareas")
