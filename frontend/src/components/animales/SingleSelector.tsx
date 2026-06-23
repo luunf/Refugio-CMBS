@@ -75,7 +75,7 @@ export default function SingleSelector({ value, onChange, items, placeholder, se
                 );
               }}
               ListEmptyComponent={
-                <Text style={styles.sinResultados}>{t('sinResultados')}</Text>
+                <Text style={styles.sinResultados}>{t('sinResultadosSelector')}</Text>
               }
             />
             <TouchableOpacity style={styles.btnListo} onPress={() => { setOpen(false); setBusqueda(""); }}>

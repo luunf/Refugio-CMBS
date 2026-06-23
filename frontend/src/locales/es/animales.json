@@ -1,6 +1,7 @@
 {
   "title": "Animales",
   "sinResultados": "No hay animales",
+  "sinResultadosSelector": "Sin resultados",
   "optionTodos": "Todos",
   "optionPerro": "Perro",
   "optionGato": "Gato",
