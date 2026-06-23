@@ -15,6 +15,7 @@ import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { storage } from '@/config/firebase';
 import { Image } from 'expo-image';
+import { MaterialIcons } from "@expo/vector-icons";
 
 interface Estado {
   id_estado: number;
@@ -173,6 +174,25 @@ export default function ModalEditarAnimal({ visible, onClose, onEditado, animal 
     setImagenEliminada(false);
   };
 
+  const handleAbrirCamara = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      return Alert.alert(t('error'), t('errorPermisoCamara'));
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+    if (result.canceled) return;
+
+    const uri = result.assets[0].uri;
+    const img = await ImageManipulator.manipulate(uri).resize({ width: 400, height: 400 }).renderAsync();
+    const manipulada = await img.saveAsync({ compress: 0.8, format: SaveFormat.JPEG });
+    setImagen(manipulada.uri);
+  };
+
   const handleGuardar = async () => {
     if (!nombre.trim()) return Alert.alert(t('error'), t('errorNombre'));
     if (!tipo) return Alert.alert(t('error'), t('errorTipo'));
@@ -325,41 +345,29 @@ export default function ModalEditarAnimal({ visible, onClose, onEditado, animal 
             )}
 
             <Text style={styles.label}>{t('labelImagen')}</Text>
-            {imagenMostrar ? (
+            {imagenMostrar && (
               <View style={styles.imagenPreviewContainer}>
+                <Image source={{ uri: imagenMostrar }} style={styles.imagenPreview} contentFit='cover' cachePolicy='memory-disk' />
                 <TouchableOpacity
-                  onPress={handleSeleccionarImagen}
-                  disabled={subiendoImagen}
-                  style={styles.imagenPreviewContainer}
+                  style={styles.btnQuitarImagen}
+                  onPress={() => { setImagen(null); setImagenEliminada(true); }}
                 >
-                  <Image source={{ uri: imagenMostrar }} style={styles.imagenPreview} contentFit='cover'  cachePolicy='memory-disk'/>
-                  <View style={styles.imagenOverlay}>
-                    {subiendoImagen ? (
-                      <>
-                        <ActivityIndicator color={Colors.surface} />
-                        <Text style={styles.imagenOverlayTexto}>{t('imagenSubiendo')}</Text>
-                      </>
-                    ) : (
-                      <Text style={styles.imagenOverlayTexto}>{t('imagenCambiar')}</Text>
-                    )}
-                  </View>
+                  <Text style={styles.btnQuitarImagenTexto}>✕</Text>
                 </TouchableOpacity>
-                {!subiendoImagen && (
-                  <TouchableOpacity
-                    style={styles.btnQuitarImagen}
-                    onPress={() => { setImagen(null); setImagenEliminada(true); }}
-                  >
-                    <Text style={styles.btnQuitarImagenTexto}>✕</Text>
-                  </TouchableOpacity>
-                )}
               </View>
-            ) : (
-              <TouchableOpacity style={[styles.btnImagen, subiendoImagen && { opacity: 0.6 }]} onPress={handleSeleccionarImagen} disabled={subiendoImagen}>
-                {subiendoImagen
-                  ? <ActivityIndicator color={Colors.surface} />
-                  : <Text style={styles.btnImagenTexto}>{t('btnAnadirImagen')}</Text>
-                }
-              </TouchableOpacity>
+            )}
+
+            {!imagenMostrar && (
+              <View style={styles.botonesImagenRow}>
+                <TouchableOpacity style={styles.btnImagenOpcion} onPress={handleSeleccionarImagen}>
+                  <MaterialIcons name="photo-library" size={24} color={Colors.primary} />
+                  <Text style={styles.btnImagenOpcionTexto}>{t('imagenGaleria')}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.btnImagenOpcion} onPress={handleAbrirCamara}>
+                  <MaterialIcons name="camera-alt" size={24} color={Colors.primary} />
+                  <Text style={styles.btnImagenOpcionTexto}>{t('imagenCamara')}</Text>
+                </TouchableOpacity>
+              </View>
             )}
 
             <Text style={styles.label}>{t('labelComportamiento')}</Text>
@@ -417,8 +425,9 @@ const styles = StyleSheet.create({
   imagenPreview: { width: '100%', height: '100%' },
   imagenOverlay: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', alignItems: 'center', gap: 8 },
   imagenOverlayTexto: { color: Colors.surface, fontSize: 14, fontWeight: '500' },
-  btnImagen: {borderWidth: 1.5, borderColor: Colors.primary, borderStyle: "dashed", borderRadius: 12, paddingVertical: 12, alignItems: "center", marginBottom: 20,},
-  btnImagenTexto: { fontSize: 14, color: Colors.primary, fontWeight: "600" },
-  btnQuitarImagen: { position: 'absolute', top: 8, right: 8, backgroundColor: 'rgba(0,0,0,0.6)', width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  btnQuitarImagen: { position: 'absolute', top: 8, right: 8, backgroundColor: 'rgba(0,0,0,0.6)', width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center'},
   btnQuitarImagenTexto: { color: Colors.surface, fontSize: 14, fontWeight: 'bold' },
+  botonesImagenRow: { flexDirection: 'row', gap: 12, marginBottom: 20,},
+  btnImagenOpcion: { flex: 1, borderWidth: 1.5, borderColor: Colors.primary, borderStyle: 'dashed', borderRadius: 12, paddingVertical: 16, alignItems: 'center', gap: 6,},
+  btnImagenOpcionTexto: { fontSize: 13, color: Colors.primary, fontWeight: '600',},
 });

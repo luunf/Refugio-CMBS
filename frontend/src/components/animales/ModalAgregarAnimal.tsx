@@ -15,6 +15,7 @@ import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '@/config/firebase';
 import { Image } from 'expo-image';
+import { MaterialIcons } from "@expo/vector-icons";
 
 interface Estado {
   id_estado: number;
@@ -241,6 +242,25 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
     setImagen(manipulada.uri);
   };
 
+  const handleAbrirCamara = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      return Alert.alert(t('error'), t('errorPermisoCamara'));
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+    if (result.canceled) return;
+
+    const uri = result.assets[0].uri;
+    const img = await ImageManipulator.manipulate(uri).resize({ width: 400, height: 400 }).renderAsync();
+    const manipulada = await img.saveAsync({ compress: 0.8, format: SaveFormat.JPEG });
+    setImagen(manipulada.uri);
+  };
+
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View style={styles.overlay}>
@@ -410,47 +430,27 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
 
             {/* Imagen */}
             <Text style={styles.label}>{t('labelImagen')}</Text>
-            {imagen ? (
-              <View style={styles.imagenPreviewContainer}>
-                <TouchableOpacity
-                  onPress={handleSeleccionarImagen}
-                  disabled={subiendoImagen}
-                  style={styles.imagenPreviewContainer}
-                >
-                  <Image source={{ uri: imagen }} style={styles.imagenPreview} contentFit='cover' />
-                  <View style={styles.imagenOverlay}>
-                    {subiendoImagen ? (
-                      <>
-                        <ActivityIndicator color={Colors.surface} />
-                        <Text style={styles.imagenOverlayTexto}>{t('imagenSubiendo')}</Text>
-                      </>
-                    ) : (
-                      <Text style={styles.imagenOverlayTexto}>{t('imagenCambiar')}</Text>
-                    )}
-                  </View>
-                </TouchableOpacity>
 
-                {/* Botón quitar imagen */}
-                {!subiendoImagen && (
-                  <TouchableOpacity
-                    style={styles.btnQuitarImagen}
-                    onPress={() => setImagen(null)}
-                  >
-                    <Text style={styles.btnQuitarImagenTexto}>✕</Text>
-                  </TouchableOpacity>
-                )}
+            {imagen && (
+              <View style={styles.imagenPreviewContainer}>
+                <Image source={{ uri: imagen }} style={styles.imagenPreview} contentFit='cover' />
+                <TouchableOpacity style={styles.btnQuitarImagen} onPress={() => setImagen(null)}>
+                  <Text style={styles.btnQuitarImagenTexto}>✕</Text>
+                </TouchableOpacity>
               </View>
-            ) : (
-              <TouchableOpacity
-                style={[styles.btnImagen, subiendoImagen && { opacity: 0.6 }]}
-                onPress={handleSeleccionarImagen}
-                disabled={subiendoImagen}
-              >
-                {subiendoImagen
-                  ? <ActivityIndicator color={Colors.surface} />
-                  : <Text style={styles.btnImagenTexto}>{t('btnAnadirImagen')}</Text>
-                }
-              </TouchableOpacity>
+            )}
+
+            {!imagen && (
+              <View style={styles.botonesImagenRow}>
+                <TouchableOpacity style={styles.btnImagenOpcion} onPress={handleSeleccionarImagen}>
+                  <MaterialIcons name="photo-library" size={24} color={Colors.primary} />
+                  <Text style={styles.btnImagenOpcionTexto}>{t('imagenGaleria')}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.btnImagenOpcion} onPress={handleAbrirCamara}>
+                  <MaterialIcons name="camera-alt" size={24} color={Colors.primary} />
+                  <Text style={styles.btnImagenOpcionTexto}>{t('imagenCamara')}</Text>
+                </TouchableOpacity>
+              </View>
             )}
             
             {/* Comportamiento */}
@@ -628,20 +628,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
   },
-  btnImagen: {
-    borderWidth: 1.5,
-    borderColor: Colors.primary,
-    borderStyle: "dashed",
-    borderRadius: 12,
-    paddingVertical: 12,
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  btnImagenTexto: { 
-    fontSize: 14, 
-    color: Colors.primary, 
-    fontWeight: "600" 
-  },
   btnQuitarImagen: {
     position: 'absolute',
     top: 8,
@@ -663,5 +649,25 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: -10,
     marginBottom: 14,
+  },
+  botonesImagenRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 20,
+  },
+  btnImagenOpcion: {
+    flex: 1,
+    borderWidth: 1.5,
+    borderColor: Colors.primary,
+    borderStyle: 'dashed',
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+    gap: 6,
+  },
+  btnImagenOpcionTexto: {
+    fontSize: 13,
+    color: Colors.primary,
+    fontWeight: '600',
   },
 });
