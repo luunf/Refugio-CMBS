@@ -39,9 +39,7 @@ export default function AnimalDatePickerModal({visible, onClose, onSelectDate, t
   const [selected, setSelected] = useState(fechaInicial());
 
   useEffect(() => {
-    if (visible) {
-      setSelected(fechaInicial());
-    }
+    if (visible) { setSelected(fechaInicial());}
   }, [visible, minDate, maxDate, fechaSeleccionada]);
 
   const handleConfirm = () => {
@@ -68,6 +66,7 @@ export default function AnimalDatePickerModal({visible, onClose, onSelectDate, t
               textDayFontWeight: '500',
               textMonthFontWeight: 'bold',
               textDayHeaderFontWeight: '600',
+              textDisabledColor: Colors.textFaint,
             }}
             markedDates={{
               [selected]: { selected: true, selectedColor: Colors.primary },
@@ -89,44 +88,13 @@ export default function AnimalDatePickerModal({visible, onClose, onSelectDate, t
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  container: {
-    backgroundColor: Colors.surface,
-    borderRadius: 20,
-    padding: 20,
-    width: '90%',
-    alignItems: 'center',
-  },
-  titulo: { 
-    fontSize: 18, 
-    fontWeight: 'bold', 
-    marginBottom: 16, 
-    color: Colors.text },
-  calendar: { 
-    width: '100%', 
-    borderRadius: 12 },
-  botones: { 
-    flexDirection: 'row', 
-    marginTop: 20, 
-    gap: 12 
-  },
-  btnCancelar: {
-    paddingVertical: 8, 
-    paddingHorizontal: 20,
-    backgroundColor: Colors.border, 
-    borderRadius: 20,
-  },
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
+  container: { backgroundColor: Colors.surface, borderRadius: 20, padding: 20, width: '90%', alignItems: 'center' },
+  titulo: { fontSize: 18, fontWeight: 'bold', marginBottom: 16, color: Colors.text },
+  calendar: { width: '100%', borderRadius: 12 },
+  botones: { flexDirection: 'row', marginTop: 20, gap: 12 },
+  btnCancelar: { paddingVertical: 8, paddingHorizontal: 20, backgroundColor: Colors.border, borderRadius: 20 },
   btnCancelarText: { color: Colors.textSoft },
-  btnConfirmar: {
-    paddingVertical: 8, 
-    paddingHorizontal: 20,
-    backgroundColor: Colors.primary, 
-    borderRadius: 20,
-  },
-  btnConfirmarText: { color: 'white', fontWeight: 'bold' },
+  btnConfirmar: { paddingVertical: 8, paddingHorizontal: 20, backgroundColor: Colors.primary, borderRadius: 20 },
+  btnConfirmarText: { color: Colors.surface, fontWeight: 'bold' },
 });

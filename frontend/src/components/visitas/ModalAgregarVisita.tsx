@@ -8,7 +8,6 @@ import { Colors } from "@/constants/theme";
 import { useTranslation } from 'react-i18next';
 import SingleSelector from "@/components/animales/SingleSelector";
 import AnimalDatePickerModal from "@/components/animales/AnimalDatePickerModal";
-import VisitaDatePickerModal from "@/components/visitas/VisitaDatePickerModal";
 
 interface Persona {
   id_persona: number;
@@ -102,25 +101,6 @@ export default function ModalRegistrarVisita({ visible, onClose, onCreada, anima
   const fechaInvalida = !!estado && ((estado === "proxima" && fecha < hoy) || (estado === "realizada" && fecha > hoy));
   const horaInvalida = estado === "proxima" ? esHoraPasada(fecha, hora) : estado === "realizada" ? esHoraFutura(fecha, hora) : false;
   const horaFormatoInvalido = hora.length > 0 && !esHoraValida(hora);
-
-  const puedeCrear = () => {
-    if (!fecha) return false;
-    if (fechaInvalida) return false;
-    if (hora && !esHoraValida(hora)) return false;
-    if (horaInvalida) return false;
-    if (!procedimiento.trim()) return false;
-    if (!veterinarioId) return false;
-    if (!estado) return false;
-
-    for (const tratamiento of tratamientos) {
-      if (!tratamiento.tipo.trim()) return false;
-      if (!tratamiento.fecha_inicio) return false;
-      if (fechaInicioTratamientoInvalida(tratamiento.fecha_inicio, fecha)) return false;
-      if (fechaFinTratamientoInvalida(tratamiento.fecha_fin, tratamiento.fecha_inicio)) return false;
-    }
-
-    return true;
-  };
 
   useEffect(() => {
     if (visible) cargarDatos();
@@ -367,8 +347,8 @@ export default function ModalRegistrarVisita({ visible, onClose, onCreada, anima
             {/* Botón crear */}
             <TouchableOpacity
               onPress={handleCrear}
-              disabled={loading || !puedeCrear()}
-              style={[styles.btnCrear, !puedeCrear() && { opacity: 0.5 }]}
+              disabled={loading}
+              style={styles.btnCrear}
             >
               {loading
                 ? <ActivityIndicator color={Colors.surface} />
@@ -381,7 +361,7 @@ export default function ModalRegistrarVisita({ visible, onClose, onCreada, anima
       </View>
 
       {/* Picker fecha visita */}
-      <VisitaDatePickerModal
+      <AnimalDatePickerModal
         visible={pickerFecha}
         onClose={() => setPickerFecha(false)}
         onSelectDate={(d) => setFecha(d)}

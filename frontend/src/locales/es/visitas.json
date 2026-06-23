@@ -64,8 +64,8 @@
     "labelVencido": "Vencido",
     "errorFechaDebeSerFutura": "La fecha debe ser hoy o posterior, ya que la visita es próxima",
     "errorFechaDebeSerPasada": "La fecha debe ser hoy o anterior, ya que la visita es realizada",
-    "errorHoraDebeSerFutura": "La hora debe ser posterior a la hora actual",
-    "errorHoraDebeSerPasada": "La hora debe ser anterior a la hora actual",
+    "errorHoraDebeSerFutura": "La hora debe ser posterior a la hora actual, ya que la visita es próxima",
+    "errorHoraDebeSerPasada": "La hora debe ser anterior a la hora actual, ya que la visita es realizada",
     "errorFechaInicioTratamiento": "La fecha de inicio debe ser igual o posterior a la fecha de la visita",
     "errorFechaFinTratamiento": "La fecha de fin debe ser igual o posterior a la fecha de inicio del tratamiento"
 }

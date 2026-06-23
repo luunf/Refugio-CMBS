@@ -8,7 +8,6 @@ import { Colors } from "@/constants/theme";
 import { useTranslation } from 'react-i18next';
 import SingleSelector from "@/components/animales/SingleSelector";
 import AnimalDatePickerModal from "@/components/animales/AnimalDatePickerModal";
-import VisitaDatePickerModal from "@/components/visitas/VisitaDatePickerModal";
 
 interface Persona {
   id_persona: number;
@@ -197,26 +196,6 @@ export default function ModalEditarVisita({ visible, onClose, onEditada, visita 
     setTratamientos((prev) =>
       prev.map((t) => (t.key === key ? { ...t, ...campo } : t))
     );
-
-  const puedeGuardar = () => {
-    if (!fecha) return false;
-    if (fechaInvalida) return false;
-    if (hora && !esHoraValida(hora)) return false;
-    if (horaInvalida) return false;
-    if (!procedimiento.trim()) return false;
-    if (!veterinarioId) return false;
-    if (!estado) return false;
-
-    const tratamientosActivos = tratamientos.filter((t) => !t.eliminado);
-    for (const tratamiento of tratamientosActivos) {
-      if (!tratamiento.tipo.trim()) return false;
-      if (!tratamiento.fecha_inicio) return false;
-      if (fechaInicioTratamientoInvalida(tratamiento.fecha_inicio, fecha)) return false;
-      if (fechaFinTratamientoInvalida(tratamiento.fecha_fin, tratamiento.fecha_inicio)) return false;
-    }
-
-    return true;
-  };
 
   const handleGuardar = async () => {
     if (!fecha) return Alert.alert(t('error'), t('errorFecha'));
@@ -417,7 +396,7 @@ export default function ModalEditarVisita({ visible, onClose, onEditada, visita 
               <Text style={styles.btnAnadirTratamientoTexto}>{t('btnAnadirTratamiento')}</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={handleGuardar} disabled={loading || !puedeGuardar()} style={[styles.btnCrear, !puedeGuardar() && { opacity: 0.5 }]}>
+            <TouchableOpacity onPress={handleGuardar} disabled={loading} style={styles.btnCrear}>
               {loading
                 ? <ActivityIndicator color={Colors.surface} />
                 : <Text style={styles.btnCrearTexto}>{t('btnGuardar')}</Text>
@@ -428,7 +407,7 @@ export default function ModalEditarVisita({ visible, onClose, onEditada, visita 
         </View>
       </View>
 
-      <VisitaDatePickerModal
+      <AnimalDatePickerModal
         visible={pickerFecha}
         onClose={() => setPickerFecha(false)}
         onSelectDate={(d) => setFecha(d)}
