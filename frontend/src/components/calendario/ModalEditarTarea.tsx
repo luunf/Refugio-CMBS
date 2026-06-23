@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import DatePickerModal from './DatePickerModal';
 import { Colors } from '@/constants/theme';
 import { api } from '@/config/api';
+import { MaterialIcons } from "@expo/vector-icons";
 
 interface Props {
   visible: boolean;
@@ -222,7 +223,7 @@ export default function ModalEditarTarea({ visible, onClose, onUpdate, tarea }: 
                       ? t('modalNuevaTarea.voluntariosSeleccionados', { count: voluntariosSeleccionados.length })
                       : t('modalNuevaTarea.seleccionarVoluntarios')}
                 </Text>
-                <Text style={styles.chevron}>{showVoluntarios ? '▲' : '▼'}</Text>
+                <MaterialIcons name={showVoluntarios ? "keyboard-arrow-up" : "keyboard-arrow-down"} size={18} color={Colors.primary} />
               </TouchableOpacity>
               {showVoluntarios && (
                 <View style={styles.dropdown}>
@@ -362,7 +363,6 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 8,
   },
-  chevron: { color: Colors.primary, fontSize: 14 },
   dropdown: {
     backgroundColor: Colors.surface,
     borderWidth: 1,

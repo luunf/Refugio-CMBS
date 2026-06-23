@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 
 import { api } from "@/config/api";
 import { Colors } from "@/constants/theme";
+import { MaterialIcons } from "@expo/vector-icons";
 
 interface Rol {
   id_rol: number;
@@ -109,7 +110,7 @@ export default function RolSelector({
           </Text>
         )}
 
-        <Text style={styles.chevron}>⌄</Text>
+        <MaterialIcons name="keyboard-arrow-down" size={18} color={Colors.primary} />
       </TouchableOpacity>
 
       <Modal visible={open} transparent animationType="fade">
@@ -205,12 +206,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     flex: 1,
   },
-
-  chevron: {
-    fontSize: 18,
-    color: Colors.primary,
-  },
-
+  
   overlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.3)",

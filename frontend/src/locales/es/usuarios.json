@@ -1,7 +1,7 @@
 {
   "title": "Usuarios",
-  "buscar": "Buscar usuario",
-  "crearUsuario": "Crear usuario",
+  "buscar": "Buscar usuario...",
+  "crearUsuario": "Nuevo usuario",
   "editarUsuario": "Editar usuario",
 
   "tipo": "Tipo",

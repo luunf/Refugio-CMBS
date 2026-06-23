@@ -78,9 +78,7 @@ export default function TratamientoCard({ tratamiento, onDelete, onAgendar, agen
             />
           </TouchableOpacity>
 
-          <Text style={[styles.chevron, vencido && styles.iconoVencido]}>
-            {expandida ? "▲" : "▼"}
-          </Text>
+          <MaterialIcons name={expandida ? "keyboard-arrow-up" : "keyboard-arrow-down"} size={18} color={vencido ? Colors.textFaint : Colors.primary} style={{ marginLeft: 4 }} />
         </View>
       </View>
 
@@ -161,8 +159,6 @@ const styles = StyleSheet.create({
   animalNombre: { fontSize: 22, fontWeight: 'bold', color: Colors.text, flex: 1 },
   textoVencido: { color: Colors.textFaint },
   btnLapiz: { marginLeft: 8, padding: 4 },
-  iconoVencido: { color: Colors.textFaint },
-  chevron: { color: Colors.primary, fontSize: 18, marginLeft: 4 },
   etiquetaVencido: {
     color: Colors.textFaint,
     fontSize: 12,

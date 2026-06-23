@@ -1,7 +1,7 @@
 {
   "title": "Personas",
-  "buscar": "Buscar...",
-  "agregar": "Agregar persona",
+  "buscar": "Buscar persona...",
+  "agregar": "Nueva persona",
   "nombre": "Nombre*",
   "apellido": "Apellido*",
   "telefono": "Teléfono",
@@ -16,7 +16,7 @@
   "adoptante": "Adoptante",
   "hogarTransito": "Hogar de tránsito",
   "sinResultados": "No hay personas",
-  "editar": "Editar",
+  "editar": "Editar persona",
   "eliminar": "Eliminar",
   "crear": "Crear",
   "guardar": "Guardar",

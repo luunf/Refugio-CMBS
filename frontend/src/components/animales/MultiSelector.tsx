@@ -5,7 +5,7 @@ import {
 } from "react-native";
 import { Colors } from '@/constants/theme';
 import { useTranslation } from 'react-i18next';
-import { Feather } from "@expo/vector-icons";
+import { MaterialIcons } from "@expo/vector-icons";
 
 interface Item {
   id: number;
@@ -49,7 +49,7 @@ export default function MultiSelector({ value, onChange, items, placeholder, sea
         <Text style={value.length > 0 ? styles.textoSeleccionado : styles.placeholder} numberOfLines={1}>
           {etiqueta}
         </Text>
-        <Feather name="chevron-down" size={16} color={Colors.primary} />
+        <MaterialIcons name="keyboard-arrow-down" size={18} color={Colors.primary} />
       </TouchableOpacity>
 
       <Modal visible={open} transparent animationType="fade">

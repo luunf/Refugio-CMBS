@@ -34,7 +34,7 @@
     "todoElDia": "Todo el día",
     "horaLabel": "Hora (HH:MM)",
     "horaPlaceholder": "Ej: 10:00",
-    "btnCrear": "Crear nueva tarea",
+    "btnCrear": "Crear",
     "errorFechaPasada": "No se pueden crear tareas en fechas pasadas",
     "errorHoraInvalida": "Formato de hora inválido (HH:MM)",
     "errorHoraPasada": "No se puede elegir una hora que ya pasó",
@@ -58,7 +58,7 @@
   },
   "modalEditarTarea": {
     "titulo": "Editar tarea",
-    "btnGuardar": "Guardar cambios"
+    "btnGuardar": "Guardar"
   },
   "alert": {
     "exito": "Éxito",

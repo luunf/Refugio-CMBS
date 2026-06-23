@@ -85,7 +85,7 @@ export default function TareaCard({ tarea, onUpdate, onDelete, onEdit }: Props) 
         >
           <MaterialIcons name="edit" size={20} color={Colors.primary} />
         </TouchableOpacity>
-        <Text style={styles.chevron}>{expandida ? "▲" : "▼"}</Text>
+        <MaterialIcons name={expandida ? "keyboard-arrow-up" : "keyboard-arrow-down"} size={18} color={Colors.primary} />
       </View>
 
       {expandida && (
