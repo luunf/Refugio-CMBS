@@ -5,6 +5,7 @@ from app.extensions import db, cors, migrate, mail
 from app.config import Config
 from app.services.firebase_service import FirebaseService
 from app.utils.error_handlers import register_error_handlers
+from app.commands import register_commands
 
 # Blueprints
 from app.routes.tareas import tarea_bp
@@ -18,14 +19,11 @@ from app.routes.compatibilidad_routes import compatibilidad_bp
 from app.routes.tratamiento_routes import tratamiento_bp
 from app.routes.visita_routes import visita_bp
 from app.routes.vacuna_routes import vacuna_bp
-from app.services.seed_service import SeedService
 
-
-    
 
 def create_app():
     app = Flask(__name__)
-    
+
     # Configuración
     app.config.from_object(Config)
 
@@ -40,10 +38,8 @@ def create_app():
     # Firebase
     FirebaseService.initialize(app)
 
-    # Importar modelos
-    with app.app_context():
-        from app.services.seed_service import SeedService
-        SeedService.run()
+    # Comandos CLI
+    register_commands(app)
 
     # Blueprints
     app.register_blueprint(tarea_bp, url_prefix="/tareas")
@@ -57,6 +53,7 @@ def create_app():
     app.register_blueprint(tratamiento_bp, url_prefix="/tratamientos")
     app.register_blueprint(visita_bp, url_prefix="/visitas")
     app.register_blueprint(vacuna_bp, url_prefix="/vacunas")
+
     # Manejo de errores
     register_error_handlers(app)
 

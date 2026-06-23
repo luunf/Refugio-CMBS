@@ -83,7 +83,7 @@ export default function MultiSelector({ value, onChange, items, placeholder, sea
                 );
               }}
               ListEmptyComponent={
-                <Text style={styles.sinResultados}>{t('sinResultados')}</Text>
+                <Text style={styles.sinResultados}>{t('sinResultadosSelector')}</Text>
               }
             />
             <TouchableOpacity style={styles.btnListo} onPress={() => { setOpen(false); setBusqueda(""); }}>
