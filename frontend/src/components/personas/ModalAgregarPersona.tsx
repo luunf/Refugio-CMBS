@@ -93,7 +93,6 @@ export default function ModalAgregarPersona({
       );
       return;
     }
-//ojo estooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
     if (
       email.trim() &&
       !isEmailValid(email)
@@ -167,7 +166,7 @@ export default function ModalAgregarPersona({
             showsVerticalScrollIndicator={false}
           >
             <Text style={styles.label}>
-              {t("nombre")}*
+              {t("nombre")}
             </Text>
 
             <TextInput
@@ -181,7 +180,7 @@ export default function ModalAgregarPersona({
             />
 
             <Text style={styles.label}>
-              {t("apellido")}*
+              {t("apellido")}
             </Text>
 
             <TextInput
@@ -195,7 +194,7 @@ export default function ModalAgregarPersona({
             />
 
             <Text style={styles.label}>
-              {t("rol")}*
+              {t("rol")}
             </Text>
 
             <RolSelector

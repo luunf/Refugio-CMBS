@@ -245,12 +245,18 @@ class PersonaService:
             raise Exception(
                 "No se puede eliminar la persona porque tiene un usuario asociado"
             )
+        
+        if persona.visitas_veterinarias:
+            raise Exception(
+                "No se puede eliminar la persona porque tiene visitas veterinarias asociadas."
+            )
 
         db.session.delete(persona)
 
         db.session.commit()
 
         return True
+    
     @staticmethod
     def buscar_por_email(email):
 
@@ -270,5 +276,6 @@ class PersonaService:
             "apellido": persona.apellido,
             "email": persona.email,
             "telefono": persona.telefono,
-            "direccion": persona.direccion
+            "direccion": persona.direccion,
+            "tiene_usuario": persona.usuario is not None
         }

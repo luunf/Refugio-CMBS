@@ -36,7 +36,7 @@ export default function ModalCrearUsuario({
     useState("");
 
   const [password, setPassword] =
-    useState("Temporal123!");
+    useState("temporal123");
 
   const [tipo, setTipo] =
     useState<"admin" | "estandar">(
@@ -51,7 +51,7 @@ export default function ModalCrearUsuario({
     setEmail("");
 
     setPassword(
-      "cont123tem"
+      "temporal123"
     );
 
     setTipo("estandar");
@@ -63,124 +63,149 @@ export default function ModalCrearUsuario({
   
   const crear = async () => {
 
-    if (!email.trim()) {
+  if (!email.trim()) {
+    Alert.alert(
+      t("error"),
+      t("emailObligatorio")
+    );
+    return;
+  }
+
+  if (!isEmailValid(email)) {
+    Alert.alert(
+      t("error"),
+      t("emailInvalido")
+    );
+    return;
+  }
+
+  if (!password.trim()) {
+    Alert.alert(
+      t("error"),
+      t("passwordObligatoria")
+    );
+    return;
+  }
+
+  if (password.length < 8) {
+    Alert.alert(
+      t("error"),
+      t("passwordMinima")
+    );
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+
+    const personaExistente =
+      await api.buscarPersonaPorEmail(
+        email.trim()
+      );
+
+    //la persona ya tiene usuario
+    if (personaExistente?.tiene_usuario) {
+
+      setLoading(false);
+
       Alert.alert(
         t("error"),
-        t("emailObligatorio")
+        t("emailYaExiste")
       );
+
       return;
     }
 
-    if (!isEmailValid(email)) {
+    //existe persona pero NO usuario
+    if (personaExistente) {
+
+      setLoading(false);
+
       Alert.alert(
-        t("error"),
-        t("emailInvalido")
-      );
-      return;
-    }
+        t("personaExisteTitulo"),
 
-    if (!password.trim()) {
-      Alert.alert(
-        t("error"),
-        t("passwordObligatoria")
-      );
-      return;
-    }
+        `${personaExistente.nombre ?? ""} ${personaExistente.apellido ?? ""}`,
 
-    if (password.length < 8) {
-      Alert.alert(
-        t("error"),
-        t("passwordMinima")
-      );
-      return;
-    }
+        [
+          {
+            text: t("crearOtro"),
+            style: "cancel",
+          },
 
-    setLoading(true);
+          {
+            text: t("usarPersona"),
 
-    try {
+            onPress: async () => {
 
-        const personaExistente =
-        await api.buscarPersonaPorEmail(
-            email.trim()
-        );
+              try {
 
-        if (personaExistente) {
+                setLoading(true);
 
-        setLoading(false);
+                await api.createUsuario({
+                  email: email.trim(),
+                  password,
+                  tipo,
+                  persona_id:
+                    personaExistente.id_persona,
+                });
 
-        Alert.alert(
-            t("personaExisteTitulo"),
+                onCreado();
+                cerrar();
 
-            `${personaExistente.nombre ?? ""} ${personaExistente.apellido ?? ""}`,
+              } catch (e: any) {
 
-            [
-            {
-                text: t("crearOtro"),
-                style: "cancel",
-            },
+                  console.log(
+                    "ERROR RESPONSE:",
+                    e?.response?.data
+                  );
 
-            {
-                text: t("usarPersona"),
+                  console.log(
+                    "ERROR COMPLETO:",
+                    e
+                  );
 
-                onPress: async () => {
-
-                try {
-
-                    setLoading(true);
-
-                    await api.createUsuario({
-                    email: email.trim(),
-                    password,
-                    tipo,
-                    persona_id:
-                        personaExistente.id_persona,
-                    });
-
-                    onCreado();
-                    cerrar();
-
-                } catch (e: any) {
-
-                    Alert.alert(
+                  Alert.alert(
                     t("error"),
                     e?.response?.data?.error ??
-                        t("errorCrear")
-                    );
+                    t("errorCrear")
+                  );
 
-                } finally {
+              } finally {
 
-                    setLoading(false);
-                }
-                },
+                setLoading(false);
+              }
             },
-            ]
-        );
+          },
+        ]
+      );
 
-        return;
-        }
-
-        await api.createUsuario({
-        email: email.trim(),
-        password,
-        tipo,
-        });
-
-        onCreado();
-        cerrar();
-
-    } catch (e: any) {
-
-        Alert.alert(
-        t("error"),
-        e?.response?.data?.error ??
-            t("errorCrear")
-        );
-
-    } finally {
-
-        setLoading(false);
+      return;
     }
-    };
+
+    // No existe persona
+    await api.createUsuario({
+      email: email.trim(),
+      password,
+      tipo,
+    });
+
+    onCreado();
+    cerrar();
+
+  } catch (e: any) {
+
+    Alert.alert(
+      t("error"),
+      e?.response?.data?.error ??
+      t("errorCrear")
+    );
+
+  } finally {
+
+    setLoading(false);
+  }
+};
 
   return (
     <Modal

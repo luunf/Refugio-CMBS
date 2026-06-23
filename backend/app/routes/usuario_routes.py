@@ -10,9 +10,8 @@ def get_usuarios(decoded_token):
     return UsuarioController.get_all_usuarios()
 
 @usuario_bp.route('', methods=['POST']) #para pruebas saque el token_required, despues lo vuelvo a poner
-#@token_required
-#def create_usuario(decoded_token):
-def create_usuario():
+@token_required
+def create_usuario(decoded_token):
     return UsuarioController.create_usuario()
 
 @usuario_bp.route('/<int:usuario_id>', methods=['DELETE'])
@@ -30,6 +29,7 @@ def get_usuario(decoded_token, usuario_id):
 @token_required
 def update_usuario(decoded_token, usuario_id):
     return UsuarioController.update_usuario(usuario_id)
+
 @usuario_bp.route(
     '/<int:usuario_id>/reenviar-verificacion',
     methods=['POST']

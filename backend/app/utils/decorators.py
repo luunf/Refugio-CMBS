@@ -23,13 +23,9 @@ def token_required(f):
 
         token = parts[1]
 
-        print("TOKEN")
-        print(token)
 
         decoded_token = FirebaseService.verify_token(token)
 
-        print("DECODED TOKEN")
-        print(decoded_token)
 
         if not decoded_token:
             return jsonify({

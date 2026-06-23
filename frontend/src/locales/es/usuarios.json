@@ -43,5 +43,6 @@
   "passwordObligatoria": "La contraseña es obligatoria",
   "passwordMinima": "La contraseña debe tener al menos 8 caracteres",
 
-  "error": "Error"
+  "error": "Error",
+  "emailYaExiste": "Ya existe un usuario con este email"
 }
