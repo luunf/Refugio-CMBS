@@ -74,6 +74,17 @@ export default function ModalEditarVacuna({
       Alert.alert(t("error"), t("errorNombreRequerido"));
       return;
     }
+    if (
+      requiereProxDosis &&
+      fechaProxDosis &&
+      new Date(fechaProxDosis) < new Date(fechaAplicacion)
+    ) {
+      Alert.alert(
+        t("error"),
+        "La fecha de la próxima dosis no puede ser anterior a la fecha de aplicación",
+      );
+      return;
+    }
     setLoading(true);
     try {
       await api.updateVacuna(vacuna.id_vacuna, {
@@ -196,7 +207,7 @@ export default function ModalEditarVacuna({
           setFechaAplicacion(d);
           setPickerFechaAplicacion(false);
         }}
-        titulo={t("titleFechaAplicacion")}
+        titulo={t("labelFechaAplicacion")}
         fechaSeleccionada={fechaAplicacion}
       />
       <AnimalDatePickerModal
@@ -206,7 +217,7 @@ export default function ModalEditarVacuna({
           setFechaProxDosis(d);
           setPickerFechaProxDosis(false);
         }}
-        titulo={t("titleFechaProxDosis")}
+        titulo={t("labelFechaProxDosis")}
         fechaSeleccionada={
           fechaProxDosis || new Date().toISOString().split("T")[0]
         }

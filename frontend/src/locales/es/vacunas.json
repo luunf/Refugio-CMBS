@@ -5,7 +5,7 @@
   "labelNombre": "Nombre",
   "labelFechaAplicacion": "Fecha de aplicación",
   "labelRequiereProxDosis": "Requiere próxima dosis",
-  "labelFechaProxDosis": "Fecha próxima dosis",
+  "labelFechaProxDosis": "Fecha de próxima dosis",
   "labelCosto": "Costo de aplicación",
 
   "placeholderNombre": "Nombre de la vacuna",
