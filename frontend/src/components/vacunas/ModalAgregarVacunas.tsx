@@ -71,10 +71,7 @@ export default function ModalAgregarVacuna({
       fechaProxDosis &&
       new Date(fechaProxDosis) < new Date(fechaAplicacion)
     ) {
-      Alert.alert(
-        t("error"),
-        "La fecha de la próxima dosis no puede ser anterior a la fecha de aplicación",
-      );
+      Alert.alert(t("error"), t("errorProxDosis"));
       return;
     }
     setLoading(true);
