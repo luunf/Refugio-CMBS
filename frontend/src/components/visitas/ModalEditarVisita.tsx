@@ -197,26 +197,6 @@ export default function ModalEditarVisita({ visible, onClose, onEditada, visita 
       prev.map((t) => (t.key === key ? { ...t, ...campo } : t))
     );
 
-  const puedeGuardar = () => {
-    if (!fecha) return false;
-    if (fechaInvalida) return false;
-    if (hora && !esHoraValida(hora)) return false;
-    if (horaInvalida) return false;
-    if (!procedimiento.trim()) return false;
-    if (!veterinarioId) return false;
-    if (!estado) return false;
-
-    const tratamientosActivos = tratamientos.filter((t) => !t.eliminado);
-    for (const tratamiento of tratamientosActivos) {
-      if (!tratamiento.tipo.trim()) return false;
-      if (!tratamiento.fecha_inicio) return false;
-      if (fechaInicioTratamientoInvalida(tratamiento.fecha_inicio, fecha)) return false;
-      if (fechaFinTratamientoInvalida(tratamiento.fecha_fin, tratamiento.fecha_inicio)) return false;
-    }
-
-    return true;
-  };
-
   const handleGuardar = async () => {
     if (!fecha) return Alert.alert(t('error'), t('errorFecha'));
     if (fechaInvalida) {return Alert.alert(t('error'), estado === "proxima" ? t('errorFechaDebeSerFutura') : t('errorFechaDebeSerPasada'));}
