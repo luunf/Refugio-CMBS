@@ -1,6 +1,6 @@
 //tareacard
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Colors } from '@/constants/theme';
 import { MaterialIcons } from "@expo/vector-icons";
@@ -17,11 +17,50 @@ export default function TareaCard({ tarea, onUpdate, onDelete, onEdit }: Props) 
   const [expandida, setExpandida] = useState(false);
 
   const toggleCompletada = async () => {
-    await onUpdate();
+    try {
+      await onUpdate();
+    } catch (error: any) {
+      if (error?.response?.status === 400) {
+        console.log("Error controlado al actualizar estado:", error?.response?.data?.error);
+      } else {
+        console.error("Error inesperado:", error);
+      }
+      Alert.alert(
+        "Error",
+        error?.response?.data?.error || "No se pudo actualizar la tarea"
+      );
+    }
   };
 
-  const handleDelete = async () => {
-    await onDelete();
+  const handleEliminar = () => {
+    Alert.alert(
+      t('tareaCard.confirmTitleEliminar'),
+      t('tareaCard.confirmMessageEliminar'),
+      [
+        { text: t('tareaCard.btnCancelar'), style: "cancel" },
+        {
+          text: t('tareaCard.btnEliminar'),
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await onDelete();
+              Alert.alert(
+                "Éxito",
+                "Tarea eliminada correctamente",
+                [{ text: "OK" }]
+              );
+            } catch (error: any) {
+              console.error("Error al eliminar tarea:", error);
+              Alert.alert(
+                "Error",
+                error?.response?.data?.error || "No se pudo eliminar la tarea",
+                [{ text: "OK" }]
+              );
+            }
+          }
+        },
+      ]
+    );
   };
 
   const hora = tarea.hora
@@ -44,19 +83,22 @@ export default function TareaCard({ tarea, onUpdate, onDelete, onEdit }: Props) 
           onPress={(e) => { e.stopPropagation(); onEdit(); }}
           style={styles.btnLapiz}
         >
-          <MaterialIcons
-            name="edit"
-            size={20}
-            color={Colors.primary}
-          />
-</TouchableOpacity>
+          <MaterialIcons name="edit" size={20} color={Colors.primary} />
+        </TouchableOpacity>
         <Text style={styles.chevron}>{expandida ? "▲" : "▼"}</Text>
       </View>
 
       {expandida && (
         <View style={styles.detalle}>
-          <Text style={styles.detalleTexto}><Text style={styles.bold}>{t('tareaCard.horarioLabel')}</Text>{hora || "—"}</Text>
-          <Text style={styles.detalleTexto}><Text style={styles.bold}>{t('tareaCard.voluntariosLabel')}</Text>{voluntarios}</Text>
+          <Text style={styles.detalleTexto}>
+            <Text style={styles.bold}>{t('tareaCard.horarioLabel')}</Text>
+            {hora || "—"}
+          </Text>
+          <Text style={styles.detalleTexto}>
+            <Text style={styles.bold}>{t('tareaCard.voluntariosLabel')}</Text>
+            {voluntarios}
+          </Text>
+
           <TouchableOpacity
             onPress={toggleCompletada}
             style={[styles.btnCompletar, tarea.completada && styles.btnCompletarGris]}
@@ -66,7 +108,7 @@ export default function TareaCard({ tarea, onUpdate, onDelete, onEdit }: Props) 
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={handleDelete} style={styles.btnEliminar}>
+          <TouchableOpacity onPress={handleEliminar} style={styles.btnEliminar}>
             <Text style={styles.btnEliminarText}>{t('tareaCard.btnEliminar')}</Text>
           </TouchableOpacity>
         </View>

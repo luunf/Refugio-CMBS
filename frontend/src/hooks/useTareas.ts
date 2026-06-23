@@ -1,4 +1,4 @@
-//usetareas
+// useTareas
 import { useState, useCallback } from 'react';
 import { api } from '@/config/api';
 
@@ -22,9 +22,12 @@ export const useTareas = (mes: number, year: number) => {
     try {
       await api.createTarea(nuevaTarea);
       await cargarTareas();
-    } catch (error) {
-      console.error('Error al crear tarea:', error);
-      throw error;
+    } catch (error: any) {
+      // Solo mostramos en consola errores graves (no 400)
+      if (error?.response?.status !== 400) {
+        console.error('Error al crear tarea:', error);
+      }
+      throw error;   // ← Importante: seguimos lanzando el error para que lo capture el handle
     }
   }, [cargarTareas]);
 
@@ -32,8 +35,10 @@ export const useTareas = (mes: number, year: number) => {
     try {
       await api.updateTarea(id, data);
       await cargarTareas();
-    } catch (error) {
-      console.error('Error al actualizar tarea:', error);
+    } catch (error: any) {
+      if (error?.response?.status !== 400 && error?.response?.status !== 404) {
+        console.error('Error al actualizar tarea:', error);
+      }
       throw error;
     }
   }, [cargarTareas]);
@@ -42,8 +47,10 @@ export const useTareas = (mes: number, year: number) => {
     try {
       await api.deleteTarea(id);
       await cargarTareas();
-    } catch (error) {
-      console.error('Error al eliminar tarea:', error);
+    } catch (error: any) {
+      if (error?.response?.status !== 400 && error?.response?.status !== 404) {
+        console.error('Error al eliminar tarea:', error);
+      }
       throw error;
     }
   }, [cargarTareas]);

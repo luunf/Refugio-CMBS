@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity,
-  ActivityIndicator, StyleSheet
+  ActivityIndicator, StyleSheet, Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -22,6 +22,7 @@ export default function CalendarioScreen() {
   const [year, setYear] = useState(hoy.getFullYear());
   const [modalVisible, setModalVisible] = useState(false);
   const [tareaEditando, setTareaEditando] = useState<any | null>(null);
+
   const { tareas, loading, cargarTareas, crearTarea, actualizarTarea, eliminarTarea } = useTareas(mes, year);
 
   useEffect(() => {
@@ -35,6 +36,68 @@ export default function CalendarioScreen() {
     if (nuevoMes < 1) { nuevoMes = 12; nuevoYear--; }
     setMes(nuevoMes);
     setYear(nuevoYear);
+  };
+
+  const handleCrearTarea = async (nuevaTarea: any) => {
+    try {
+      await crearTarea(nuevaTarea);
+      
+      Alert.alert(
+        "Éxito",
+        "Tarea creada correctamente",
+        [{ text: "OK" }]
+      );
+    } catch (error: any) {
+      if (error?.response?.status === 400) {
+        console.log("Error controlado del backend (400):", error?.response?.data?.error);
+      } else {
+        console.error("Error inesperado al crear tarea:", error);
+      }
+
+      let mensajeError = 'No se pudo crear la tarea. Inténtalo de nuevo.';
+
+      if (error?.response?.data?.error) {
+        mensajeError = error.response.data.error;
+      } else if (error?.response?.data?.message) {
+        mensajeError = error.response.data.message;
+      }
+
+      Alert.alert(
+        "Error",
+        mensajeError,
+        [{ text: "OK" }]
+      );
+    }
+  };
+
+  const handleActualizarTarea = async (id: number, data: any) => {
+    try {
+      await actualizarTarea(id, data);
+      
+      Alert.alert(
+        "Éxito",
+        "Tarea actualizada correctamente",
+        [{ text: "OK" }]
+      );
+    } catch (error: any) {
+      if (error?.response?.status === 400 || error?.response?.status === 404) {
+        console.log("Error controlado:", error?.response?.data?.error);
+      } else {
+        console.error("Error inesperado al actualizar tarea:", error);
+      }
+
+      let mensajeError = 'No se pudo actualizar la tarea.';
+
+      if (error?.response?.data?.error) {
+        mensajeError = error.response.data.error;
+      }
+
+      Alert.alert(
+        "Error",
+        mensajeError,
+        [{ text: "OK" }]
+      );
+    }
   };
 
   const tareasPorDia: Record<number, any[]> = {};
@@ -100,7 +163,7 @@ export default function CalendarioScreen() {
       <ModalNuevaTarea
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
-        onCreate={crearTarea}
+        onCreate={handleCrearTarea}
         mesActual={mes}
         yearActual={year}
       />
@@ -108,7 +171,7 @@ export default function CalendarioScreen() {
       <ModalEditarTarea
         visible={!!tareaEditando}
         onClose={() => setTareaEditando(null)}
-        onUpdate={actualizarTarea}
+        onUpdate={handleActualizarTarea}
         tarea={tareaEditando}
       />
     </SafeAreaView>

@@ -1,8 +1,33 @@
 from flask import request, jsonify
 from app.services.tarea_service import TareaService
-
+from datetime import datetime
 
 class TareaController:
+
+    @staticmethod
+    def _validar_fecha(fecha_str: str) -> bool:
+        try:
+            datetime.strptime(fecha_str, "%Y-%m-%d")
+            return True
+        except:
+            return False
+
+    @staticmethod
+    def _validar_hora(hora_str: str) -> bool:
+        if not hora_str:
+            return True
+        try:
+            datetime.strptime(hora_str, "%H:%M")
+            return True
+        except:
+            return False
+
+    @staticmethod
+    def _validar_nombre(nombre: str) -> bool:
+        if not nombre or not isinstance(nombre, str):
+            return False
+        nombre_limpio = nombre.strip()
+        return len(nombre_limpio) >= 3 and not nombre_limpio.isdigit()  # mínimo 3 caracteres y no solo números
 
     @staticmethod
     def get_all_tareas():
@@ -19,20 +44,30 @@ class TareaController:
         try:
             tarea = TareaService.get_tarea_by_id(tarea_id)
             return jsonify(tarea), 200
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 404
         except Exception as e:
-            if "no encontrada" in str(e):
-                return jsonify({"error": str(e)}), 404
-            return jsonify({"error": str(e)}), 500
+            return jsonify({"error": "Error interno"}), 500
 
     @staticmethod
     def create_tarea():
         data = request.get_json()
         if not data:
             return jsonify({"error": "Datos inválidos"}), 400
-        required = ["nombre", "fecha"]
-        for field in required:
-            if field not in data:
-                return jsonify({"error": f"Falta el campo requerido: {field}"}), 400
+
+        # Validaciones fuertes
+        if not TareaController._validar_nombre(data.get("nombre")):
+            return jsonify({"error": "El nombre debe tener al menos 3 caracteres y no puede ser solo números"}), 400
+
+        if not data.get("fecha") or not TareaController._validar_fecha(data.get("fecha")):
+            return jsonify({"error": "Fecha inválida. Formato: YYYY-MM-DD"}), 400
+
+        if "hora" in data and not TareaController._validar_hora(data.get("hora")):
+            return jsonify({"error": "Hora inválida. Formato: HH:MM"}), 400
+
+        if "personas_ids" in data and not isinstance(data.get("personas_ids"), list):
+            return jsonify({"error": "'personas_ids' debe ser una lista de números"}), 400
+
         try:
             tarea = TareaService.crear_tarea(data)
             return jsonify(tarea), 201
@@ -44,10 +79,13 @@ class TareaController:
         data = request.get_json()
         if not data:
             return jsonify({"error": "Datos inválidos"}), 400
-        required = ["nombre", "fecha_inicio"]
-        for field in required:
-            if field not in data:
-                return jsonify({"error": f"Falta el campo requerido: {field}"}), 400
+
+        if not TareaController._validar_nombre(data.get("nombre")):
+            return jsonify({"error": "El nombre debe tener al menos 3 caracteres y no puede ser solo números"}), 400
+
+        if not data.get("fecha_inicio") or not TareaController._validar_fecha(data.get("fecha_inicio")):
+            return jsonify({"error": "fecha_inicio inválida"}), 400
+
         try:
             tareas = TareaService.crear_tareas_desde_tratamiento(
                 nombre=data["nombre"],
@@ -64,12 +102,21 @@ class TareaController:
         data = request.get_json()
         if not data:
             return jsonify({"error": "Datos inválidos"}), 400
+
+        # Validar nombre solo si viene en el update
+        if "nombre" in data and not TareaController._validar_nombre(data.get("nombre")):
+            return jsonify({"error": "El nombre debe tener al menos 3 caracteres y no puede ser solo números"}), 400
+
+        allowed = {"nombre", "fecha", "hora", "es_todo_el_dia", "completada", "personas_ids", "descripcion"}
+        if any(key not in allowed for key in data.keys()):
+            return jsonify({"error": "Campos no permitidos"}), 400
+
         try:
             tarea = TareaService.actualizar_tarea(tarea_id, data)
             return jsonify(tarea), 200
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 404
         except Exception as e:
-            if "no encontrada" in str(e):
-                return jsonify({"error": str(e)}), 404
             return jsonify({"error": str(e)}), 400
 
     @staticmethod
@@ -77,19 +124,19 @@ class TareaController:
         try:
             TareaService.eliminar_tarea(tarea_id)
             return jsonify({"message": "Tarea eliminada correctamente"}), 200
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 404
         except Exception as e:
-            if "no encontrada" in str(e):
-                return jsonify({"error": str(e)}), 404
-            return jsonify({"error": str(e)}), 500
+            return jsonify({"error": "Error interno"}), 500
 
     @staticmethod
     def get_personas_by_tarea(tarea_id):
         try:
             personas = TareaService.get_personas_by_tarea(tarea_id)
             return jsonify(personas), 200
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 404
         except Exception as e:
-            if "no encontrada" in str(e):
-                return jsonify({"error": str(e)}), 404
             return jsonify({"error": str(e)}), 500
 
     @staticmethod
@@ -97,7 +144,7 @@ class TareaController:
         try:
             tareas = TareaService.get_tareas_by_persona(persona_id)
             return jsonify(tareas), 200
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 404
         except Exception as e:
-            if "no encontrada" in str(e):
-                return jsonify({"error": str(e)}), 404
             return jsonify({"error": str(e)}), 500

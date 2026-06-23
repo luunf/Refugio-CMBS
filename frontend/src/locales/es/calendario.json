@@ -51,18 +51,19 @@
     "voluntariosLabel": "Voluntarios: ",
     "btnMarcarPendiente": "Marcar pendiente",
     "btnMarcarCompletada": "Marcar completada",
-    "btnEliminar": "Eliminar tarea"
+    "btnEliminar": "Eliminar tarea",
+    "confirmTitleEliminar": "Eliminar tarea",
+    "confirmMessageEliminar": "¿Estás seguro de que deseas eliminar esta tarea?",
+    "btnCancelar": "Cancelar"
   },
-
-  "datePicker": {
-    "titulo": "Selecciona una fecha",
-    "cancelar": "Cancelar",
-    "aceptar": "Aceptar"
-  },
-
-  
   "modalEditarTarea": {
     "titulo": "Editar tarea",
     "btnGuardar": "Guardar cambios"
+  },
+  "alert": {
+    "exito": "Éxito",
+    "tareaCreada": "Tarea creada correctamente",
+    "tareaActualizada": "Tarea actualizada correctamente",
+    "error": "Error"
   }
 }
