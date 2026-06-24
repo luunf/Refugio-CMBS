@@ -1,5 +1,6 @@
 from flask import Blueprint
 from app.controllers.tarea_controller import TareaController
+from app.utils.decorators import token_required
 
 tarea_bp = Blueprint('tareas', __name__)
 
@@ -12,20 +13,29 @@ def get_tarea(tarea_id):
     return TareaController.get_tarea(tarea_id)
 
 @tarea_bp.route('', methods=['POST'])
-def create_tarea():
-    return TareaController.create_tarea()
+@token_required
+def create_tarea(decoded_token):
+    return TareaController.create_tarea(decoded_token)
 
 @tarea_bp.route('/desde-tratamiento', methods=['POST'])
 def create_tareas_desde_tratamiento():
     return TareaController.create_tareas_desde_tratamiento()
 
 @tarea_bp.route('/<int:tarea_id>', methods=['PATCH'])
-def update_tarea(tarea_id):
-    return TareaController.update_tarea(tarea_id)
+@token_required
+def update_tarea(decoded_token, tarea_id):
+    return TareaController.update_tarea(
+        tarea_id,
+        decoded_token
+    )
 
 @tarea_bp.route('/<int:tarea_id>', methods=['DELETE'])
-def delete_tarea(tarea_id):
-    return TareaController.delete_tarea(tarea_id)
+@token_required
+def delete_tarea(decoded_token, tarea_id):
+    return TareaController.delete_tarea(
+        tarea_id,
+        decoded_token
+    )
 
 @tarea_bp.route('/personas/<int:persona_id>/tareas', methods=['GET'])
 def tareas_de_persona(persona_id):

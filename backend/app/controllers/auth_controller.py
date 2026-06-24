@@ -34,26 +34,4 @@ class AuthController:
             "perfil_completo": perfil_completo
         }), 200
     
-    @staticmethod
-    def dev_login(usuario_id):
-
-        usuario = UsuarioService.get_usuario_by_id(usuario_id)
-
-        if not usuario:
-            return jsonify({
-                "error": "Usuario no encontrado"
-            }), 404
-
-        persona = usuario.persona
-
-        roles = [rol.nombre for rol in persona.roles]
-
-        return jsonify({
-            "id_usuario": usuario.id_usuario,
-            "email": usuario.email,
-            "nombre": persona.nombre,
-            "apellido": persona.apellido,
-            "tipo": usuario.tipo,
-            "roles": roles,
-            "persona_id": persona.id_persona
-        }), 200 
+    

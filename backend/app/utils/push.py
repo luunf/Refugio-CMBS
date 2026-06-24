@@ -48,7 +48,7 @@ def _enviar_push(persona, titulo, cuerpo):
         "to": persona.usuario.expo_push_token,
         "title": titulo,
         "body": cuerpo,
-        "sound": "default",
+        #"sound": "default",
     }
 
     print("PAYLOAD:")

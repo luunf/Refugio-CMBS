@@ -9,3 +9,4 @@ from .rol                import Rol
 from .usuario            import Usuario
 from .tarea              import Tarea
 from .asociaciones       import (AnimalEstado, AnimalCompatibilidad, AnimalPersona, PersonaRol, TareaPersona)
+from .push_token         import PushToken

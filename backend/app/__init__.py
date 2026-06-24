@@ -21,6 +21,9 @@ from app.routes.visita_routes import visita_bp
 from app.routes.vacuna_routes import vacuna_bp
 
 
+#notis
+from app.routes.notificaciones_routes import notificaciones_bp, init_scheduler
+
 def create_app():
     app = Flask(__name__)
 
@@ -54,7 +57,13 @@ def create_app():
     app.register_blueprint(visita_bp, url_prefix="/visitas")
     app.register_blueprint(vacuna_bp, url_prefix="/vacunas")
 
+    #notis
+    app.register_blueprint(notificaciones_bp, url_prefix="/notificaciones")
     # Manejo de errores
     register_error_handlers(app)
+
+    # Inicializar el scheduler para notificaciones
+    with app.app_context():
+        init_scheduler(app)
 
     return app

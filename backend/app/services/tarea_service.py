@@ -3,7 +3,11 @@ from app.models.tarea import Tarea
 from app.models.persona import Persona
 from app.utils.email import enviar_email_asignacion, enviar_email_modificacion
 from datetime import timedelta, datetime as dt
-
+from app.routes.notificaciones_routes import (
+    notificar_tarea_asignada,
+    notificar_tarea_completada,
+    notificar_tarea_cancelada,
+)
 class TareaService:
 
     @staticmethod
@@ -24,7 +28,7 @@ class TareaService:
         return tarea.to_dict()
 
     @staticmethod
-    def crear_tarea(data):
+    def crear_tarea(data,asignado_por="Sistema"):
         personas_ids = data.pop("personas_ids", [])
         tarea = Tarea(
             nombre=data["nombre"],
@@ -38,9 +42,21 @@ class TareaService:
         if personas_ids:
             personas = Persona.query.filter(Persona.id_persona.in_(personas_ids)).all()
             tarea.personas = personas
+
         db.session.commit()
+        print(
+            f"[DEBUG] Enviando notificación a personas: {personas_ids}"
+        )
+
+        notificar_tarea_asignada(
+            tarea=tarea,
+            personas_ids=personas_ids,
+            asignado_por=asignado_por
+        )
+
         for persona in tarea.personas:
             enviar_email_asignacion(persona, tarea)
+
         return tarea.to_dict()
 
     @staticmethod
@@ -75,27 +91,63 @@ class TareaService:
         return [t.to_dict() for t in tareas_creadas]
 
     @staticmethod
-    def actualizar_tarea(id, data):
+    def actualizar_tarea(
+        id,
+        data,
+        actualizado_por="Sistema"
+    ):
         tarea = Tarea.query.get(id)
+
         if not tarea:
             raise Exception("Tarea no encontrada")
+
+        was_completed = tarea.completada
+
         personas_ids = data.pop("personas_ids", None)
+
         for key, value in data.items():
             if hasattr(tarea, key):
                 setattr(tarea, key, value)
+
         if personas_ids is not None:
-            personas = Persona.query.filter(Persona.id_persona.in_(personas_ids)).all()
+            personas = Persona.query.filter(
+                Persona.id_persona.in_(personas_ids)
+            ).all()
+
             tarea.personas = personas
+
             for persona in tarea.personas:
-                enviar_email_modificacion(persona, tarea)
+                enviar_email_modificacion(
+                    persona,
+                    tarea
+                )
+
         db.session.commit()
+
+        if (
+            not was_completed and
+            tarea.completada
+        ):
+            notificar_tarea_completada(
+                tarea=tarea,
+                completada_por=actualizado_por
+            )
+
         return tarea.to_dict()
 
     @staticmethod
-    def eliminar_tarea(id):
+    def eliminar_tarea(id, cancelada_por="Sistema"):
         tarea = Tarea.query.get(id)
+
         if not tarea:
             raise Exception("Tarea no encontrada")
+
+        if cancelada_por:
+            notificar_tarea_cancelada(
+                tarea=tarea,
+                cancelada_por=cancelada_por
+            )
+
         db.session.delete(tarea)
         db.session.commit()
 

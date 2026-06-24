@@ -1,6 +1,7 @@
 from flask import request, jsonify
 from app.services.tarea_service import TareaService
 from datetime import datetime
+from app.services.usuario_service import UsuarioService
 
 class TareaController:
 
@@ -50,7 +51,7 @@ class TareaController:
             return jsonify({"error": "Error interno"}), 500
 
     @staticmethod
-    def create_tarea():
+    def create_tarea(decoded_token):
         data = request.get_json()
         if not data:
             return jsonify({"error": "Datos inválidos"}), 400
@@ -69,8 +70,20 @@ class TareaController:
             return jsonify({"error": "'personas_ids' debe ser una lista de números"}), 400
 
         try:
-            tarea = TareaService.crear_tarea(data)
+
+            nombre_usuario = (
+                TareaController._obtener_nombre_usuario(
+                    decoded_token
+                )
+            )
+
+            tarea = TareaService.crear_tarea(
+                data,
+                asignado_por=nombre_usuario
+            )
+
             return jsonify(tarea), 201
+
         except Exception as e:
             return jsonify({"error": str(e)}), 400
 
@@ -98,7 +111,7 @@ class TareaController:
             return jsonify({"error": str(e)}), 400
 
     @staticmethod
-    def update_tarea(tarea_id):
+    def update_tarea(tarea_id, decoded_token):
         data = request.get_json()
         if not data:
             return jsonify({"error": "Datos inválidos"}), 400
@@ -112,7 +125,13 @@ class TareaController:
             return jsonify({"error": "Campos no permitidos"}), 400
 
         try:
-            tarea = TareaService.actualizar_tarea(tarea_id, data)
+            nombre_usuario = (
+                TareaController._obtener_nombre_usuario(
+                    decoded_token
+                )
+            )
+
+            tarea = TareaService.actualizar_tarea(tarea_id, data, actualizado_por=nombre_usuario)
             return jsonify(tarea), 200
         except ValueError as e:
             return jsonify({"error": str(e)}), 404
@@ -120,10 +139,19 @@ class TareaController:
             return jsonify({"error": str(e)}), 400
 
     @staticmethod
-    def delete_tarea(tarea_id):
+    def delete_tarea(tarea_id, decoded_token):
         try:
-            TareaService.eliminar_tarea(tarea_id)
-            return jsonify({"message": "Tarea eliminada correctamente"}), 200
+            nombre_usuario = (
+                TareaController._obtener_nombre_usuario(
+                    decoded_token
+                )
+            )
+
+            TareaService.eliminar_tarea(
+                tarea_id,
+                cancelada_por=nombre_usuario
+            )
+            return jsonify({"message": "Tarea cancelada correctamente"}), 200
         except ValueError as e:
             return jsonify({"error": str(e)}), 404
         except Exception as e:
@@ -148,3 +176,20 @@ class TareaController:
             return jsonify({"error": str(e)}), 404
         except Exception as e:
             return jsonify({"error": str(e)}), 500
+        
+    @staticmethod
+    def _obtener_nombre_usuario(decoded_token):
+
+        firebase_uid = decoded_token.get("uid")
+
+        usuario = UsuarioService.get_usuario_by_firebase_uid(
+            firebase_uid
+        )
+
+        if not usuario:
+            return "Sistema"
+
+        return (
+            f"{usuario.persona.nombre} "
+            f"{usuario.persona.apellido}"
+        )
