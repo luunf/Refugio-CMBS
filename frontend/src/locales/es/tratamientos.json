@@ -44,13 +44,25 @@
   },
   "modalEditar": {
     "titulo": "Editar tratamiento",
-    "tipoLabel": "Tipo *",
-    "fechaInicioLabel": "Fecha inicio *",
+    "tipoLabel": "Tipo*",
+    "fechaInicioLabel": "Fecha inicio*",
     "fechaInicioPlaceholder": "DD/MM/AAAA",
     "fechaFinLabel": "Fecha fin",
     "fechaFinPlaceholder": "DD/MM/AAAA",
     "descripcionLabel": "Descripción",
-    "btnGuardar": "Guardar cambios",
+    "btnGuardar": "Guardar",
     "errorFechaFin": "La fecha de fin no puede ser anterior a la fecha de inicio"
+  },
+  "alertas":{
+    "sinFechaFinTitulo": "Error",
+    "sinFechaFinMensaje": "El tratamiento no tiene fecha de fin definida",
+    "tareaCreadaTitulo": "Éxito",
+    "tareaCreadaMensaje": "Tarea registrada correctamente",
+    "errorTitulo": "Error",
+    "errorAgendarMensaje": "No se pudo registrar la tarea",
+    "tratamientoActualizadoTitulo": "Éxito",
+    "tratamientoActualizadoMensaje": "Tratamiento editado correctamente",
+    "errorEditarMensaje": "No se pudo editar el tratamiento",
+    "ErrorEliminarMensaje": "No se pudo eliminar el tratamiento"
   }
 }

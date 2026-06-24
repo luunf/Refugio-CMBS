@@ -17,6 +17,8 @@
   "crear": "Crear",
   "cancelar": "Cancelar",
 
+  "sinNombre": "Usuario sin nombre",
+
   "emailObligatorio": "El email es obligatorio",
   "errorCrear": "No se pudo crear el usuario",
 

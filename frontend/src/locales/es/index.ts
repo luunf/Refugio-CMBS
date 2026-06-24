@@ -7,6 +7,7 @@ import calendario from "./calendario.json";
 import usuarios from "./usuarios.json";
 import tratamientos from "./tratamientos.json";
 import vacunas from "./vacunas.json";
+import home from "./home.json";
 
 export default {
   animales,
@@ -18,4 +19,5 @@ export default {
   usuarios,
   tratamientos,
   vacunas,
+  home,
 };

@@ -61,7 +61,7 @@
     "errorEliminar": "No se pudo eliminar la visita",
     "titleVisita": "Visita",
     "sinTratamientos": "No hay tratamientos asociados",
-    "labelVencido": "Vencido",
+    "labelVencido": "Finalizado",
     "errorFechaDebeSerFutura": "La fecha debe ser hoy o posterior, ya que la visita es próxima",
     "errorFechaDebeSerPasada": "La fecha debe ser hoy o anterior, ya que la visita es realizada",
     "errorHoraDebeSerFutura": "La hora debe ser posterior a la hora actual, ya que la visita es próxima",
