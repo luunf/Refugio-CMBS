@@ -86,30 +86,21 @@ class UsuarioService:
             password=password
         )
 
-        if tipo == "admin":
+        auth.update_user(
+            firebase_user.uid,
+            email_verified=False
+        )
 
-            auth.update_user(
-                firebase_user.uid,
-                email_verified=True
-            )
+        link = auth.generate_email_verification_link(
+            email
+        )
 
-        else:
+        enviar_email_verificacion(
+            email,
+            link
+        )
 
-            auth.update_user(
-                firebase_user.uid,
-                email_verified=False
-            )
-
-            link = auth.generate_email_verification_link(
-                email
-            )
-
-            enviar_email_verificacion(
-                email,
-                link
-            )
         # PERSONA EXISTENTE
-
         if persona_id:
 
             persona = Persona.query.get(
@@ -131,7 +122,6 @@ class UsuarioService:
                 )
 
         # PERSONA NUEVA
-
         else:
 
             persona = Persona(
@@ -268,9 +258,7 @@ class UsuarioService:
     @staticmethod
     def reenviar_verificacion(usuario_id):
 
-        usuario = Usuario.query.get(
-            usuario_id
-        )
+        usuario = Usuario.query.get(usuario_id)
 
         if not usuario:
             raise Exception(
@@ -282,18 +270,28 @@ class UsuarioService:
         )
 
         if firebase_user.email_verified:
-
             raise Exception(
                 "El email ya fue verificado"
             )
 
-        link = auth.generate_email_verification_link(
-            usuario.email
-        )
+        try:
 
-        enviar_email_verificacion(
-            usuario.email,
-            link
-        )
+            link = auth.generate_email_verification_link(
+                usuario.email
+            )
 
-        return True
+            enviar_email_verificacion(
+                usuario.email,
+                link
+            )
+
+            return True
+
+        except Exception as e:
+
+            if "TOO_MANY_ATTEMPTS_TRY_LATER" in str(e):
+                raise Exception(
+                    "Ya se envió un correo de verificación recientemente. Espere unos minutos antes de solicitar otro."
+                )
+
+            raise e
