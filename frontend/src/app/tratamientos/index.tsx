@@ -9,7 +9,6 @@ import { useTranslation } from 'react-i18next';
 import Feather from "@expo/vector-icons/build/Feather";
 import { useTratamientos } from '../../hooks/useTratamientos';
 import TratamientoCard from '../../components/tratamientos/TratamientoCard';
-import ModalNuevoTratamiento from '../../components/tratamientos/ModalNuevoTratamiento';
 import ModalEditarTratamiento from '../../components/tratamientos/ModalEditarTratamiento';
 import { Colors } from '@/constants/theme';
 
@@ -20,7 +19,6 @@ export default function TratamientosScreen() {
     tratamientos,
     loading,
     cargarTratamientos,
-    crearTratamientoCompleto,
     actualizarTratamiento,
     eliminarTratamiento,
     agendarEnCalendario,
@@ -28,7 +26,6 @@ export default function TratamientosScreen() {
 
   const [busqueda, setBusqueda] = useState('');
   const [filtro, setFiltro] = useState('Todos');
-  const [modalVisible, setModalVisible] = useState(false);
   const [tratamientoEditando, setTratamientoEditando] = useState<any | null>(null);
   const [agendando, setAgendando] = useState<number | null>(null);
 
@@ -50,41 +47,49 @@ export default function TratamientosScreen() {
 
   const handleAgendar = async (tratamiento: any) => {
     if (!tratamiento.fecha_fin) {
-      console.warn('El tratamiento no tiene fecha de fin definida');
+      Alert.alert(t('alertas.sinFechaFinTitulo'), t('alertas.sinFechaFinMensaje'));
       return;
     }
     setAgendando(tratamiento.id);
     try {
       await agendarEnCalendario(tratamiento);
+      Alert.alert(t('alertas.tareaCreadaTitulo'), t('alertas.tareaCreadaMensaje'));
     } catch (e) {
       console.error(e);
+      Alert.alert(t('alertas.errorTitulo'), t('alertas.errorAgendarMensaje'));
     } finally {
       setAgendando(null);
     }
   };
 
-  // ← Esta es la función que arregla el conflicto con ModalEditarTratamiento
   const handleEditarGuardar = async (id: number, data: any) => {
     try {
       await actualizarTratamiento(id, data);
-      Alert.alert(
-        t('card.exito') || 'Éxito',
-        t('card.tratamientoActualizado') || 'Tratamiento actualizado correctamente'
-      );
+      Alert.alert(t('alertas.tratamientoActualizadoTitulo'), t('alertas.tratamientoActualizadoMensaje'));
     } catch (e: any) {
-      Alert.alert(
-        t('error') || 'Error',
-        e?.response?.data?.error || t('card.errorActualizar') || 'No se pudo actualizar el tratamiento'
-      );
+      Alert.alert(t('alertas.errorTitulo'), e?.response?.data?.error ?? t('alertas.errorEditarMensaje'));
+    }
+  };
+
+  // onDelete acá NO muestra alert de confirmación — eso ya lo hace TratamientoCard internamente.
+  // Solo ejecuta la eliminación real cuando TratamientoCard ya confirmó con el usuario.
+  const handleDelete = async (id: number) => {
+    try {
+      await eliminarTratamiento(id);
+    } catch (e: any) {
+      Alert.alert(t('alertas.errorTitulo'), e?.response?.data?.error ?? t('alertas.errorEliminarMensaje'));
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
+
+      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerText}>{t('headerTitulo')}</Text>
       </View>
 
+      {/* Buscador */}
       <View style={styles.buscadorRow}>
         <View style={styles.buscadorContainer}>
           <Feather name="search" size={18} color={Colors.textFaint} style={{ marginRight: 6 }} />
@@ -98,6 +103,7 @@ export default function TratamientosScreen() {
         </View>
       </View>
 
+      {/* Filtros */}
       <View style={styles.filtrosGrilla}>
         {FILTROS_ESPECIE.map(f => (
           <TouchableOpacity
@@ -112,6 +118,7 @@ export default function TratamientosScreen() {
         ))}
       </View>
 
+      {/* Lista */}
       {loading ? (
         <ActivityIndicator size="large" color={Colors.primary} style={{ marginTop: 40 }} />
       ) : (
@@ -123,7 +130,7 @@ export default function TratamientosScreen() {
               <TratamientoCard
                 key={tr.id}
                 tratamiento={tr}
-                onDelete={eliminarTratamiento}
+                onDelete={handleDelete}
                 onAgendar={handleAgendar}
                 agendando={agendando === tr.id}
                 onEdit={() => setTratamientoEditando(tr)}
@@ -134,100 +141,90 @@ export default function TratamientosScreen() {
         </ScrollView>
       )}
 
-      <ModalNuevoTratamiento
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-        onCrear={async (data) => {
-          await crearTratamientoCompleto(
-            data.animal_id,
-            { fecha: data.fecha_inicio, procedimiento: data.tipo, estado: 'realizada', veterinario_id: 1 },
-            { tipo: data.tipo, descripcion: data.descripcion, fecha_inicio: data.fecha_inicio, fecha_fin: data.fecha_fin }
-          );
-          setModalVisible(false);
-        }}
-      />
-
       <ModalEditarTratamiento
         visible={!!tratamientoEditando}
         onClose={() => setTratamientoEditando(null)}
         tratamiento={tratamientoEditando}
         onSave={handleEditarGuardar}
       />
+
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: Colors.background },
-
-  header: { 
-    backgroundColor: Colors.primary, 
-    paddingHorizontal: 16, 
-    paddingVertical: 16 },
-
-  headerText: { 
-    color: Colors.surface, 
-    fontSize: 24, 
-    fontWeight: 'bold' },
-
-  buscadorRow: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    paddingHorizontal: 16, 
-    paddingVertical: 12, 
-    backgroundColor: Colors.surface, 
-    gap: 10 },
-
-  buscadorContainer: { 
-    flex: 1, 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    backgroundColor: Colors.background, 
-    borderRadius: 20, 
-    paddingHorizontal: 12, 
-    paddingVertical: 8 },
-
-  buscadorInput: { 
-    flex: 1, 
-    fontSize: 14, 
-    color: Colors.text },
-
-  filtrosGrilla: { 
-    flexDirection: 'row', 
-    flexWrap: 'wrap', 
-    paddingHorizontal: 16, 
-    paddingVertical: 10, 
-    backgroundColor: Colors.surface, 
-    gap: 8 },
-
-  filtroBadge: { 
-    paddingHorizontal: 14, 
-    paddingVertical: 6, 
-    borderRadius: 20, 
-    backgroundColor: Colors.background },
-
-  filtroBadgeActivo: { 
-    backgroundColor: Colors.primary },
-    
-  filtroTexto: { 
-    color: Colors.textSoft, 
-    fontSize: 13, 
-    fontWeight: '500' },
-
-  filtroTextoActivo: { 
-    color: Colors.surface, 
-    fontSize: 13, 
-    fontWeight: '600' },
-
-  lista: { 
-    flex: 1, 
-    paddingHorizontal: 16, 
-    paddingTop: 12 },
-
-  sinResultados: { 
-    textAlign: 'center', 
-    color: Colors.textFaint, 
-    marginTop: 40, fontSize: 16 },
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+  header: {
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  headerText: {
+    color: Colors.surface,
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  buscadorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: Colors.surface,
+    gap: 10,
+  },
+  buscadorContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.background,
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  buscadorInput: {
+    flex: 1,
+    fontSize: 14,
+    color: Colors.text,
+  },
+  filtrosGrilla: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: Colors.surface,
+    gap: 8,
+  },
+  filtroBadge: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
+    backgroundColor: Colors.background,
+  },
+  filtroBadgeActivo: {
+    backgroundColor: Colors.primary,
+  },
+  filtroTexto: {
+    color: Colors.textSoft,
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  filtroTextoActivo: {
+    color: Colors.surface,
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  lista: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+  },
+  sinResultados: {
+    textAlign: 'center',
+    color: Colors.textFaint,
+    marginTop: 40,
+    fontSize: 16,
+  },
 });

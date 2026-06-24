@@ -19,9 +19,10 @@
     "confirmTitleEliminar": "Eliminar tratamiento",
     "confirmMessageEliminar": "¿Estás seguro de que deseas eliminar este tratamiento?",
     "btnCancelar": "Cancelar",
-    "exito": "Éxito",
-    "tratamientoActualizado": "Tratamiento actualizado correctamente",
+    "exito":"Exito",
+    "TratamientoActualizado": "Tratamiento actualizado correctamente",
     "errorActualizar": "No se pudo actualizar el tratamiento"
+
   },
   "modalNuevo": {
     "titulo": "Tratamiento",

@@ -22,13 +22,9 @@ const esVencido = (fechaFin: string | null): boolean => {
 };
 
 const formatearFecha = (fecha?: string | null) => {
-  if (!fecha) return '—';
+  if (!fecha) return "—";
 
-  const d = new Date(fecha);
-
-  const dia = String(d.getDate()).padStart(2, '0');
-  const mes = String(d.getMonth() + 1).padStart(2, '0');
-  const anio = d.getFullYear();
+  const [anio, mes, dia] = fecha.substring(0, 10).split("-");
 
   return `${dia}/${mes}/${anio}`;
 };
