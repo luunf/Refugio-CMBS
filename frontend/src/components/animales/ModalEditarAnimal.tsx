@@ -71,6 +71,9 @@ const formatFecha = (fecha?: string) => {
   return `${d}/${m}/${y}`;
 };
 
+const nombreCompleto = (p: Persona) =>
+  [p.nombre, p.apellido].filter(Boolean).join(' ') || 'Usuario sin nombre';
+
 export default function ModalEditarAnimal({ visible, onClose, onEditado, animal }: Props) {
   const { t } = useTranslation('animales');
 
@@ -257,9 +260,9 @@ export default function ModalEditarAnimal({ visible, onClose, onEditado, animal 
   };
 
   const compatibilidadesItems = compatibilidades.map(c => ({ id: c.id_compatibilidad, nombre: c.nombre }));
-  const voluntariosItems = voluntarios.map(p => ({ id: p.id_persona, nombre: `${p.nombre} ${p.apellido}` }));
-  const adoptantesItems = adoptantes.map(p => ({ id: p.id_persona, nombre: `${p.nombre} ${p.apellido}` }));
-  const hogaresItems = hogares.map(p => ({ id: p.id_persona, nombre: `${p.nombre} ${p.apellido}` }));
+  const voluntariosItems = voluntarios.map(p => ({ id: p.id_persona, nombre: nombreCompleto(p) }));
+  const adoptantesItems = adoptantes.map(p => ({ id: p.id_persona, nombre: nombreCompleto(p) }));
+  const hogaresItems = hogares.map(p => ({ id: p.id_persona, nombre: nombreCompleto(p) }));
 
   return (
     <Modal visible={visible} animationType='slide' transparent>

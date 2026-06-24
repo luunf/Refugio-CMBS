@@ -62,6 +62,9 @@ const fechaIngresoInvalida = (fechaIngreso: string, fechaNacimiento: string): bo
   return false;
 };
 
+const nombreCompleto = (p: Persona) =>
+  [p.nombre, p.apellido].filter(Boolean).join(' ') || 'Usuario sin nombre';
+
 export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props) {
   const { t } = useTranslation('animales');
   
@@ -219,9 +222,9 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
   };
 
   const compatibilidadesItems = compatibilidades.map(c => ({ id: c.id_compatibilidad, nombre: c.nombre }));
-  const voluntariosItems = voluntarios.map(p => ({ id: p.id_persona, nombre: `${p.nombre} ${p.apellido}` }));
-  const adoptantesItems = adoptantes.map(p => ({ id: p.id_persona, nombre: `${p.nombre} ${p.apellido}` }));
-  const hogaresItems = hogares.map(p => ({ id: p.id_persona, nombre: `${p.nombre} ${p.apellido}` }));
+  const voluntariosItems = voluntarios.map(p => ({ id: p.id_persona, nombre: nombreCompleto(p) }));
+  const adoptantesItems = adoptantes.map(p => ({ id: p.id_persona, nombre: nombreCompleto(p) }));
+  const hogaresItems = hogares.map(p => ({ id: p.id_persona, nombre: nombreCompleto(p) }));
 
   const handleSeleccionarImagen = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
