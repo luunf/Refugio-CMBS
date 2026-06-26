@@ -5,6 +5,7 @@ from app.models.animal import Animal
 from app.models.persona import Persona
 from app.models.tarea import Tarea
 from app.services.tratamiento_service import TratamientoService
+from app.routes.notificaciones_routes import notificar_tarea_completada
 
 
 class VisitaService:
@@ -54,6 +55,7 @@ class VisitaService:
         db.session.add(visita)
         db.session.flush()
 
+        tarea = None
         if visita.estado == "proxima":
             tarea = Tarea(
                 nombre=f"Visita veterinaria {animal.nombre}",
@@ -65,7 +67,7 @@ class VisitaService:
             db.session.add(tarea)
 
         db.session.commit()
-        return visita
+        return visita, tarea
     
         
     @staticmethod
@@ -127,7 +129,15 @@ class VisitaService:
 
         db.session.commit()
 
+        tenia_tarea = visita.tarea is not None
         VisitaService.sincronizar_tarea(visita)
+        tarea_creada = visita.estado == "proxima" and not tenia_tarea and visita.tarea is not None
+
+        return {
+            "message": "Visita actualizada correctamente.",
+            "tarea_creada": tarea_creada,
+            "tarea_nombre": visita.tarea.nombre if tarea_creada else None,
+        }
 
     @staticmethod
     def delete_visita(visita_id):
@@ -149,9 +159,19 @@ class VisitaService:
         tarea = visita.tarea
 
         if visita.estado == "realizada":
-            if tarea:
-                db.session.delete(tarea)
-                db.session.commit()
+            if not tarea:
+                return
+            tarea.fecha = visita.fecha
+            tarea.hora = visita.hora
+            tarea.es_todo_el_dia = visita.hora is None
+            ya_estaba_completada = tarea.completada
+            tarea.completada = True
+            db.session.commit()
+            if not ya_estaba_completada:
+                notificar_tarea_completada(
+                    tarea=tarea,
+                    completada_por="Sistema"
+                )
             return
 
         if visita.estado == "proxima":
@@ -160,6 +180,7 @@ class VisitaService:
                 tarea.hora = visita.hora
                 tarea.es_todo_el_dia = visita.hora is None
                 tarea.nombre = f"Visita veterinaria {visita.animal.nombre}"
+                tarea.completada = False
             else:
                 tarea = Tarea(
                     nombre=f"Visita veterinaria {visita.animal.nombre}",

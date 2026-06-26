@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "13049423961",
+    "project_id": "refugio-cmbs",
+    "storage_bucket": "refugio-cmbs.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:13049423961:android:5076cb15c4da5f00f66948",
+        "android_client_info": {
+          "package_name": "com.refugiocmbs.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBl9o0YIMjeX0TTzwVoM9eW3BXvxir-usc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

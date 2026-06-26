@@ -39,6 +39,7 @@
     "errorFechaInicio": "La fecha de inicio de tratamiento es obligatoria",
     "success": "Éxito",
     "successRegistrar": "Visita registrada correctamente",
+    "successTareaAgendada": "Se agendó la tarea \"{{nombre}}\" en el calendario",
     "errorRegistrar": "No se pudo registrar la visita",
     "titleNuevaVisita": "Nueva visita veterinaria",
     "titleTratamientos": "Tratamientos",

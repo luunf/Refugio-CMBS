@@ -197,7 +197,10 @@ export default function ModalRegistrarVisita({ visible, onClose, onCreada, anima
 
       onCreada();
       handleClose();
-      Alert.alert(t('success'), t('successRegistrar'));
+      const successMessage = visita.tarea_creada
+        ? `${t('successRegistrar')}\n${t('successTareaAgendada', { nombre: visita.tarea_nombre })}`
+        : t('successRegistrar');
+      Alert.alert(t('success'), successMessage);
     } catch (e: any) {
       Alert.alert(t('error'), e?.response?.data?.error ?? t('errorRegistrar'));
     } finally {

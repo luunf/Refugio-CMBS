@@ -28,8 +28,11 @@ class VisitaController:
                 return jsonify({"error": f"Falta el campo requerido: {field}"}), 400
         
         try:
-            visita = VisitaService.create_visita(animal_id, data)
-            return jsonify(visita.to_dict()), 201
+            visita, tarea = VisitaService.create_visita(animal_id, data)
+            respuesta = visita.to_dict()
+            respuesta["tarea_creada"] = tarea is not None
+            respuesta["tarea_nombre"] = tarea.nombre if tarea else None
+            return jsonify(respuesta), 201
         except LookupError as e:
             return jsonify({"error": str(e)}), 404
         except ValueError as e:
@@ -54,8 +57,8 @@ class VisitaController:
             return jsonify({"error": "Datos inválidos"}), 400
 
         try:
-            VisitaService.update_visita(visita_id, data)
-            return jsonify({"message": "Visita actualizada correctamente."}), 200
+            respuesta = VisitaService.update_visita(visita_id, data)
+            return jsonify(respuesta), 200
         except LookupError as e:
             return jsonify({"error": str(e)}), 404
         except ValueError as e:

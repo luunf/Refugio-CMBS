@@ -128,10 +128,21 @@ class TareaService:
             not was_completed and
             tarea.completada
         ):
+            if tarea.visita_id and tarea.visita.estado != "realizada":
+                tarea.visita.estado = "realizada"
+                db.session.commit()
+
             notificar_tarea_completada(
                 tarea=tarea,
                 completada_por=actualizado_por
             )
+        elif (
+            was_completed and
+            not tarea.completada
+        ):
+            if tarea.visita_id and tarea.visita.estado != "proxima":
+                tarea.visita.estado = "proxima"
+                db.session.commit()
 
         return tarea.to_dict()
 

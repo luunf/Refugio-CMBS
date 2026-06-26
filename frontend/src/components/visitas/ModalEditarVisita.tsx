@@ -221,7 +221,7 @@ export default function ModalEditarVisita({ visible, onClose, onEditada, visita 
     setLoading(true);
     try {
       // Actualizar visita
-      await api.updateVisita(visita.id_visita, {
+      const respuesta = await api.updateVisita(visita.id_visita, {
         fecha,
         hora: hora || null,
         procedimiento: procedimiento.trim(),
@@ -261,6 +261,12 @@ export default function ModalEditarVisita({ visible, onClose, onEditada, visita 
 
       onEditada();
       onClose();
+      if (respuesta.tarea_creada) {
+        Alert.alert(
+          t('success'),
+          t('successTareaAgendada', { nombre: respuesta.tarea_nombre })
+        );
+      }
     } catch (e: any) {
       Alert.alert(t('error'), e?.response?.data?.error ?? t('errorEditar'));
     } finally {
