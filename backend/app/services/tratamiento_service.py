@@ -14,26 +14,37 @@ class TratamientoService:
 
     @staticmethod
     def create(visita_id, data):
+        fecha_inicio = datetime.strptime(data["fecha_inicio"], "%Y-%m-%d").date()
+
+        existente = Tratamiento.query.filter_by(
+            visita_id=visita_id,
+            tipo=data["tipo"],
+            fecha_inicio=fecha_inicio
+        ).first()
+
+        if existente:
+            raise ValueError("Ya existe un tratamiento con el mismo tipo y fecha de inicio para esta visita.")
+
         tratamiento = Tratamiento(
             tipo=data["tipo"],
             descripcion=data.get("descripcion"),
-            fecha_inicio=datetime.strptime(data["fecha_inicio"], "%Y-%m-%d").date(),
-            fecha_fin=datetime.strptime(data["fecha_fin"], "%Y-%m-%d").date()
+            fecha_inicio=fecha_inicio,
+            fecha_fin=datetime.strptime(data["fecha_fin"], "%Y-%m-%d").date() 
                 if data.get("fecha_fin") else None,
             visita_id=visita_id
         )
+
         db.session.add(tratamiento)
         db.session.commit()
 
         TratamientoService.sincronizar_estado_tratamiento(tratamiento.visita_id)
 
         return tratamiento.to_dict()
-    
-
 
     @staticmethod
     def update(id_tratamiento, data):
         tratamiento = Tratamiento.query.get_or_404(id_tratamiento)
+
         if "tipo" in data:
             tratamiento.tipo = data["tipo"]
         if "descripcion" in data:
@@ -43,20 +54,21 @@ class TratamientoService:
         if "fecha_fin" in data:
             tratamiento.fecha_fin = datetime.strptime(data["fecha_fin"], "%Y-%m-%d").date() \
                 if data["fecha_fin"] else None
+
         db.session.commit()
-        
         TratamientoService.sincronizar_estado_tratamiento(tratamiento.visita_id)
+
         return tratamiento.to_dict()
 
     @staticmethod
     def delete(id_tratamiento):
         tratamiento = Tratamiento.query.get_or_404(id_tratamiento)
         visita_id = tratamiento.visita_id
+
         db.session.delete(tratamiento)
         db.session.commit()
 
         TratamientoService.sincronizar_estado_tratamiento(visita_id)
-
 
     @staticmethod
     def sincronizar_estado_tratamiento_por_animal(animal):
@@ -82,7 +94,6 @@ class TratamientoService:
     @staticmethod
     def sincronizar_estado_tratamiento(visita_id):
         visita = VisitaVeterinaria.query.get(visita_id)
-        if not visita:
+        if not visita or not visita.animal:
             return
         TratamientoService.sincronizar_estado_tratamiento_por_animal(visita.animal)
-        db.session.commit()

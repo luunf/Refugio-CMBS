@@ -18,42 +18,19 @@
     "vencido": "Finalizado",
     "confirmTitleEliminar": "Eliminar tratamiento",
     "confirmMessageEliminar": "¿Estás seguro de que deseas eliminar este tratamiento?",
-    "btnCancelar": "Cancelar",
-    "exito":"Exito",
-    "TratamientoActualizado": "Tratamiento actualizado correctamente",
-    "errorActualizar": "No se pudo actualizar el tratamiento"
-
-  },
-  "modalNuevo": {
-    "titulo": "Tratamiento",
-    "especieLabel": "Especie*",
-    "perro": "Perro",
-    "gato": "Gato",
-    "animalLabel": "Animal*",
-    "cargandoAnimales": "Cargando...",
-    "seleccionarAnimal": "Seleccionar animal...",
-    "sinAnimales": "Sin {{especie}}s registrados",
-    "tipoLabel": "Tipo de tratamiento*",
-    "tipoPlaceholder": "Ej: Medicación",
-    "fechaInicioLabel": "Fecha de inicio*",
-    "fechaFinLabel": "Fecha de fin",
-    "seleccionarFecha": "Seleccionar fecha...",
-    "descripcionLabel": "Descripcion",
-    "descripcionPlaceholder": "Ej: Administrar antiinflamatorio...",
-    "btnCargar": "cargar"
+    "btnCancelar": "Cancelar"
   },
   "modalEditar": {
     "titulo": "Editar tratamiento",
-    "tipoLabel": "Tipo*",
-    "fechaInicioLabel": "Fecha inicio*",
-    "fechaInicioPlaceholder": "DD/MM/AAAA",
+    "tipoLabel": "Tipo *",
+    "fechaInicioLabel": "Fecha inicio *",
     "fechaFinLabel": "Fecha fin",
     "fechaFinPlaceholder": "DD/MM/AAAA",
     "descripcionLabel": "Descripción",
-    "btnGuardar": "Guardar",
+    "btnGuardar": "Guardar cambios",
     "errorFechaFin": "La fecha de fin no puede ser anterior a la fecha de inicio"
   },
-  "alertas":{
+  "alertas": {
     "sinFechaFinTitulo": "Error",
     "sinFechaFinMensaje": "El tratamiento no tiene fecha de fin definida",
     "tareaCreadaTitulo": "Éxito",
@@ -61,8 +38,8 @@
     "errorTitulo": "Error",
     "errorAgendarMensaje": "No se pudo registrar la tarea",
     "tratamientoActualizadoTitulo": "Éxito",
-    "tratamientoActualizadoMensaje": "Tratamiento editado correctamente",
-    "errorEditarMensaje": "No se pudo editar el tratamiento",
-    "ErrorEliminarMensaje": "No se pudo eliminar el tratamiento"
+    "tratamientoActualizadoMensaje": "Tratamiento actualizado correctamente",
+    "errorEditarMensaje": "No se pudo actualizar el tratamiento",
+    "errorEliminarMensaje": "No se pudo eliminar el tratamiento"
   }
 }
