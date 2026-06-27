@@ -14,6 +14,6 @@ def register_commands(app):
 
         print("Ejecutando seeds...")
 
-        SeedService.run()
+        SeedService.run() # Ejecuta cundo se hace setup-db (manual)
 
         print("Base de datos inicializada correctamente")
