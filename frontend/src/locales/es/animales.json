@@ -57,6 +57,8 @@
   "errorGenero": "El género es obligatorio",
   "errorTamanio": "El tamaño es obligatorio",
   "errorFechaIngreso": "La fecha de ingreso es obligatoria",
+  "errorAdoptanteRequerido": "Seleccione un adoptante",
+  "errorHogarRequerido": "Seleccione un hogar de tránsito",
   "errorEstados": "Seleccione al menos un estado",
   "errorRegistrar": "No se pudo registrar el animal",
   "success": "Éxito",

@@ -203,6 +203,8 @@ export default function ModalEditarAnimal({ visible, onClose, onEditado, animal 
     if (!tamanio) return Alert.alert(t('error'), t('errorTamanio'));
     if (!fechaIngreso) return Alert.alert(t('error'), t('errorFechaIngreso'));
     if (estadoIds.length === 0) return Alert.alert(t('error'), t('errorEstados'));
+    if (tieneTransito && !hogarId) return Alert.alert(t('error'), t('errorHogarRequerido'));
+    if (tieneAdoptado && !adoptanteId) return Alert.alert(t('error'), t('errorAdoptanteRequerido'));
 
     setLoading(true);
     try {
@@ -335,14 +337,14 @@ export default function ModalEditarAnimal({ visible, onClose, onEditado, animal 
 
             {tieneTransito && (
               <>
-                <Text style={styles.label}>{t('labelHogarTransito')}</Text>
+                <Text style={styles.label}>{t('labelHogarTransito')}{t('requiredSymbol')}</Text>
                 <SingleSelector value={hogarId} onChange={setHogarId} items={hogaresItems} placeholder={t('placeholderSeleccionarHogar')} searchable />
               </>
             )}
 
             {tieneAdoptado && (
               <>
-                <Text style={styles.label}>{t('labelAdoptante')}</Text>
+                <Text style={styles.label}>{t('labelAdoptante')}{t('requiredSymbol')}</Text>
                 <SingleSelector value={adoptanteId} onChange={setAdoptanteId} items={adoptantesItems} placeholder={t('placeholderSeleccionarAdoptante')} searchable />
               </>
             )}

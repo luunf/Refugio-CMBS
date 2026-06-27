@@ -173,6 +173,8 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
     if (errorFechaNacimiento) return Alert.alert(t('error'), t('errorFechaNacimientoInvalida'));
     if (errorFechaIngreso) return Alert.alert(t('error'), t('errorFechaIngresoInvalida'));
     if (estadoIds.length === 0) return Alert.alert(t('error'), t('errorEstados'));
+    if (tieneTransito && !hogarId) return Alert.alert(t('error'), t('errorHogarRequerido'));
+    if (tieneAdoptado && !adoptanteId) return Alert.alert(t('error'), t('errorAdoptanteRequerido'));
 
 
     setLoading(true);
@@ -406,7 +408,7 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
             {/* Hogar de tránsito */}
             {tieneTransito && (
               <>
-                <Text style={styles.label}>{t('labelHogarTransito')}</Text>
+                <Text style={styles.label}>{t('labelHogarTransito')}{t('requiredSymbol')}</Text>
                 <SingleSelector
                   value={hogarId}
                   onChange={setHogarId}
@@ -420,7 +422,7 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
             {/* Adoptante */}
             {tieneAdoptado && (
               <>
-                <Text style={styles.label}>{t('labelAdoptante')}</Text>
+                <Text style={styles.label}>{t('labelAdoptante')}{t('requiredSymbol')}</Text>
                 <SingleSelector
                   value={adoptanteId}
                   onChange={setAdoptanteId}
