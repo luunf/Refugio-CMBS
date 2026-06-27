@@ -232,11 +232,12 @@ class UsuarioService:
                 "email": usuario.persona.email
             }
         }
-    
     @staticmethod
     def update_usuario(usuario_id, data):
 
-        usuario = Usuario.query.get(usuario_id)
+        usuario = Usuario.query.get(
+            usuario_id
+        )
 
         if not usuario:
             raise Exception(
@@ -251,6 +252,15 @@ class UsuarioService:
 
         if activo is not None:
             usuario.activo = activo
+            try:
+                auth.update_user(
+                    usuario.firebase_uid,
+                    disabled=not activo
+                )
+            except Exception as e:
+                print(
+                    f"[Firebase] Error al actualizar estado: {e}"
+                )
 
         db.session.commit()
 

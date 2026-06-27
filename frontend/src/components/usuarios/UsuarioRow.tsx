@@ -38,12 +38,6 @@ const esSesionActual = usuario.email === emailActual;
 const esEmailAdmin = usuario.email === "admin@refugiocmbs.com";
 const bloqueado = esSesionActual || esEmailAdmin;
 
-console.log("emailActual:", emailActual);
-console.log("usuario.email:", usuario.email);
-console.log("esSesionActual:", esSesionActual);
-console.log("esEmailAdmin:", esEmailAdmin);
-console.log("bloqueado:", bloqueado);
-
 const confirmarEliminar =
 () => {
 
