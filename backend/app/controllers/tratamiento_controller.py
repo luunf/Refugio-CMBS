@@ -18,6 +18,7 @@ def create_tratamiento(visita_id):
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
     except Exception as e:
+        print("Error completo al crear tratamiento:", str(e))
         return jsonify({"error": "Error al crear el tratamiento"}), 500
 
 

@@ -100,3 +100,48 @@ export function useNotifications(autenticado: boolean) {
 
   return { desregistrarToken };
 }
+
+export async function notificarTratamientoCreado(
+  tipoTratamiento: string,
+  nombreAnimal: string
+) {
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: "💊 Nuevo tratamiento registrado",
+      body: `Se creó "${tipoTratamiento}" para ${nombreAnimal}`,
+      data: { tipo: "TRATAMIENTO_CREADO" },
+    },
+    trigger: null, // inmediata
+  });
+}
+
+/**
+ * Notifica cuando se agenda un tratamiento
+ */
+export async function notificarTratamientoAgendado(
+  tipoTratamiento: string,
+  nombreAnimal: string
+) {
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: "📅 Tratamiento agendado",
+      body: `Se agendó "${tipoTratamiento}" para ${nombreAnimal}`,
+      data: { tipo: "TRATAMIENTO_AGENDADO" },
+    },
+    trigger: null,
+  });
+}
+
+export async function notificarTratamientoActualizadoLocal(
+  tipoTratamiento: string,
+  nombreAnimal: string
+) {
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: "🔄 Tratamiento actualizado",
+      body: `El tratamiento "${tipoTratamiento}" de ${nombreAnimal} fue actualizado`,
+      data: { tipo: "TRATAMIENTO_ACTUALIZADO" },
+    },
+    trigger: null,
+  });
+}

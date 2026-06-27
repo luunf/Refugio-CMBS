@@ -169,29 +169,28 @@ def notificar_tarea_cancelada(tarea, cancelada_por: str) -> None:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Job del scheduler — recordatorios de vencimiento
+# Job del scheduler — recordatorios de vencimiento para TAREAS
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _job_recordatorios_vencimiento(app) -> None:
-    """
-    Corre cada hora. Busca tareas no completadas que vencen en las
-    próximas 24 horas y envía recordatorios a sus personas asignadas.
-    """
+    print("=== [SCHEDULER TAREAS] EJECUTANDO ===")
     with app.app_context():
-        from app.models.tarea import Tarea  # import local
+        from app.models.tarea import Tarea
 
         ahora = datetime.now(timezone.utc).date()
         manana = ahora + timedelta(days=1)
-        #manana = ahora
+        print(f"[SCHEDULER TAREAS] Hoy: {ahora}, Mañana: {manana}")
+        
         tareas = (
             Tarea.query
             .filter(
                 Tarea.fecha == manana,
-                Tarea.completada == False,  # noqa: E712
+                Tarea.completada == False,
             )
             .all()
         )
 
+        print(f"[SCHEDULER TAREAS] Tareas por vencer mañana: {len(tareas)}")
         logger.info(f"[Scheduler] Tareas por vencer mañana: {len(tareas)}")
 
         for tarea in tareas:
@@ -204,6 +203,157 @@ def _job_recordatorios_vencimiento(app) -> None:
                     data={"id_tarea": tarea.id_tarea, "tipo": "TAREA_POR_VENCER"},
                 )
 
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Notificaciones para TRATAMIENTOS
+# ─────────────────────────────────────────────────────────────────────────────
+
+def notificar_tratamiento_actualizado(tratamiento) -> None:
+    """Notifica a las personas asociadas al animal cuando se actualiza un tratamiento."""
+    visita = tratamiento.visita
+    animal = visita.animal
+    
+    print(f"=== [ACTUALIZADO] Tratamiento: {tratamiento.tipo} (ID: {tratamiento.id_tratamiento}) ===")
+    print(f"[ACTUALIZADO] Animal: {animal.nombre} (ID: {animal.id_animal})")
+    print(f"[ACTUALIZADO] Personas asociadas: {len(animal.personas)}")
+    
+    personas_a_notificar = list(animal.personas)
+    
+    if not personas_a_notificar and hasattr(visita, 'veterinario') and visita.veterinario:
+        personas_a_notificar.append(visita.veterinario)
+        print(f"[ACTUALIZADO] Usando fallback: veterinario de la visita: {visita.veterinario.nombre}")
+    
+    for persona in personas_a_notificar:
+        tokens = _get_tokens_de_persona(persona.id_persona)
+        if tokens:
+            _enviar_push(
+                tokens=tokens,
+                title="🔄 Tratamiento actualizado",
+                body=f'El tratamiento "{tratamiento.tipo}" de {animal.nombre} fue actualizado',
+                data={
+                    "id_tratamiento": tratamiento.id_tratamiento,
+                    "id_visita": visita.id_visita,
+                    "id_animal": animal.id_animal,
+                    "tipo": "TRATAMIENTO_ACTUALIZADO"
+                },
+            )
+
+
+def _notificar_tratamiento_agendado(tratamiento) -> None:
+    """Notifica a las personas asociadas al animal cuando se agenda un tratamiento."""
+    visita = tratamiento.visita
+    animal = visita.animal
+    
+    print(f"=== [AGENDADO] Tratamiento: {tratamiento.tipo} (ID: {tratamiento.id_tratamiento}) ===")
+    print(f"[AGENDADO] Animal: {animal.nombre} (ID: {animal.id_animal})")
+    print(f"[AGENDADO] Personas asociadas: {len(animal.personas)}")
+    
+    personas_a_notificar = list(animal.personas)
+    
+    if not personas_a_notificar and hasattr(visita, 'veterinario') and visita.veterinario:
+        personas_a_notificar.append(visita.veterinario)
+        print(f"[AGENDADO] Usando fallback: veterinario de la visita: {visita.veterinario.nombre}")
+    
+    print(f"[AGENDADO] Total a notificar: {len(personas_a_notificar)}")
+    
+    for persona in personas_a_notificar:
+        tokens = _get_tokens_de_persona(persona.id_persona)
+        print(f"[AGENDADO] {persona.nombre} {persona.apellido}: {len(tokens)} tokens")
+        if tokens:
+            mensaje = f'Se agendó el tratamiento "{tratamiento.tipo}" de {animal.nombre} en el calendario'
+            if tratamiento.fecha_fin:
+                mensaje += f" (finaliza {tratamiento.fecha_fin.strftime('%d/%m/%Y')})"
+            _enviar_push(
+                tokens=tokens,
+                title="📅 Tratamiento agendado",
+                body=mensaje,
+                data={
+                    "id_tratamiento": tratamiento.id_tratamiento,
+                    "id_visita": visita.id_visita,
+                    "id_animal": animal.id_animal,
+                    "tipo": "TRATAMIENTO_AGENDADO"
+                },
+            )
+
+
+def notificar_tratamiento_por_vencer(tratamiento) -> None:
+    """Notifica a las personas asociadas al animal cuando un tratamiento está por vencer."""
+    try:
+        visita = tratamiento.visita
+        animal = visita.animal
+        
+        print(f"=== [POR VENCER] Tratamiento: {tratamiento.tipo} (ID: {tratamiento.id_tratamiento}) ===")
+        print(f"[POR VENCER] Animal: {animal.nombre} (ID: {animal.id_animal})")
+        print(f"[POR VENCER] Personas asociadas: {len(animal.personas)}")
+        
+        personas_a_notificar = list(animal.personas)
+        
+        if not personas_a_notificar and hasattr(visita, 'veterinario') and visita.veterinario:
+            personas_a_notificar.append(visita.veterinario)
+            print(f"[POR VENCER] Usando fallback: veterinario de la visita: {visita.veterinario.nombre} {visita.veterinario.apellido}")
+        
+        print(f"[POR VENCER] Total a notificar: {len(personas_a_notificar)}")
+        
+        for persona in personas_a_notificar:
+            print(f"[POR VENCER] Evaluando: {persona.nombre} {persona.apellido} (ID: {persona.id_persona})")
+            tokens = _get_tokens_de_persona(persona.id_persona)
+            print(f"[POR VENCER] Tokens encontrados: {len(tokens)}")
+            if tokens:
+                _enviar_push(
+                    tokens=tokens,
+                    title="⏰ Tratamiento por vencer",
+                    body=f'El tratamiento "{tratamiento.tipo}" de {animal.nombre} vence mañana',
+                    data={
+                        "id_tratamiento": tratamiento.id_tratamiento,
+                        "id_visita": visita.id_visita,
+                        "id_animal": animal.id_animal,
+                        "tipo": "TRATAMIENTO_POR_VENCER"
+                    },
+                )
+            else:
+                print(f"[POR VENCER] ⚠️ No hay tokens para {persona.nombre} {persona.apellido}")
+                
+    except Exception as e:
+        print(f"[ERROR notificar_tratamiento_por_vencer] {e}")
+        import traceback
+        traceback.print_exc()
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Job del scheduler — recordatorios de vencimiento para TRATAMIENTOS
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _job_recordatorios_tratamientos(app) -> None:
+    """Corre cada hora. Busca tratamientos que vencen mañana y envía recordatorios."""
+    with app.app_context():
+        from app.models.tratamiento import Tratamiento
+
+        tz = timezone(timedelta(hours=-3))
+        ahora = datetime.now(tz).date()
+        manana = ahora + timedelta(days=1)
+        
+        print(f"=== [SCHEDULER TRATAMIENTOS] Ejecutando ===")
+        print(f"[SCHEDULER TRATAMIENTOS] Hoy (Argentina): {ahora}")
+        print(f"[SCHEDULER TRATAMIENTOS] Mañana (Argentina): {manana}")
+        
+        tratamientos = (
+            Tratamiento.query
+            .filter(Tratamiento.fecha_fin == manana)
+            .all()
+        )
+
+        print(f"[SCHEDULER TRATAMIENTOS] Tratamientos que vencen mañana: {len(tratamientos)}")
+
+        for tratamiento in tratamientos:
+            print(f"[SCHEDULER TRATAMIENTOS] Enviando notificación para: {tratamiento.tipo} (ID: {tratamiento.id_tratamiento})")
+            notificar_tratamiento_por_vencer(tratamiento)
+
+        logger.info(f"[Scheduler] Tratamientos por vencer mañana: {len(tratamientos)}")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# init_scheduler
+# ─────────────────────────────────────────────────────────────────────────────
 
 def init_scheduler(app) -> None:
     """
@@ -225,10 +375,21 @@ def init_scheduler(app) -> None:
         hours=1,
         id="recordatorios_vencimiento",
         replace_existing=True,
-        next_run_time=datetime.now(),  # ejecutar al iniciar también
+        next_run_time=datetime.now(),
     )
+
+    _scheduler.add_job(
+        func=_job_recordatorios_tratamientos,
+        args=[app],
+        trigger="interval",
+        hours=1,
+        id="recordatorios_tratamientos",
+        replace_existing=True,
+        next_run_time=datetime.now(),
+    )
+
     _scheduler.start()
-    logger.info("[Scheduler] Iniciado: recordatorios de vencimiento cada 1 hora.")
+    logger.info("[Scheduler] Iniciado: recordatorios de vencimiento y tratamientos cada 1 hora.")
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -316,6 +477,8 @@ def eliminar_token(decoded_token):
     return jsonify({
         "mensaje": "Token desactivado"
     }), 200
+
+
 @notificaciones_bp.route("/test", methods=["POST"])
 @token_required
 def test_push(decoded_token):
@@ -340,10 +503,32 @@ def test_push(decoded_token):
     _enviar_push(
         tokens=tokens,
         title="🚀 Push de prueba",
-        body="Si recibís esto, funciona todo"
+        body="Si recibés esto, funciona todo"
     )
 
     return jsonify({
         "ok": True,
         "tokens": len(tokens)
+    }), 200
+
+
+@notificaciones_bp.route("/tratamiento-agendado/<int:tratamiento_id>", methods=["POST"])
+@token_required
+def notificar_tratamiento_agendado_endpoint(decoded_token, tratamiento_id):
+    """
+    Endpoint para notificar que un tratamiento fue agendado en el calendario.
+    """
+    from app.models.tratamiento import Tratamiento
+    
+    tratamiento = Tratamiento.query.get(tratamiento_id)
+    if not tratamiento:
+        return jsonify({"error": "Tratamiento no encontrado"}), 404
+    
+    print(f"=== Notificando agendado de tratamiento {tratamiento_id} ===")
+    _notificar_tratamiento_agendado(tratamiento)
+    
+    return jsonify({
+        "mensaje": "Notificación de agendado enviada",
+        "tratamiento": tratamiento.tipo,
+        "animal": tratamiento.visita.animal.nombre
     }), 200

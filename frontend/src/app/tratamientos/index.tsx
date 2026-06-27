@@ -11,6 +11,7 @@ import { useTratamientos } from '../../hooks/useTratamientos';
 import TratamientoCard from '../../components/tratamientos/TratamientoCard';
 import ModalEditarTratamiento from '../../components/tratamientos/ModalEditarTratamiento';
 import { Colors } from '@/constants/theme';
+import { notificarTratamientoCreado } from '@/hooks/useNotifications';
 
 export default function TratamientosScreen() {
   const { t } = useTranslation('tratamientos');
@@ -65,14 +66,19 @@ export default function TratamientosScreen() {
   const handleEditarGuardar = async (id: number, data: any) => {
     try {
       await actualizarTratamiento(id, data);
-      Alert.alert(t('alertas.tratamientoActualizadoTitulo'), t('alertas.tratamientoActualizadoMensaje'));
+      Alert.alert(
+        "Éxito",
+        "Tratamiento actualizado correctamente"
+      );
     } catch (e: any) {
-      Alert.alert(t('alertas.errorTitulo'), e?.response?.data?.error ?? t('alertas.errorEditarMensaje'));
+      Alert.alert(
+        "Error",
+        e?.response?.data?.error ?? "No se pudo actualizar el tratamiento"
+      );
     }
   };
 
-  // onDelete acá NO muestra alert de confirmación — eso ya lo hace TratamientoCard internamente.
-  // Solo ejecuta la eliminación real cuando TratamientoCard ya confirmó con el usuario.
+
   const handleDelete = async (id: number) => {
     try {
       await eliminarTratamiento(id);

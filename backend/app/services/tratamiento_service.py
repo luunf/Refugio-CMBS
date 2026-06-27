@@ -1,8 +1,13 @@
+# app/services/tratamiento_service.py
+
 from datetime import date, datetime
 from app.extensions import db
 from app.models.tratamiento import Tratamiento
 from app.models.estado import Estado
 from app.models.visita_veterinaria import VisitaVeterinaria
+from app.routes.notificaciones_routes import (
+    notificar_tratamiento_actualizado,  
+)
 
 
 class TratamientoService:
@@ -36,11 +41,12 @@ class TratamientoService:
 
         db.session.add(tratamiento)
         db.session.commit()
-
+        db.session.refresh(tratamiento)   
+        
         TratamientoService.sincronizar_estado_tratamiento(tratamiento.visita_id)
-
+        
         return tratamiento.to_dict()
-
+    
     @staticmethod
     def update(id_tratamiento, data):
         tratamiento = Tratamiento.query.get_or_404(id_tratamiento)
@@ -58,12 +64,21 @@ class TratamientoService:
         db.session.commit()
         TratamientoService.sincronizar_estado_tratamiento(tratamiento.visita_id)
 
+    
+        try:
+            notificar_tratamiento_actualizado(tratamiento)
+        except Exception as e:
+            print(f"[ERROR NOTIFICACIÓN TRATAMIENTO ACTUALIZADO] {e}")
+
         return tratamiento.to_dict()
 
     @staticmethod
     def delete(id_tratamiento):
         tratamiento = Tratamiento.query.get_or_404(id_tratamiento)
         visita_id = tratamiento.visita_id
+
+        # ─── ELIMINAR LLAMADA A notificar_tratamiento_eliminado ───
+        # (ya no se usa)
 
         db.session.delete(tratamiento)
         db.session.commit()

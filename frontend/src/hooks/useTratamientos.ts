@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { api } from '@/config/api';
+import { getAuth } from 'firebase/auth';
 
 export const useTratamientos = () => {
   const [tratamientos, setTratamientos] = useState<any[]>([]);
@@ -50,8 +51,10 @@ export const useTratamientos = () => {
     }
   }, [cargarTratamientos]);
 
+  // ─── MODIFICAR: agendarEnCalendario con notificación push ───
   const agendarEnCalendario = useCallback(async (tratamiento: any) => {
     try {
+      // 1. Crear la tarea en el calendario
       const nombreTarea = `${tratamiento.tipo} - ${tratamiento.animal_nombre ?? 'animal'}`;
       await api.crearTareasDesdeTratamiento({
         nombre: nombreTarea,
@@ -59,6 +62,23 @@ export const useTratamientos = () => {
         fecha_fin: tratamiento.fecha_fin,
         descripcion: tratamiento.descripcion,
       });
+
+      // 2. Enviar notificación push al backend
+      const firebaseUser = getAuth().currentUser;
+      if (firebaseUser) {
+        const idToken = await firebaseUser.getIdToken();
+        const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://192.168.1.101:5000';
+        
+        await fetch(`${API_BASE_URL}/notificaciones/tratamiento-agendado/${tratamiento.id}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${idToken}`,
+          },
+        });
+      }
+
+      console.log('✅ Tratamiento agendado y notificación enviada');
     } catch (error) {
       console.error('Error agendando tratamiento en calendario:', error);
       throw error;

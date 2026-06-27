@@ -3,6 +3,7 @@ import { Modal, View, Text, TextInput, TouchableOpacity, ActivityIndicator, Styl
 import { useTranslation } from 'react-i18next';
 import { Colors } from '@/constants/theme';
 import DatePickerModal from '../calendario/DatePickerModal';
+import { notificarTratamientoActualizadoLocal } from '@/hooks/useNotifications';
 
 interface Props {
   visible: boolean;
@@ -71,6 +72,7 @@ export default function ModalEditarTratamiento({ visible, onClose, tratamiento, 
         fecha_fin: fechaFin ? formatDate(fechaFin) : null,
         descripcion,
       });
+       await notificarTratamientoActualizadoLocal(tipo, tratamiento.animal_nombre || "el animal");
       onClose();
     } catch (error) {
       console.error(error);
