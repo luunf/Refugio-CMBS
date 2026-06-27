@@ -48,7 +48,11 @@ def _get_tokens_de_persona(id_persona: int) -> list[str]:
 
 
 def _enviar_push(tokens: list[str], title: str, body: str, data: dict = None) -> None:
-    #Envía notificaciones push a través de la Expo Push API. Acepta hasta 100 tokens por llamada (límite de Expo).
+    """
+    Envía notificaciones push a través de la Expo Push API.
+    Acepta hasta 100 tokens por llamada (límite de Expo).
+    Falla silenciosamente con log de error para no romper el flujo principal.
+    """
     tokens_validos = [t for t in tokens if t and t.startswith("ExponentPushToken")]
     if not tokens_validos:
         return
@@ -93,8 +97,10 @@ def _enviar_push(tokens: list[str], title: str, body: str, data: dict = None) ->
         )
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Funciones públicas — llamalas desde tus otras rutas
+# ─────────────────────────────────────────────────────────────────────────────
 
-# Funciones públicas 
 def notificar_tarea_asignada(
     tarea,
     personas_ids: list[int],
@@ -123,7 +129,15 @@ def notificar_tarea_asignada(
 
 
 def notificar_tarea_completada(tarea, completada_por: str) -> None:
-    #Notifica a todas las personas de la tarea cuando se marca como completada.
+    """
+    Notifica a todas las personas de la tarea cuando se marca como completada.
+
+    Llamada desde: app/routes/tareas.py → PATCH /tareas/<id>/completar
+
+    Ejemplo:
+        from app.routes.notificaciones_routes import notificar_tarea_completada
+        notificar_tarea_completada(tarea, nombre_usuario_actual)
+    """
     for persona in tarea.personas:
         tokens = _get_tokens_de_persona(persona.id_persona)
         _enviar_push(
@@ -135,7 +149,15 @@ def notificar_tarea_completada(tarea, completada_por: str) -> None:
 
 
 def notificar_tarea_cancelada(tarea, cancelada_por: str) -> None:
-    #Notifica a todas las personas de la tarea cuando se elimina/cancela.
+    """
+    Notifica a todas las personas de la tarea cuando se elimina/cancela.
+
+    Llamada desde: app/routes/tareas.py → DELETE /tareas/<id>
+
+    Ejemplo:
+        from app.routes.notificaciones_routes import notificar_tarea_cancelada
+        notificar_tarea_cancelada(tarea, nombre_usuario_actual)
+    """
     for persona in tarea.personas:
         tokens = _get_tokens_de_persona(persona.id_persona)
         _enviar_push(
@@ -146,36 +168,30 @@ def notificar_tarea_cancelada(tarea, cancelada_por: str) -> None:
         )
 
 
-
 # ─────────────────────────────────────────────────────────────────────────────
-# Job del scheduler — recordatorios de vencimiento para TAREAS
+# Job del scheduler — recordatorios de vencimiento
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _job_recordatorios_vencimiento(app) -> None:
     """
     Corre cada hora. Busca tareas no completadas que vencen en las
-    próximas 24 horas y envía recordatorios a los usuarios asignados.
+    próximas 24 horas y envía recordatorios a sus personas asignadas.
     """
-    print("=== [SCHEDULER TAREAS] EJECUTANDO ===")
-
-
     with app.app_context():
-        from app.models.tarea import Tarea
+        from app.models.tarea import Tarea  # import local
 
         ahora = datetime.now(timezone.utc).date()
         manana = ahora + timedelta(days=1)
-        print(f"[SCHEDULER TAREAS] Hoy: {ahora}, Mañana: {manana}")
-        
+        #manana = ahora
         tareas = (
             Tarea.query
             .filter(
                 Tarea.fecha == manana,
-                Tarea.completada == False,
+                Tarea.completada == False,  # noqa: E712
             )
             .all()
         )
 
-        print(f"[SCHEDULER TAREAS] Tareas por vencer mañana: {len(tareas)}")
         logger.info(f"[Scheduler] Tareas por vencer mañana: {len(tareas)}")
 
         for tarea in tareas:
@@ -190,7 +206,7 @@ def _job_recordatorios_vencimiento(app) -> None:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Notificaciones para TRATAMIENTOS
+# NUEVO: Notificaciones para TRATAMIENTOS
 # ─────────────────────────────────────────────────────────────────────────────
 
 def notificar_tratamiento_actualizado(tratamiento) -> None:
@@ -305,7 +321,7 @@ def notificar_tratamiento_por_vencer(tratamiento) -> None:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Job del scheduler — recordatorios de vencimiento para TRATAMIENTOS
+# NUEVO: Job del scheduler — recordatorios de vencimiento para TRATAMIENTOS
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _job_recordatorios_tratamientos(app) -> None:
@@ -336,26 +352,18 @@ def _job_recordatorios_tratamientos(app) -> None:
         logger.info(f"[Scheduler] Tratamientos por vencer mañana: {len(tratamientos)}")
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# init_scheduler
-# ─────────────────────────────────────────────────────────────────────────────
-
 def init_scheduler(app) -> None:
-    #Inicializa el scheduler de recordatorios.
+    """
+    Inicializa el scheduler de recordatorios.
+    Llamalo en create_app() después de registrar los blueprints.
 
-    # ─── VERIFICAR SI LOS JOBS YA EXISTEN ───
+    En app/__init__.py:
+        from app.routes.notificaciones_routes import notificaciones_bp, init_scheduler
+        app.register_blueprint(notificaciones_bp, url_prefix="/notificaciones")
+        init_scheduler(app)
+    """
     if _scheduler.running:
-        # Verificar si los jobs ya están programados
-        jobs = _scheduler.get_jobs()
-        job_ids = [j.id for j in jobs]
-        
-        if "recordatorios_vencimiento" in job_ids and "recordatorios_tratamientos" in job_ids:
-            logger.info("[Scheduler] Jobs ya existentes, no se duplican")
-            return
-        
-        # Si no están todos, limpiar y recrear
-        _scheduler.remove_all_jobs()
-        logger.info("[Scheduler] Jobs anteriores eliminados para recrear")
+        return
 
     _scheduler.add_job(
         func=_job_recordatorios_vencimiento,
@@ -364,9 +372,10 @@ def init_scheduler(app) -> None:
         hours=1,
         id="recordatorios_vencimiento",
         replace_existing=True,
-        next_run_time=datetime.now(),
+        next_run_time=datetime.now(),  # ejecutar al iniciar también
     )
 
+    # ─── NUEVO: Job para tratamientos ───
     _scheduler.add_job(
         func=_job_recordatorios_tratamientos,
         args=[app],
@@ -377,13 +386,13 @@ def init_scheduler(app) -> None:
         next_run_time=datetime.now(),
     )
 
-    if not _scheduler.running:
-        _scheduler.start()
-        logger.info("[Scheduler] Iniciado: recordatorios de vencimiento y tratamientos cada 1 hora.")
-    else:
-        logger.info("[Scheduler] Ya estaba corriendo, jobs reemplazados")
+    _scheduler.start()
+    logger.info("[Scheduler] Iniciado: recordatorios de vencimiento y tratamientos cada 1 hora.")
 
-#endpoints
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Endpoints REST
+# ─────────────────────────────────────────────────────────────────────────────
 
 @notificaciones_bp.route("/token", methods=["POST"])
 @token_required
@@ -500,6 +509,10 @@ def test_push(decoded_token):
         "tokens": len(tokens)
     }), 200
 
+
+# ─────────────────────────────────────────────────────────────────────────────
+# NUEVO: Endpoint para notificar agendado de tratamiento
+# ─────────────────────────────────────────────────────────────────────────────
 
 @notificaciones_bp.route("/tratamiento-agendado/<int:tratamiento_id>", methods=["POST"])
 @token_required
