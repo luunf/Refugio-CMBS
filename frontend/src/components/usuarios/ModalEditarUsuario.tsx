@@ -60,6 +60,7 @@ export default function ModalEditarUsuario({
     if (!usuario) return;
 
     setLoading(true);
+    console.log("Enviando:", { tipo, activo });
 
     try {
       await api.updateUsuario(

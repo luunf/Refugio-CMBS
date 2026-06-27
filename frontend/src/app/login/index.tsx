@@ -57,7 +57,11 @@ export default function LoginScreen() {
 
       router.replace("/(tabs)");
     } catch (e: any) {
-      Alert.alert(t("error"), t("credencialesInvalidas"));
+      if (e.code === "auth/user-disabled") {
+        Alert.alert(t("error"), t("cuentaDeshabilitada"));
+      } else {
+        Alert.alert(t("error"), t("credencialesInvalidas"));
+      }
     } finally {
       setLoading(false);
     }

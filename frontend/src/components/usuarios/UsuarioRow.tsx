@@ -21,16 +21,22 @@ interface Props {
 usuario: any;
 onEditar: (u: any) => void;
 onActualizado: () => void;
+emailActual?: string;
 }
 
 export default function UsuarioRow({
 usuario,
 onEditar,
 onActualizado,
+emailActual
 }: Props) {
+  
 
-const { t } =
-useTranslation("usuarios");
+const { t } = useTranslation("usuarios");
+
+const esSesionActual = usuario.email === emailActual;
+const esEmailAdmin = usuario.email === "admin@refugiocmbs.com";
+const bloqueado = esSesionActual || esEmailAdmin;
 
 const confirmarEliminar =
 () => {
@@ -169,13 +175,12 @@ eliminarPersona: boolean
         onPress={() =>
           onEditar(usuario)
         }
+        disabled={bloqueado}
       >
         <MaterialIcons
           name="edit"
           size={22}
-          color={
-            Colors.primary
-          }
+          color={bloqueado ? Colors.textFaint : Colors.primary}
         />
       </TouchableOpacity>
 
@@ -205,20 +210,18 @@ eliminarPersona: boolean
         <MaterialIcons
           name="mail-outline"
           size={22}
-          color={Colors.primary}
+          color={bloqueado ? Colors.textFaint : Colors.primary}
         />
       </TouchableOpacity>
 
       <TouchableOpacity
-        onPress={
-          confirmarEliminar
-        }
+        onPress={confirmarEliminar}
+        disabled={bloqueado}
       >
         <MaterialIcons
           name="delete"
           size={22}
-          color={
-            Colors.delete
+          color={bloqueado ? Colors.textFaint : Colors.delete
           }
         />
       </TouchableOpacity>

@@ -48,8 +48,7 @@ interface Usuario {
 
 export default function UsuariosScreen() {
   const { t } = useTranslation("usuarios");
-
-  const { esAdmin } = useAuth();
+  const { esAdmin, usuario } = useAuth();
 
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(false);
@@ -278,12 +277,13 @@ export default function UsuariosScreen() {
             </Text>
           ) : (
             usuariosFiltrados.map(
-              (usuario) => (
+              (usuarioItem) => (
                 <UsuarioRow
-                  key={usuario.id_usuario}
-                  usuario={usuario}
+                  key={usuarioItem.id_usuario}
+                  usuario={usuarioItem}
                   onEditar={abrirEditar}
                   onActualizado={cargarUsuarios}
+                  emailActual={usuario?.email}
                 />
               )
             )
