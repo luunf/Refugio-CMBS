@@ -68,7 +68,6 @@ export default function ModalEditarTarea({ visible, onClose, onUpdate, tarea }: 
   const [showVoluntarios, setShowVoluntarios] = useState(false);
   const [loadingVoluntarios, setLoadingVoluntarios] = useState(false);
 
-  // Precargar datos de la tarea cuando se abre el modal
   useEffect(() => {
     if (visible && tarea) {
       setNombre(tarea.nombre ?? '');
@@ -115,11 +114,12 @@ export default function ModalEditarTarea({ visible, onClose, onUpdate, tarea }: 
     }
   };
 
+  // ─── SOLO CAMBIO EN LA VALIDACIÓN ───
   const puedeGuardar = () => {
     if (!nombre) return false;
     if (esFechaPasada(fecha)) return false;
-    if (!esTodoElDia && hora) {
-      if (!esHoraValida(hora)) return false;
+    if (!esTodoElDia) {
+      if (!hora || !esHoraValida(hora)) return false;
       if (esHoraPasada(fecha, hora)) return false;
     }
     return true;
@@ -198,16 +198,24 @@ export default function ModalEditarTarea({ visible, onClose, onUpdate, tarea }: 
 
               {!esTodoElDia && (
                 <>
-                  <Text style={styles.label}>{t('modalNuevaTarea.horaLabel')}</Text>
+                  {/* ─── SOLO CAMBIO: asterisco y mensaje ─── */}
+                  <Text style={styles.label}>
+                    {t('modalNuevaTarea.horaLabel')}
+                    <Text style={styles.asterisco}> *</Text>
+                  </Text>
                   <TextInput
                     value={hora}
                     onChangeText={handleCambioHora}
                     placeholder={t('modalNuevaTarea.horaPlaceholder')}
-                    style={[styles.input, errorHora && styles.inputError]}
+                    style={[styles.input, errorHora && styles.inputError, !hora && styles.inputObligatorio]}
                     maxLength={5}
                     keyboardType="numbers-and-punctuation"
                   />
-                  {errorHora ? <Text style={styles.errorTexto}>{errorHora}</Text> : null}
+                  {errorHora ? (
+                    <Text style={styles.errorTexto}>{errorHora}</Text>
+                  ) : !hora ? (
+                    <Text style={styles.errorTexto}>{t('modalNuevaTarea.errorHoraObligatoria')}</Text>
+                  ) : null}
                 </>
               )}
 
@@ -249,10 +257,11 @@ export default function ModalEditarTarea({ visible, onClose, onUpdate, tarea }: 
                 </View>
               )}
 
+              {/* ─── SOLO CAMBIO: estilo del botón ─── */}
               <TouchableOpacity
                 onPress={handleGuardar}
                 disabled={loading || !puedeGuardar()}
-                style={[styles.btnCrear, !puedeGuardar() && { opacity: 0.5 }]}
+                style={[styles.btnCrear, (!puedeGuardar() || loading) && styles.btnCrearDisabled]}
               >
                 {loading ? <ActivityIndicator color={Colors.surface} /> : <Text style={styles.btnCrearTexto}>{t('modalEditarTarea.btnGuardar')}</Text>}
               </TouchableOpacity>
@@ -316,6 +325,10 @@ const styles = StyleSheet.create({
   },
   inputError: {
     borderColor: Colors.delete,
+  },
+  inputObligatorio: {
+    borderColor: Colors.delete,
+    borderWidth: 1.5,
   },
   errorTexto: {
     color: Colors.delete,
@@ -399,9 +412,18 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 8,
   },
+  btnCrearDisabled: {
+    backgroundColor: Colors.primaryLight,
+    opacity: 0.5,
+  },
   btnCrearTexto: {
     color: Colors.surface,
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  asterisco: {
+    color: Colors.text,
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });

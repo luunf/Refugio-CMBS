@@ -28,7 +28,7 @@ class TareaController:
         if not nombre or not isinstance(nombre, str):
             return False
         nombre_limpio = nombre.strip()
-        return len(nombre_limpio) >= 3 and not nombre_limpio.isdigit()  # mínimo 3 caracteres y no solo números
+        return len(nombre_limpio) >= 3 and not nombre_limpio.isdigit()
 
     @staticmethod
     def get_all_tareas():
@@ -63,7 +63,16 @@ class TareaController:
         if not data.get("fecha") or not TareaController._validar_fecha(data.get("fecha")):
             return jsonify({"error": "Fecha inválida. Formato: YYYY-MM-DD"}), 400
 
-        if "hora" in data and not TareaController._validar_hora(data.get("hora")):
+        # ─── VALIDACIÓN DE HORA ───
+        es_todo_el_dia = data.get("es_todo_el_dia", False)
+        hora = data.get("hora")
+
+        # Si NO es todo el día, la hora es OBLIGATORIA
+        if not es_todo_el_dia and not hora:
+            return jsonify({"error": "Debes especificar una hora para una tarea puntual"}), 400
+
+        # Si se envía hora, validar formato
+        if hora and not TareaController._validar_hora(hora):
             return jsonify({"error": "Hora inválida. Formato: HH:MM"}), 400
 
         if "personas_ids" in data and not isinstance(data.get("personas_ids"), list):
@@ -119,6 +128,20 @@ class TareaController:
         # Validar nombre solo si viene en el update
         if "nombre" in data and not TareaController._validar_nombre(data.get("nombre")):
             return jsonify({"error": "El nombre debe tener al menos 3 caracteres y no puede ser solo números"}), 400
+
+        # ─── VALIDACIÓN DE HORA EN UPDATE ───
+        # Si se está actualizando es_todo_el_dia o hora
+        if "es_todo_el_dia" in data or "hora" in data:
+            es_todo_el_dia = data.get("es_todo_el_dia", False)
+            hora = data.get("hora")
+            
+            # Si NO es todo el día, la hora es OBLIGATORIA
+            if not es_todo_el_dia and not hora:
+                return jsonify({"error": "Debes especificar una hora para una tarea puntual"}), 400
+            
+            # Si se envía hora, validar formato
+            if hora and not TareaController._validar_hora(hora):
+                return jsonify({"error": "Hora inválida. Formato: HH:MM"}), 400
 
         allowed = {"nombre", "fecha", "hora", "es_todo_el_dia", "completada", "personas_ids", "descripcion"}
         if any(key not in allowed for key in data.keys()):
