@@ -1,3 +1,5 @@
+import re
+
 from flask import request, jsonify, current_app
 from app.services.firebase_service import FirebaseService
 from app.services.usuario_service import UsuarioService
@@ -34,4 +36,23 @@ class AuthController:
             "perfil_completo": perfil_completo
         }), 200
     
-    
+    @staticmethod
+    def check_email():
+        email = request.json.get("email", "").strip()
+
+        if not email:
+            return jsonify({"error": "Email requerido"}), 400
+
+        email_regex = r'^[^@\s]+@[^@\s]+\.[^@\s]+$'
+        if not re.match(email_regex, email):
+            return jsonify({"error": "Email inválido"}), 400
+
+        user = FirebaseService.get_user_by_email(email)
+
+        if user is None:
+            return jsonify({"error": "Email no registrado"}), 404
+
+        if not user.email_verified:
+            return jsonify({"error": "Email no verificado"}), 403
+
+        return jsonify({"ok": True}), 200

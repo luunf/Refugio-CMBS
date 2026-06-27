@@ -48,11 +48,7 @@ def _get_tokens_de_persona(id_persona: int) -> list[str]:
 
 
 def _enviar_push(tokens: list[str], title: str, body: str, data: dict = None) -> None:
-    """
-    Envía notificaciones push a través de la Expo Push API.
-    Acepta hasta 100 tokens por llamada (límite de Expo).
-    Falla silenciosamente con log de error para no romper el flujo principal.
-    """
+    #Envía notificaciones push a través de la Expo Push API. Acepta hasta 100 tokens por llamada (límite de Expo).
     tokens_validos = [t for t in tokens if t and t.startswith("ExponentPushToken")]
     if not tokens_validos:
         return
@@ -97,10 +93,8 @@ def _enviar_push(tokens: list[str], title: str, body: str, data: dict = None) ->
         )
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Funciones públicas — llamalas desde tus otras rutas
-# ─────────────────────────────────────────────────────────────────────────────
 
+# Funciones públicas 
 def notificar_tarea_asignada(
     tarea,
     personas_ids: list[int],
@@ -129,15 +123,7 @@ def notificar_tarea_asignada(
 
 
 def notificar_tarea_completada(tarea, completada_por: str) -> None:
-    """
-    Notifica a todas las personas de la tarea cuando se marca como completada.
-
-    Llamada desde: app/routes/tareas.py → PATCH /tareas/<id>/completar
-
-    Ejemplo:
-        from app.routes.notificaciones_routes import notificar_tarea_completada
-        notificar_tarea_completada(tarea, nombre_usuario_actual)
-    """
+    #Notifica a todas las personas de la tarea cuando se marca como completada.
     for persona in tarea.personas:
         tokens = _get_tokens_de_persona(persona.id_persona)
         _enviar_push(
@@ -149,15 +135,7 @@ def notificar_tarea_completada(tarea, completada_por: str) -> None:
 
 
 def notificar_tarea_cancelada(tarea, cancelada_por: str) -> None:
-    """
-    Notifica a todas las personas de la tarea cuando se elimina/cancela.
-
-    Llamada desde: app/routes/tareas.py → DELETE /tareas/<id>
-
-    Ejemplo:
-        from app.routes.notificaciones_routes import notificar_tarea_cancelada
-        notificar_tarea_cancelada(tarea, nombre_usuario_actual)
-    """
+    #Notifica a todas las personas de la tarea cuando se elimina/cancela.
     for persona in tarea.personas:
         tokens = _get_tokens_de_persona(persona.id_persona)
         _enviar_push(
@@ -168,14 +146,11 @@ def notificar_tarea_cancelada(tarea, cancelada_por: str) -> None:
         )
 
 
-# ─────────────────────────────────────────────────────────────────────────────
 # Job del scheduler — recordatorios de vencimiento
-# ─────────────────────────────────────────────────────────────────────────────
-
 def _job_recordatorios_vencimiento(app) -> None:
     """
     Corre cada hora. Busca tareas no completadas que vencen en las
-    próximas 24 horas y envía recordatorios a sus personas asignadas.
+    próximas 24 horas y envía recordatorios a los usuarios asignados.
     """
     with app.app_context():
         from app.models.tarea import Tarea  # import local
@@ -206,15 +181,8 @@ def _job_recordatorios_vencimiento(app) -> None:
 
 
 def init_scheduler(app) -> None:
-    """
-    Inicializa el scheduler de recordatorios.
-    Llamalo en create_app() después de registrar los blueprints.
+    #Inicializa el scheduler de recordatorios.
 
-    En app/__init__.py:
-        from app.routes.notificaciones_routes import notificaciones_bp, init_scheduler
-        app.register_blueprint(notificaciones_bp, url_prefix="/notificaciones")
-        init_scheduler(app)
-    """
     if _scheduler.running:
         return
 
@@ -231,9 +199,7 @@ def init_scheduler(app) -> None:
     logger.info("[Scheduler] Iniciado: recordatorios de vencimiento cada 1 hora.")
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Endpoints REST
-# ─────────────────────────────────────────────────────────────────────────────
+#endpoints
 
 @notificaciones_bp.route("/token", methods=["POST"])
 @token_required
@@ -315,35 +281,4 @@ def eliminar_token(decoded_token):
 
     return jsonify({
         "mensaje": "Token desactivado"
-    }), 200
-@notificaciones_bp.route("/test", methods=["POST"])
-@token_required
-def test_push(decoded_token):
-
-    firebase_uid = decoded_token.get("uid")
-
-    usuario = UsuarioService.get_usuario_by_firebase_uid(
-        firebase_uid
-    )
-
-    if not usuario:
-        return jsonify({
-            "error": "Usuario no encontrado"
-        }), 404
-
-    tokens = [
-        pt.token
-        for pt in usuario.push_tokens
-        if pt.activo
-    ]
-
-    _enviar_push(
-        tokens=tokens,
-        title="🚀 Push de prueba",
-        body="Si recibís esto, funciona todo"
-    )
-
-    return jsonify({
-        "ok": True,
-        "tokens": len(tokens)
     }), 200
