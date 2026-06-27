@@ -152,14 +152,12 @@ def notificar_tarea_cancelada(tarea, cancelada_por: str) -> None:
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _job_recordatorios_vencimiento(app) -> None:
-    print("=== [SCHEDULER TAREAS] EJECUTANDO ===")
-
-# Job del scheduler — recordatorios de vencimiento
-def _job_recordatorios_vencimiento(app) -> None:
     """
     Corre cada hora. Busca tareas no completadas que vencen en las
     próximas 24 horas y envía recordatorios a los usuarios asignados.
     """
+    print("=== [SCHEDULER TAREAS] EJECUTANDO ===")
+
 
     with app.app_context():
         from app.models.tarea import Tarea
@@ -345,8 +343,19 @@ def _job_recordatorios_tratamientos(app) -> None:
 def init_scheduler(app) -> None:
     #Inicializa el scheduler de recordatorios.
 
+    # ─── VERIFICAR SI LOS JOBS YA EXISTEN ───
     if _scheduler.running:
-        return
+        # Verificar si los jobs ya están programados
+        jobs = _scheduler.get_jobs()
+        job_ids = [j.id for j in jobs]
+        
+        if "recordatorios_vencimiento" in job_ids and "recordatorios_tratamientos" in job_ids:
+            logger.info("[Scheduler] Jobs ya existentes, no se duplican")
+            return
+        
+        # Si no están todos, limpiar y recrear
+        _scheduler.remove_all_jobs()
+        logger.info("[Scheduler] Jobs anteriores eliminados para recrear")
 
     _scheduler.add_job(
         func=_job_recordatorios_vencimiento,
@@ -368,9 +377,11 @@ def init_scheduler(app) -> None:
         next_run_time=datetime.now(),
     )
 
-    _scheduler.start()
-    logger.info("[Scheduler] Iniciado: recordatorios de vencimiento y tratamientos cada 1 hora.")
-
+    if not _scheduler.running:
+        _scheduler.start()
+        logger.info("[Scheduler] Iniciado: recordatorios de vencimiento y tratamientos cada 1 hora.")
+    else:
+        logger.info("[Scheduler] Ya estaba corriendo, jobs reemplazados")
 
 #endpoints
 
