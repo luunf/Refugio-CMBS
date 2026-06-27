@@ -71,11 +71,26 @@ const formatFecha = (fecha?: string) => {
   return `${d}/${m}/${y}`;
 };
 
+const fechaNacimientoInvalida = (fechaNacimiento: string, fechaIngreso: string, hoy: string): boolean => {
+  if (!fechaNacimiento) return false;
+  if (fechaNacimiento > hoy) return true;
+  if (fechaIngreso && fechaNacimiento > fechaIngreso) return true;
+  return false;
+};
+
+const fechaIngresoInvalida = (fechaIngreso: string, fechaNacimiento: string): boolean => {
+  if (!fechaIngreso) return false;
+  if (fechaNacimiento && fechaIngreso < fechaNacimiento) return true;
+  return false;
+};
+
 const nombreCompleto = (p: Persona) =>
   [p.nombre, p.apellido].filter(Boolean).join(' ') || 'Usuario sin nombre';
 
 export default function ModalEditarAnimal({ visible, onClose, onEditado, animal }: Props) {
   const { t } = useTranslation('animales');
+
+  const hoy = new Date().toISOString().split('T')[0];
 
   const [loading, setLoading] = useState(false);
   const [estados, setEstados] = useState<Estado[]>([]);
@@ -112,6 +127,12 @@ export default function ModalEditarAnimal({ visible, onClose, onEditado, animal 
   const tieneAdoptado = estadoIds.some(id =>
     estados.find(e => e.id_estado === id)?.nombre === 'Adoptado'
   );
+
+  const errorFechaNacimiento = fechaNacimientoInvalida(fechaNacimiento, fechaIngreso, hoy);
+  const errorFechaIngreso = fechaIngresoInvalida(fechaIngreso, fechaNacimiento);
+
+  const maxDateNacimiento = fechaIngreso && fechaIngreso < hoy ? fechaIngreso : hoy;
+  const minDateIngreso = fechaNacimiento || undefined;
 
   const imagenMostrar = imagen ?? (!imagenEliminada ? animal.url_imagen ?? null : null);
 
@@ -202,6 +223,8 @@ export default function ModalEditarAnimal({ visible, onClose, onEditado, animal 
     if (!genero) return Alert.alert(t('error'), t('errorGenero'));
     if (!tamanio) return Alert.alert(t('error'), t('errorTamanio'));
     if (!fechaIngreso) return Alert.alert(t('error'), t('errorFechaIngreso'));
+    if (errorFechaNacimiento) return Alert.alert(t('error'), t('errorFechaNacimientoInvalida'));
+    if (errorFechaIngreso) return Alert.alert(t('error'), t('errorFechaIngresoInvalida'));
     if (estadoIds.length === 0) return Alert.alert(t('error'), t('errorEstados'));
     if (tieneTransito && !hogarId) return Alert.alert(t('error'), t('errorHogarRequerido'));
     if (tieneAdoptado && !adoptanteId) return Alert.alert(t('error'), t('errorAdoptanteRequerido'));
@@ -321,6 +344,9 @@ export default function ModalEditarAnimal({ visible, onClose, onEditado, animal 
                 {fechaNacimiento? formatFecha(fechaNacimiento) : t('placeholderSeleccionarFecha')}
               </Text>
             </TouchableOpacity>
+            {errorFechaNacimiento && (
+              <Text style={styles.fechaErrorTexto}>{t('errorFechaNacimientoInvalida')}</Text>
+            )}
 
             <Text style={styles.label}>{t('labelFechaIngreso')}{t('requiredSymbol')}</Text>
             <TouchableOpacity style={styles.inputFecha} onPress={() => setPickerIngreso(true)}>
@@ -328,6 +354,9 @@ export default function ModalEditarAnimal({ visible, onClose, onEditado, animal 
                 {fechaIngreso ? formatFecha(fechaIngreso) : t('placeholderSeleccionarFecha')}
               </Text>
             </TouchableOpacity>
+            {errorFechaIngreso && (
+              <Text style={styles.fechaErrorTexto}>{t('errorFechaIngresoInvalida')}</Text>
+            )}
 
             <Text style={styles.label}>{t('labelEstados')}{t('requiredSymbol')}</Text>
             <EstadoSelector value={estadoIds} onChange={setEstadoIds} estados={estados} placeholder={t('placeholderSeleccionarEstados')} />
@@ -400,8 +429,8 @@ export default function ModalEditarAnimal({ visible, onClose, onEditado, animal 
         </View>
       </View>
 
-      <AnimalDatePickerModal visible={pickerNacimiento} onClose={() => setPickerNacimiento(false)} onSelectDate={setFechaNacimiento} titulo={t('titleSeleccionarFechaNacimiento')} fechaSeleccionada={fechaNacimiento} />
-      <AnimalDatePickerModal visible={pickerIngreso} onClose={() => setPickerIngreso(false)} onSelectDate={setFechaIngreso} titulo={t('titleSeleccionarFechaIngreso')} fechaSeleccionada={fechaIngreso} />
+      <AnimalDatePickerModal visible={pickerNacimiento} onClose={() => setPickerNacimiento(false)} onSelectDate={setFechaNacimiento} titulo={t('titleSeleccionarFechaNacimiento')} fechaSeleccionada={fechaNacimiento} maxDate={maxDateNacimiento}/>
+      <AnimalDatePickerModal visible={pickerIngreso} onClose={() => setPickerIngreso(false)} onSelectDate={setFechaIngreso} titulo={t('titleSeleccionarFechaIngreso')} fechaSeleccionada={fechaIngreso} minDate={minDateIngreso}/>
     </Modal>
   );
 }
@@ -435,4 +464,5 @@ const styles = StyleSheet.create({
   botonesImagenRow: { flexDirection: 'row', gap: 12, marginBottom: 20,},
   btnImagenOpcion: { flex: 1, borderWidth: 1.5, borderColor: Colors.primary, borderStyle: 'dashed', borderRadius: 12, paddingVertical: 16, alignItems: 'center', gap: 6,},
   btnImagenOpcionTexto: { fontSize: 13, color: Colors.primary, fontWeight: '600',},
+  fechaErrorTexto: { color: Colors.delete, fontSize: 12, marginTop: -10, marginBottom: 14, },
 });
