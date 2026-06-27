@@ -62,8 +62,10 @@ def create_app():
     # Manejo de errores
     register_error_handlers(app)
 
-    # Inicializar el scheduler para notificaciones
+    
     with app.app_context():
-        init_scheduler(app)
+        from app.services.seed_service import SeedService
+        SeedService.run() #Ejecuta el seed cuando levantamos la app (automático)
+        init_scheduler(app)# Inicializar el scheduler para notificaciones
 
     return app
