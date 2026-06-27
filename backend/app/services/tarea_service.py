@@ -8,6 +8,7 @@ from app.routes.notificaciones_routes import (
     notificar_tarea_completada,
     notificar_tarea_cancelada,
 )
+
 class TareaService:
 
     @staticmethod
@@ -28,7 +29,7 @@ class TareaService:
         return tarea.to_dict()
 
     @staticmethod
-    def crear_tarea(data,asignado_por="Sistema"):
+    def crear_tarea(data, asignado_por="Sistema"):
         personas_ids = data.pop("personas_ids", [])
         tarea = Tarea(
             nombre=data["nombre"],
@@ -44,9 +45,7 @@ class TareaService:
             tarea.personas = personas
 
         db.session.commit()
-        print(
-            f"[DEBUG] Enviando notificación a personas: {personas_ids}"
-        )
+        print(f"[DEBUG] Enviando notificación a personas: {personas_ids}")
 
         notificar_tarea_asignada(
             tarea=tarea,
@@ -61,11 +60,6 @@ class TareaService:
 
     @staticmethod
     def crear_tareas_desde_tratamiento(nombre, fecha_inicio, fecha_fin, descripcion=None):
-        """
-        Crea una tarea por cada día entre fecha_inicio y fecha_fin (inclusive).
-        Todas son visibles para todos los voluntarios (sin personas_ids específicas,
-        ya que es un cuidado general del refugio).
-        """
         inicio = dt.strptime(fecha_inicio, "%Y-%m-%d").date()
         fin = dt.strptime(fecha_fin, "%Y-%m-%d").date() if fecha_fin else inicio
 
@@ -91,17 +85,15 @@ class TareaService:
         return [t.to_dict() for t in tareas_creadas]
 
     @staticmethod
-    def actualizar_tarea(
-        id,
-        data,
-        actualizado_por="Sistema"
-    ):
+    def actualizar_tarea(id, data, actualizado_por="Sistema"):
         tarea = Tarea.query.get(id)
 
         if not tarea:
             raise Exception("Tarea no encontrada")
 
         was_completed = tarea.completada
+        # ─── GUARDAR PERSONAS ANTERIORES ───
+        personas_anteriores = set(p.id_persona for p in tarea.personas)
 
         personas_ids = data.pop("personas_ids", None)
 
@@ -113,21 +105,24 @@ class TareaService:
             personas = Persona.query.filter(
                 Persona.id_persona.in_(personas_ids)
             ).all()
-
             tarea.personas = personas
 
             for persona in tarea.personas:
-                enviar_email_modificacion(
-                    persona,
-                    tarea
+                enviar_email_modificacion(persona, tarea)
+
+            # ─── NOTIFICAR PUSH A NUEVOS VOLUNTARIOS ───
+            nuevas_personas = [p.id_persona for p in personas if p.id_persona not in personas_anteriores]
+            if nuevas_personas:
+                print(f"[DEBUG] Nuevos voluntarios asignados: {nuevas_personas}")
+                notificar_tarea_asignada(
+                    tarea=tarea,
+                    personas_ids=nuevas_personas,
+                    asignado_por=actualizado_por
                 )
 
         db.session.commit()
 
-        if (
-            not was_completed and
-            tarea.completada
-        ):
+        if not was_completed and tarea.completada:
             if tarea.visita_id and tarea.visita.estado != "realizada":
                 tarea.visita.estado = "realizada"
                 db.session.commit()
@@ -136,10 +131,7 @@ class TareaService:
                 tarea=tarea,
                 completada_por=actualizado_por
             )
-        elif (
-            was_completed and
-            not tarea.completada
-        ):
+        elif was_completed and not tarea.completada:
             if tarea.visita_id and tarea.visita.estado != "proxima":
                 tarea.visita.estado = "proxima"
                 db.session.commit()
