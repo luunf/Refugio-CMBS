@@ -53,7 +53,6 @@ export default function ModalNuevaTarea({ visible, onClose, onCreate, mesActual,
 
   const hoy = new Date();
   const fechaInicial = () => {
-    // Si el mes/año mostrado es el actual, default a hoy. Si no, día 1 del mes elegido.
     const esMesActual = mesActual === hoy.getMonth() + 1 && yearActual === hoy.getFullYear();
     return esMesActual ? hoy : new Date(yearActual, mesActual - 1, 1);
   };
@@ -104,17 +103,17 @@ export default function ModalNuevaTarea({ visible, onClose, onCreate, mesActual,
 
   const handleSelectFecha = (nuevaFecha: Date) => {
     setFecha(nuevaFecha);
-    // Si cambia la fecha, re-validar la hora ya ingresada
     if (hora.length === 5 && esHoraValida(hora)) {
       setErrorHora(esHoraPasada(nuevaFecha, hora) ? t('modalNuevaTarea.errorHoraPasada') : '');
     }
   };
 
+  // ─── SOLO CAMBIO EN LA VALIDACIÓN ───
   const puedeCrear = () => {
     if (!nombre) return false;
     if (esFechaPasada(fecha)) return false;
-    if (!esTodoElDia && hora) {
-      if (!esHoraValida(hora)) return false;
+    if (!esTodoElDia) {
+      if (!hora || !esHoraValida(hora)) return false;
       if (esHoraPasada(fecha, hora)) return false;
     }
     return true;
@@ -204,20 +203,27 @@ export default function ModalNuevaTarea({ visible, onClose, onCreate, mesActual,
 
               {!esTodoElDia && (
                 <>
-                  <Text style={styles.label}>{t('modalNuevaTarea.horaLabel')}</Text>
+                  {/* ─── SOLO CAMBIO: asterisco y mensaje ─── */}
+                  <Text style={styles.label}>
+                    {t('modalNuevaTarea.horaLabel')}
+                    <Text style={styles.asterisco}> *</Text>
+                  </Text>
                   <TextInput
                     value={hora}
                     onChangeText={handleCambioHora}
                     placeholder={t('modalNuevaTarea.horaPlaceholder')}
-                    style={[styles.input, errorHora && styles.inputError]}
+                    style={[styles.input, errorHora && styles.inputError, !hora && styles.inputObligatorio]}
                     maxLength={5}
                     keyboardType="numbers-and-punctuation"
                   />
-                  {errorHora ? <Text style={styles.errorTexto}>{errorHora}</Text> : null}
+                  {errorHora ? (
+                    <Text style={styles.errorTexto}>{errorHora}</Text>
+                  ) : !hora ? (
+                    <Text style={styles.errorTexto}>{t('modalNuevaTarea.errorHoraObligatoria')}</Text>
+                  ) : null}
                 </>
               )}
 
-              {/* Selector de voluntarios */}
               <Text style={styles.label}>{t('modalNuevaTarea.voluntariosLabel')}</Text>
               <TouchableOpacity
                 onPress={() => setShowVoluntarios(!showVoluntarios)}
@@ -256,10 +262,11 @@ export default function ModalNuevaTarea({ visible, onClose, onCreate, mesActual,
                 </View>
               )}
 
+              {/* ─── SOLO CAMBIO: estilo del botón ─── */}
               <TouchableOpacity
                 onPress={handleCrear}
                 disabled={loading || !puedeCrear()}
-                style={[styles.btnCrear, !puedeCrear() && { opacity: 0.5 }]}
+                style={[styles.btnCrear, (!puedeCrear() || loading) && styles.btnCrearDisabled]}
               >
                 {loading ? <ActivityIndicator color={Colors.surface} /> : <Text style={styles.btnCrearTexto}>{t('modalNuevaTarea.btnCrear')}</Text>}
               </TouchableOpacity>
@@ -323,6 +330,10 @@ const styles = StyleSheet.create({
   },
   inputError: {
     borderColor: Colors.delete,
+  },
+  inputObligatorio: {
+    borderColor: Colors.delete,
+    borderWidth: 1.5,
   },
   errorTexto: {
     color: Colors.delete,
@@ -406,9 +417,18 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 8,
   },
+  btnCrearDisabled: {
+    backgroundColor: Colors.primaryLight,
+    opacity: 0.5,
+  },
   btnCrearTexto: {
     color: Colors.surface,
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  asterisco: {
+    color: Colors.text,
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });

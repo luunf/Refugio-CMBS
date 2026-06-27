@@ -42,7 +42,8 @@
     "seleccionarVoluntarios": "Seleccionar voluntarios...",
     "voluntariosSeleccionados": "{{count}} voluntario(s) seleccionado(s)",
     "cargandoVoluntarios": "Cargando...",
-    "sinVoluntarios": "Sin voluntarios registrados"
+    "sinVoluntarios": "Sin voluntarios registrados",
+    "errorHoraObligatoria": "La hora es obligatoria para tareas puntuales"
   },
   "tareaCard": {
     "sinAsignar": "Sin asignar",
@@ -58,7 +59,8 @@
   },
   "modalEditarTarea": {
     "titulo": "Editar tarea",
-    "btnGuardar": "Guardar"
+    "btnGuardar": "Guardar",
+    "errorHoraObligatoria": "La hora es obligatoria para tareas puntuales"
   },
   "alert": {
     "exito": "Éxito",
