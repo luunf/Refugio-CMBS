@@ -3,6 +3,7 @@ import { auth } from "@/config/firebase";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:5000";
 
+// potegida
 const apiClient = axios.create({
   baseURL: API_URL,
   headers: { "Content-Type": "application/json" },
@@ -13,12 +14,24 @@ apiClient.interceptors.request.use(async (config) => {
 
   if (user) {
     const token = await user.getIdToken();
-
     config.headers.Authorization = `Bearer ${token}`;
   }
 
   return config;
 });
+
+// pública
+const publicClient = axios.create({
+  baseURL: API_URL,
+  headers: { "Content-Type": "application/json" },
+});
+
+export const publicApi = {
+  checkEmail: async (email: string) => {
+    const res = await publicClient.post("/auth/check-email", { email });
+    return res.data;
+  },
+};
 
 export const api = {
   // PERSONAS
@@ -130,12 +143,6 @@ export const api = {
       },
     });
 
-    return res.data;
-  },
-
-  //auth de desarrollo sin firebase
-  devLogin: async (usuarioId: number) => {
-    const res = await apiClient.get(`/auth/dev-login/${usuarioId}`);
     return res.data;
   },
 

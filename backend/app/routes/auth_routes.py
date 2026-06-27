@@ -8,3 +8,7 @@ auth_bp = Blueprint('auth', __name__)
 @token_required
 def get_current_user(decoded_token):
     return AuthController.get_current_user(decoded_token)
+
+@auth_bp.route('/check-email', methods=['POST'])
+def check_email():
+    return AuthController.check_email()

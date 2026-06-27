@@ -83,3 +83,13 @@ class FirebaseService:
             raise Exception(
                 f"Error deleting Firebase user: {str(e)}"
             )
+    
+    @staticmethod
+    def get_user_by_email(email):
+        try:
+            user = auth.get_user_by_email(email)
+            return user
+        except auth.UserNotFoundError:
+            return None
+        except Exception as e:
+            raise Exception(f"Error fetching Firebase user: {str(e)}")

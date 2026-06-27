@@ -246,6 +246,15 @@ class PersonaService:
                 "No se puede eliminar la persona porque tiene un usuario asociado"
             )
         
+        if persona.animales:  
+            raise Exception(
+                "No se puede eliminar la persona porque tiene animales asignados"
+            )
+        if persona.tareas: 
+            raise Exception(
+                "No se puede eliminar la persona porque tiene tareas asignadas"
+            )
+        
         if persona.visitas_veterinarias:
             raise Exception(
                 "No se puede eliminar la persona porque tiene visitas veterinarias asociadas."
