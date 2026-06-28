@@ -31,15 +31,17 @@
     "errorFechaFin": "La fecha de fin no puede ser anterior a la fecha de inicio"
   },
   "alertas": {
-    "sinFechaFinTitulo": "Error",
-    "sinFechaFinMensaje": "El tratamiento no tiene fecha de fin definida",
-    "tareaCreadaTitulo": "Éxito",
-    "tareaCreadaMensaje": "Tarea registrada correctamente",
-    "errorTitulo": "Error",
-    "errorAgendarMensaje": "No se pudo registrar la tarea",
-    "tratamientoActualizadoTitulo": "Éxito",
-    "tratamientoActualizadoMensaje": "Tratamiento actualizado correctamente",
-    "errorEditarMensaje": "No se pudo actualizar el tratamiento",
-    "errorEliminarMensaje": "No se pudo eliminar el tratamiento"
-  }
+  "sinFechaFinTitulo": "Error",
+  "sinFechaFinMensaje": "El tratamiento no tiene fecha de fin definida",
+  "tareaCreadaTitulo": "Éxito",
+  "tareaCreadaMensaje": "Tarea registrada correctamente",
+  "errorTitulo": "Error",
+  "errorAgendarMensaje": "No se pudo registrar la tarea",
+  "tratamientoActualizadoTitulo": "Éxito",
+  "tratamientoActualizadoMensaje": "Tratamiento actualizado correctamente",
+  "errorEditarMensaje": "No se pudo actualizar el tratamiento",
+  "errorEliminarMensaje": "No se pudo eliminar el tratamiento",
+  "yaAgendadoTitulo": "Ya agendado",
+  "yaAgendadoMensaje": "Este tratamiento ya fue agendado previamente en el calendario."
+}
 }

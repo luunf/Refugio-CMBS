@@ -50,7 +50,25 @@ class TratamientoService:
     @staticmethod
     def update(id_tratamiento, data):
         tratamiento = Tratamiento.query.get_or_404(id_tratamiento)
+        
+        nuevo_tipo = data.get("tipo") if "tipo" in data else None
+        nueva_fecha_inicio = data.get("fecha_inicio") if "fecha_inicio" in data else None
+        if nuevo_tipo:
+            query = Tratamiento.query.filter(
+                Tratamiento.tipo == nuevo_tipo,
+                Tratamiento.visita_id == tratamiento.visita_id,
+                Tratamiento.id_tratamiento != id_tratamiento
+            )
 
+            if nueva_fecha_inicio:
+                query = query.filter(Tratamiento.fecha_inicio == nueva_fecha_inicio)
+            else:
+                query = query.filter(Tratamiento.fecha_inicio == tratamiento.fecha_inicio)
+        
+            existente = query.first()
+            if existente:
+                raise ValueError(f"Ya existe un tratamiento con el tipo '{nuevo_tipo}' en esta visita")
+        
         if "tipo" in data:
             tratamiento.tipo = data["tipo"]
         if "descripcion" in data:

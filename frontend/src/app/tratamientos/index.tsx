@@ -46,22 +46,32 @@ export default function TratamientosScreen() {
     return matchBusqueda && matchFiltro;
   });
 
-  const handleAgendar = async (tratamiento: any) => {
-    if (!tratamiento.fecha_fin) {
-      Alert.alert(t('alertas.sinFechaFinTitulo'), t('alertas.sinFechaFinMensaje'));
-      return;
+ const handleAgendar = async (tratamiento: any) => {
+  if (!tratamiento.fecha_fin) {
+    Alert.alert(t('alertas.sinFechaFinTitulo'), t('alertas.sinFechaFinMensaje'));
+    return;
+  }
+  setAgendando(tratamiento.id);
+  try {
+    await agendarEnCalendario(tratamiento);
+    Alert.alert(t('alertas.tareaCreadaTitulo'), t('alertas.tareaCreadaMensaje'));
+  } catch (e: any) {
+    console.log(' Error al agendar:', e?.response?.data?.error || e?.message);
+    const mensaje = e?.response?.data?.error || e?.message || t('alertas.errorAgendarMensaje');
+    
+    // Si el error es "ya fue agendado", mostrar mensaje específico
+    if (mensaje.includes('ya fue agendado') || mensaje.includes('ya fue agendado previamente')) {
+      Alert.alert(
+        t('alertas.yaAgendadoTitulo'), 
+        t('alertas.yaAgendadoMensaje')
+      );
+    } else {
+      Alert.alert(t('alertas.errorTitulo'), mensaje);
     }
-    setAgendando(tratamiento.id);
-    try {
-      await agendarEnCalendario(tratamiento);
-      Alert.alert(t('alertas.tareaCreadaTitulo'), t('alertas.tareaCreadaMensaje'));
-    } catch (e) {
-      console.error(e);
-      Alert.alert(t('alertas.errorTitulo'), t('alertas.errorAgendarMensaje'));
-    } finally {
-      setAgendando(null);
-    }
-  };
+  } finally {
+    setAgendando(null);
+  }
+};
 
   const handleEditarGuardar = async (id: number, data: any) => {
     try {

@@ -5,11 +5,13 @@ from app.utils.decorators import token_required
 tarea_bp = Blueprint('tareas', __name__)
 
 @tarea_bp.route('', methods=['GET'])
-def get_tareas():
+@token_required
+def get_tareas(decoded_token):
     return TareaController.get_all_tareas()
 
 @tarea_bp.route('/<int:tarea_id>', methods=['GET'])
-def get_tarea(tarea_id):
+@token_required
+def get_tarea(decoded_token, tarea_id):
     return TareaController.get_tarea(tarea_id)
 
 @tarea_bp.route('', methods=['POST'])
@@ -18,7 +20,8 @@ def create_tarea(decoded_token):
     return TareaController.create_tarea(decoded_token)
 
 @tarea_bp.route('/desde-tratamiento', methods=['POST'])
-def create_tareas_desde_tratamiento():
+@token_required
+def create_tareas_desde_tratamiento(decoded_token):
     return TareaController.create_tareas_desde_tratamiento()
 
 @tarea_bp.route('/<int:tarea_id>', methods=['PATCH'])
@@ -38,9 +41,11 @@ def delete_tarea(decoded_token, tarea_id):
     )
 
 @tarea_bp.route('/personas/<int:persona_id>/tareas', methods=['GET'])
-def tareas_de_persona(persona_id):
+@token_required
+def tareas_de_persona(decoded_token,persona_id):
     return TareaController.get_tareas_by_persona(persona_id)
 
 @tarea_bp.route('/<int:tarea_id>/personas', methods=['GET'])
-def personas_de_tarea(tarea_id):
+@token_required
+def personas_de_tarea(decoded_token, tarea_id):
     return TareaController.get_personas_by_tarea(tarea_id)

@@ -117,7 +117,6 @@ export default function ModalEditarTarea({ visible, onClose, onUpdate, tarea }: 
   // ─── SOLO CAMBIO EN LA VALIDACIÓN ───
   const puedeGuardar = () => {
     if (!nombre) return false;
-    if (esFechaPasada(fecha)) return false;
     if (!esTodoElDia) {
       if (!hora || !esHoraValida(hora)) return false;
       if (esHoraPasada(fecha, hora)) return false;
@@ -172,10 +171,6 @@ export default function ModalEditarTarea({ visible, onClose, onUpdate, tarea }: 
               <TouchableOpacity onPress={() => setShowDatePicker(true)} style={styles.input}>
                 <Text style={fechaInvalida && { color: Colors.delete }}>{fechaStr}</Text>
               </TouchableOpacity>
-              {fechaInvalida && (
-                <Text style={styles.errorTexto}>{t('modalNuevaTarea.errorFechaPasada')}</Text>
-              )}
-
               <Text style={styles.label}>{t('modalNuevaTarea.horarioLabel')}</Text>
               <View style={styles.row}>
                 <TouchableOpacity

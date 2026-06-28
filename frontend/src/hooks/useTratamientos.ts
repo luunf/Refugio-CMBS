@@ -36,7 +36,7 @@ export const useTratamientos = () => {
       await api.updateTratamiento(id, data);
       await cargarTratamientos();
     } catch (error) {
-      console.error('Error actualizando tratamiento:', error);
+      console.log('Error actualizando tratamiento:', error);
       throw error;
     }
   }, [cargarTratamientos]);
@@ -51,10 +51,8 @@ export const useTratamientos = () => {
     }
   }, [cargarTratamientos]);
 
-  // ─── MODIFICAR: agendarEnCalendario con notificación push ───
   const agendarEnCalendario = useCallback(async (tratamiento: any) => {
     try {
-      // 1. Crear la tarea en el calendario
       const nombreTarea = `${tratamiento.tipo} - ${tratamiento.animal_nombre ?? 'animal'}`;
       await api.crearTareasDesdeTratamiento({
         nombre: nombreTarea,
@@ -63,7 +61,6 @@ export const useTratamientos = () => {
         descripcion: tratamiento.descripcion,
       });
 
-      // 2. Enviar notificación push al backend
       const firebaseUser = getAuth().currentUser;
       if (firebaseUser) {
         const idToken = await firebaseUser.getIdToken();
@@ -77,10 +74,10 @@ export const useTratamientos = () => {
           },
         });
       }
-
+      
       console.log('✅ Tratamiento agendado y notificación enviada');
-    } catch (error) {
-      console.error('Error agendando tratamiento en calendario:', error);
+    } catch (error: any) {
+      console.log('Error agendando tratamiento en calendario:', error);
       throw error;
     }
   }, []);

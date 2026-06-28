@@ -25,15 +25,15 @@ class TareaService:
     def get_tarea_by_id(id):
         tarea = Tarea.query.get(id)
         if not tarea:
-            raise Exception("Tarea no encontrada")
+            raise ValueError("Tarea no encontrada")
         return tarea.to_dict()
 
     @staticmethod
     def crear_tarea(data, asignado_por="Sistema"):
         personas_ids = data.pop("personas_ids", [])
         tarea = Tarea(
-            nombre=data["nombre"],
-            fecha=data["fecha"],
+            nombre=data.get("nombre"),
+            fecha=data.get("fecha"),
             hora=data.get("hora"),
             es_todo_el_dia=data.get("es_todo_el_dia", False),
             completada=data.get("completada", False)
@@ -60,12 +60,28 @@ class TareaService:
 
     @staticmethod
     def crear_tareas_desde_tratamiento(nombre, fecha_inicio, fecha_fin, descripcion=None):
+        print(f"[DEBUG] Intentando agendar: nombre={nombre}, inicio={fecha_inicio}, fin={fecha_fin}")
         inicio = dt.strptime(fecha_inicio, "%Y-%m-%d").date()
         fin = dt.strptime(fecha_fin, "%Y-%m-%d").date() if fecha_fin else inicio
 
         if fin < inicio:
-            raise Exception("La fecha de fin no puede ser anterior a la fecha de inicio")
+           raise ValueError("La fecha de fin no puede ser anterior a la fecha de inicio")
 
+        if (fin - inicio).days > 90:
+           raise ValueError("El rango del tratamiento no puede superar los 90 días")
+
+        existentes = Tarea.query.filter(
+            Tarea.nombre == nombre,
+            Tarea.fecha >= inicio,
+            Tarea.fecha <= fin,
+            Tarea.es_todo_el_dia == True
+        ).count()
+        
+        print(f"[DEBUG] Tareas existentes encontradas: {existentes}")
+        
+        if existentes > 0:
+            raise ValueError("Este tratamiento ya fue agendado previamente")
+        
         tareas_creadas = []
         fecha_actual = inicio
 
@@ -89,10 +105,28 @@ class TareaService:
         tarea = Tarea.query.get(id)
 
         if not tarea:
-            raise Exception("Tarea no encontrada")
+            raise ValueError("Tarea no encontrada")
+        
+        nuevo_nombre = data.get("nombre") if "nombre" in data else None
+        nueva_fecha = data.get("fecha") if "fecha" in data else None
+        
 
+        if nuevo_nombre:
+            query = Tarea.query.filter(
+                Tarea.nombre == nuevo_nombre,
+                Tarea.id_tarea != id
+            )
+        
+            if nueva_fecha:
+                query = query.filter(Tarea.fecha == nueva_fecha)
+            else:
+                query = query.filter(Tarea.fecha == tarea.fecha)
+        
+            existente = query.first()
+            if existente:
+                raise ValueError(f"Ya existe una tarea con el nombre '{nuevo_nombre}' en la fecha {existente.fecha}")
+        
         was_completed = tarea.completada
-        # ─── GUARDAR PERSONAS ANTERIORES ───
         personas_anteriores = set(p.id_persona for p in tarea.personas)
 
         personas_ids = data.pop("personas_ids", None)
@@ -107,6 +141,12 @@ class TareaService:
             ).all()
             tarea.personas = personas
 
+            encontrados = {p.id_persona for p in personas}
+            inexistentes = set(personas_ids) - encontrados
+            
+            if inexistentes:
+                raise ValueError(f"Las siguientes personas no existen: {list(inexistentes)}")
+            
             for persona in tarea.personas:
                 enviar_email_modificacion(persona, tarea)
 
@@ -143,7 +183,7 @@ class TareaService:
         tarea = Tarea.query.get(id)
 
         if not tarea:
-            raise Exception("Tarea no encontrada")
+            raise ValueError("Tarea no encontrada")
 
         if cancelada_por:
             notificar_tarea_cancelada(
@@ -158,12 +198,12 @@ class TareaService:
     def get_tareas_by_persona(persona_id):
         persona = Persona.query.get(persona_id)
         if not persona:
-            raise Exception("Persona no encontrada")
+            raise ValueError("Persona no encontrada")
         return [t.to_dict() for t in persona.tareas]
 
     @staticmethod
     def get_personas_by_tarea(tarea_id):
         tarea = Tarea.query.get(tarea_id)
         if not tarea:
-            raise Exception("Tarea no encontrada")
+            raise ValueError("Tarea no encontrada")
         return [p.to_dict() for p in tarea.personas]
