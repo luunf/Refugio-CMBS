@@ -74,6 +74,14 @@ export default function ModalAgregarVacuna({
       Alert.alert(t("error"), t("errorProxDosis"));
       return;
     }
+
+    const costoNumero = costo ? parseFloat(costo.replace(",", ".")) : null;
+
+    if (costo && isNaN(costoNumero!)) {
+      Alert.alert(t("error"), t("errorCostoInvalido"));
+      return;
+    }
+
     setLoading(true);
     try {
       await api.createVacuna(animalId, {
@@ -82,7 +90,7 @@ export default function ModalAgregarVacuna({
         requiere_prox_dosis: requiereProxDosis,
         fecha_prox_dosis:
           requiereProxDosis && fechaProxDosis ? fechaProxDosis : null,
-        costo_aplicacion: costo ? parseFloat(costo.replace(",", ".")) : null,
+        costo_aplicacion: costoNumero,
       });
       onCreada();
       handleClose();

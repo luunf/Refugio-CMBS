@@ -18,6 +18,7 @@
   "errorEditar": "No se pudo editar la vacuna",
   "errorEliminar": "No se pudo eliminar la vacuna",
   "errorProxDosis": "La fecha de próxima dosis es menor a la fecha de aplicación",
+  "errorCostoInvalido": "El costo debe ser un valor numérico.",
 
   "titleNuevaVacuna": "Nueva vacuna",
   "titleDetalleVacuna": "Vacuna",
