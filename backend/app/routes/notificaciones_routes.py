@@ -173,36 +173,30 @@ def notificar_tarea_cancelada(tarea, cancelada_por: str) -> None:
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _job_recordatorios_vencimiento(app) -> None:
-    """
-    Corre cada hora. Busca tareas no completadas que vencen en las
-    próximas 24 horas y envía recordatorios a sus personas asignadas.
-    """
     with app.app_context():
-        from app.models.tarea import Tarea  # import local
+        from app.models.tarea import Tarea
 
-        ahora = datetime.now(timezone.utc).date()
-        manana = ahora + timedelta(days=1)
-        #manana = ahora
-        tareas = (
-            Tarea.query
-            .filter(
-                Tarea.fecha == manana,
-                Tarea.completada == False,  # noqa: E712
-            )
-            .all()
-        )
+        tz = timezone(timedelta(hours=-3))
+        hoy = datetime.now(tz).date()
+        manana = hoy + timedelta(days=1)
 
-        logger.info(f"[Scheduler] Tareas por vencer mañana: {len(tareas)}")
+        tareas = Tarea.query.filter(
+            Tarea.fecha == manana,
+            Tarea.completada == False
+        ).all()
 
         for tarea in tareas:
+            hora_str = tarea.hora.strftime("%H:%M") if tarea.hora else "Todo el día"
+            
             for persona in tarea.personas:
                 tokens = _get_tokens_de_persona(persona.id_persona)
-                _enviar_push(
-                    tokens=tokens,
-                    title="⏰ Tarea por vencer",
-                    body=f'"{tarea.nombre}" vence mañana. ¡No te olvides!',
-                    data={"id_tarea": tarea.id_tarea, "tipo": "TAREA_POR_VENCER"},
-                )
+                if tokens:
+                    _enviar_push(
+                        tokens=tokens,
+                        title="⏰ Tarea por vencer",
+                        body=f'"{tarea.nombre}" vence mañana ({hora_str}). ¡No te olvides!',
+                        data={"id_tarea": tarea.id_tarea, "tipo": "TAREA_POR_VENCER"},
+                    )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -303,7 +297,7 @@ def notificar_tratamiento_por_vencer(tratamiento) -> None:
                 _enviar_push(
                     tokens=tokens,
                     title="⏰ Tratamiento por vencer",
-                    body=f'El tratamiento "{tratamiento.tipo}" de {animal.nombre} vence mañana',
+                    body=f'El tratamiento "{tratamiento.tipo}" de {animal.nombre} vence mañana. ¡No te olvides!',
                     data={
                         "id_tratamiento": tratamiento.id_tratamiento,
                         "id_visita": visita.id_visita,
@@ -362,6 +356,9 @@ def init_scheduler(app) -> None:
         app.register_blueprint(notificaciones_bp, url_prefix="/notificaciones")
         init_scheduler(app)
     """
+    if getattr(app, '_scheduler_initialized', False):
+        return
+    
     if _scheduler.running:
         return
 
@@ -388,7 +385,8 @@ def init_scheduler(app) -> None:
 
     _scheduler.start()
     logger.info("[Scheduler] Iniciado: recordatorios de vencimiento y tratamientos cada 1 hora.")
-
+    
+    app._scheduler_initialized = True
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Endpoints REST
