@@ -53,6 +53,7 @@ export default function ModalDetalleVacuna({
             await api.deleteVacuna(vacuna.id_vacuna);
             onEliminada();
             onClose();
+            Alert.alert(t("success"), t("successEliminar"));
           } catch (e: any) {
             Alert.alert(
               t("error"),

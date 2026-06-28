@@ -100,6 +100,7 @@ export default function ModalEditarVacuna({
           requiereProxDosis && fechaProxDosis ? fechaProxDosis : null,
         costo_aplicacion: costoNumero,
       });
+      Alert.alert(t("success"), t("successEditar"));
       onEditada();
     } catch (e: any) {
       Alert.alert(t("error"), e?.response?.data?.error ?? t("errorEditar"));
