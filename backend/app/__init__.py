@@ -64,8 +64,7 @@ def create_app():
 
     
     with app.app_context():
-        from app.services.seed_service import SeedService
-        SeedService.run() #Ejecuta el seed cuando levantamos la app (automático)
+        
         init_scheduler(app)# Inicializar el scheduler para notificaciones
 
     return app
