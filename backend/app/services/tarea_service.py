@@ -131,6 +131,17 @@ class TareaService:
 
         personas_ids = data.pop("personas_ids", None)
 
+        nueva_fecha_parseada = None
+        if "fecha" in data and data["fecha"]:
+            nueva_fecha_parseada = dt.strptime(data["fecha"], "%Y-%m-%d").date()
+
+        nueva_hora_parseada = None
+        if "hora" in data and data["hora"]:
+            nueva_hora_parseada = dt.strptime(data["hora"], "%H:%M").time()
+
+        fecha_cambio = "fecha" in data and nueva_fecha_parseada != tarea.fecha
+        hora_cambio = "hora" in data and nueva_hora_parseada != tarea.hora
+
         for key, value in data.items():
             if hasattr(tarea, key):
                 setattr(tarea, key, value)
@@ -159,6 +170,12 @@ class TareaService:
                     personas_ids=nuevas_personas,
                     asignado_por=actualizado_por
                 )
+
+        if (fecha_cambio or hora_cambio) and tarea.visita_id and tarea.visita:
+            if fecha_cambio:
+                tarea.visita.fecha = nueva_fecha_parseada
+            if hora_cambio:
+                tarea.visita.hora = nueva_hora_parseada
 
         db.session.commit()
 
