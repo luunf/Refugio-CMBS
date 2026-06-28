@@ -30,6 +30,31 @@ class TareaService:
 
     @staticmethod
     def crear_tarea(data, asignado_por="Sistema"):
+        # ─── VALIDACIÓN DE DUPLICADOS AL CREAR ───
+        # Si la tarea viene de una visita, no validar (puede haber múltiples visitas el mismo día)
+        if not data.get("visita_id"):
+            nombre = data.get("nombre")
+            fecha = data.get("fecha")
+            hora = data.get("hora")
+            
+            if nombre and fecha:
+                query = Tarea.query.filter(
+                    Tarea.nombre == nombre,
+                    Tarea.fecha == fecha
+                )
+                
+                # Si se especifica hora, validar también la hora
+                if hora:
+                    query = query.filter(Tarea.hora == hora)
+                
+                existente = query.first()
+                
+                if existente:
+                    if hora:
+                        raise ValueError(f"Ya existe una tarea con el nombre '{nombre}' en la fecha {fecha} a las {hora}")
+                    else:
+                        raise ValueError(f"Ya existe una tarea con el nombre '{nombre}' en la fecha {fecha}")
+        
         personas_ids = data.pop("personas_ids", [])
         tarea = Tarea(
             nombre=data.get("nombre"),
@@ -107,24 +132,36 @@ class TareaService:
         if not tarea:
             raise ValueError("Tarea no encontrada")
         
-        nuevo_nombre = data.get("nombre") if "nombre" in data else None
-        nueva_fecha = data.get("fecha") if "fecha" in data else None
-        
-
-        if nuevo_nombre:
-            query = Tarea.query.filter(
-                Tarea.nombre == nuevo_nombre,
-                Tarea.id_tarea != id
-            )
-        
-            if nueva_fecha:
-                query = query.filter(Tarea.fecha == nueva_fecha)
-            else:
-                query = query.filter(Tarea.fecha == tarea.fecha)
-        
-            existente = query.first()
-            if existente:
-                raise ValueError(f"Ya existe una tarea con el nombre '{nuevo_nombre}' en la fecha {existente.fecha}")
+        # ─── VALIDACIÓN DE DUPLICADOS AL ACTUALIZAR ───
+        # Si la tarea está vinculada a una visita, no validar (puede haber múltiples visitas el mismo día)
+        if not tarea.visita_id:
+            nuevo_nombre = data.get("nombre") if "nombre" in data else None
+            nueva_fecha = data.get("fecha") if "fecha" in data else None
+            nueva_hora = data.get("hora") if "hora" in data else None
+            
+            if nuevo_nombre:
+                query = Tarea.query.filter(
+                    Tarea.nombre == nuevo_nombre,
+                    Tarea.id_tarea != id
+                )
+                
+                if nueva_fecha:
+                    query = query.filter(Tarea.fecha == nueva_fecha)
+                else:
+                    query = query.filter(Tarea.fecha == tarea.fecha)
+                
+                # Si se especifica hora, validar también la hora
+                if nueva_hora:
+                    query = query.filter(Tarea.hora == nueva_hora)
+                elif tarea.hora:
+                    query = query.filter(Tarea.hora == tarea.hora)
+                
+                existente = query.first()
+                if existente:
+                    if nueva_hora:
+                        raise ValueError(f"Ya existe una tarea con el nombre '{nuevo_nombre}' en la fecha {existente.fecha} a las {nueva_hora}")
+                    else:
+                        raise ValueError(f"Ya existe una tarea con el nombre '{nuevo_nombre}' en la fecha {existente.fecha}")
         
         was_completed = tarea.completada
         personas_anteriores = set(p.id_persona for p in tarea.personas)
