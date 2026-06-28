@@ -82,6 +82,14 @@ export default function ModalEditarVacuna({
       Alert.alert(t("error"), t("errorProxDosis"));
       return;
     }
+
+    const costoNumero = costo ? parseFloat(costo.replace(",", ".")) : null;
+
+    if (costo && isNaN(costoNumero!)) {
+      Alert.alert(t("error"), t("errorCostoInvalido"));
+      return;
+    }
+
     setLoading(true);
     try {
       await api.updateVacuna(vacuna.id_vacuna, {
@@ -90,7 +98,7 @@ export default function ModalEditarVacuna({
         requiere_prox_dosis: requiereProxDosis,
         fecha_prox_dosis:
           requiereProxDosis && fechaProxDosis ? fechaProxDosis : null,
-        costo_aplicacion: costo ? parseFloat(costo.replace(",", ".")) : null,
+        costo_aplicacion: costoNumero,
       });
       onEditada();
     } catch (e: any) {
