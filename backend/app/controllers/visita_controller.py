@@ -1,5 +1,6 @@
 from flask import request, jsonify
 from app.services.visita_service import VisitaService
+from app.services.usuario_service import UsuarioService
 
 
 class VisitaController:
@@ -51,13 +52,14 @@ class VisitaController:
             return jsonify({"error": str(e)}), 500
     
     @staticmethod
-    def update_visita(visita_id):
+    def update_visita(visita_id, decoded_token):
         data = request.get_json()
         if not data:
             return jsonify({"error": "Datos inválidos"}), 400
 
         try:
-            respuesta = VisitaService.update_visita(visita_id, data)
+            nombre_usuario = VisitaController._obtener_nombre_usuario(decoded_token)
+            respuesta = VisitaService.update_visita(visita_id, data, actualizado_por=nombre_usuario)
             return jsonify(respuesta), 200
         except LookupError as e:
             return jsonify({"error": str(e)}), 404
@@ -75,3 +77,20 @@ class VisitaController:
             return jsonify({"error": str(e)}), 404
         except Exception as e:
             return jsonify({"error": str(e)}), 500
+        
+    @staticmethod
+    def _obtener_nombre_usuario(decoded_token):
+
+        firebase_uid = decoded_token.get("uid")
+
+        usuario = UsuarioService.get_usuario_by_firebase_uid(
+            firebase_uid
+        )
+
+        if not usuario:
+            return "Sistema"
+
+        return (
+            f"{usuario.persona.nombre} "
+            f"{usuario.persona.apellido}"
+        )

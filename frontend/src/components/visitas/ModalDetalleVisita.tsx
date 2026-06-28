@@ -97,6 +97,7 @@ export default function ModalDetalleVisita({ visible, onClose, visitaId, onActua
                 await api.deleteVisita(visitaId!);
                 onEliminada();
                 onClose();
+                Alert.alert(t("success"), t("successEliminar"));
             } catch (e: any) {
                 Alert.alert(t('error'), e?.response?.data?.error ?? t('errorEliminar'));
             }

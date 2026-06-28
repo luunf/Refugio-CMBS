@@ -161,6 +161,11 @@ export default function ModalRegistrarVisita({ visible, onClose, onCreada, anima
     if (!veterinarioId) return Alert.alert(t('error'), t('errorVeterinario'));
     if (!estado) return Alert.alert(t('error'), t('errorEstado'));
 
+    const costoNumero = costo ? parseFloat(costo.replace(",", ".")) : null;
+    if (costo && isNaN(costoNumero!)) {
+      return Alert.alert(t('error'), t('errorCostoInvalido'));
+    }
+
     for (const tratamiento of tratamientos) {
       if (!tratamiento.tipo.trim()) return Alert.alert(t('error'), t('errorTipo'));
       if (!tratamiento.fecha_inicio) return Alert.alert(t('error'), t('errorFechaInicio'));
@@ -182,7 +187,7 @@ export default function ModalRegistrarVisita({ visible, onClose, onCreada, anima
         veterinario_id: veterinarioId,
         estado,
         info_adicional: infoAdicional.trim() || null,
-        costo: estado === "realizada" && costo ? parseFloat(costo.replace(",", ".")) : null,
+        costo: estado === "realizada" ? costoNumero : null,
       });
 
       // Crear tratamientos asociados

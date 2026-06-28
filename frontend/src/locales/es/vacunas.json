@@ -20,6 +20,7 @@
   "errorProxDosis": "La fecha de próxima dosis es menor a la fecha de aplicación",
   "errorCostoInvalido": "El costo debe ser un valor numérico.",
   "success": "Éxito",
+  "successRegistrar": "Vacuna registrada correctamente",
   "successEliminar": "Vacuna eliminada correctamente",
   "successEditar": "Vacuna actualizada correctamente",
 

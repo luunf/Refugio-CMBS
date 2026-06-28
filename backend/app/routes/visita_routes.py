@@ -1,6 +1,7 @@
 from flask import Blueprint
 from app.controllers.visita_controller import VisitaController
 from app.controllers.tratamiento_controller import create_tratamiento
+from app.utils.decorators import token_required
 
 visita_bp = Blueprint('visitas', __name__)
 
@@ -13,8 +14,9 @@ def get_visita(visita_id):
     return VisitaController.get_visita(visita_id)
 
 @visita_bp.route('/<int:visita_id>', methods=['PATCH'])
-def update_visita(visita_id):
-    return VisitaController.update_visita(visita_id)
+@token_required
+def update_visita(decoded_token, visita_id):
+    return VisitaController.update_visita(visita_id, decoded_token)
 
 @visita_bp.route('/<int:visita_id>', methods=['DELETE'])
 def delete_visita(visita_id):

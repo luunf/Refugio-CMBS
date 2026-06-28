@@ -103,7 +103,7 @@ class VisitaService:
         }
 
     @staticmethod
-    def update_visita(visita_id, data):
+    def update_visita(visita_id, data, actualizado_por="Sistema"):
         visita = VisitaVeterinaria.query.get(visita_id)
         if not visita:
             raise LookupError(f"Visita con id {visita_id} no encontrada")
@@ -130,7 +130,7 @@ class VisitaService:
         db.session.commit()
 
         tenia_tarea = visita.tarea is not None
-        VisitaService.sincronizar_tarea(visita)
+        VisitaService.sincronizar_tarea(visita, actualizado_por=actualizado_por)
         tarea_creada = visita.estado == "proxima" and not tenia_tarea and visita.tarea is not None
 
         return {
@@ -155,7 +155,7 @@ class VisitaService:
         db.session.commit()
     
     @staticmethod
-    def sincronizar_tarea(visita):
+    def sincronizar_tarea(visita, actualizado_por="Sistema"):
         tarea = visita.tarea
 
         if visita.estado == "realizada":
@@ -170,7 +170,7 @@ class VisitaService:
             if not ya_estaba_completada:
                 notificar_tarea_completada(
                     tarea=tarea,
-                    completada_por="Sistema"
+                    completada_por=actualizado_por
                 )
             return
 

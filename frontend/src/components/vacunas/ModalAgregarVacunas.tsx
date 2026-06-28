@@ -94,6 +94,7 @@ export default function ModalAgregarVacuna({
       });
       onCreada();
       handleClose();
+      Alert.alert(t("success"), t("successRegistrar"));
     } catch (e: any) {
       Alert.alert(t("error"), e?.response?.data?.error ?? t("errorCrear"));
     } finally {

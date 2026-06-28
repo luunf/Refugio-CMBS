@@ -206,6 +206,11 @@ export default function ModalEditarVisita({ visible, onClose, onEditada, visita 
     if (!veterinarioId) return Alert.alert(t('error'), t('errorVeterinario'));
     if (!estado) return Alert.alert(t('error'), t('errorEstado'));
 
+    const costoNumero = costo ? parseFloat(costo.replace(",", ".")) : null;
+    if (costo && isNaN(costoNumero!)) {
+      return Alert.alert(t('error'), t('errorCostoInvalido'));
+    }
+
     const tratamientosActivos = tratamientos.filter((t) => !t.eliminado);
     for (const tratamiento of tratamientosActivos) {
       if (!tratamiento.tipo.trim()) return Alert.alert(t('error'), t('errorTipo'));
@@ -228,7 +233,7 @@ export default function ModalEditarVisita({ visible, onClose, onEditada, visita 
         veterinario_id: veterinarioId,
         estado,
         info_adicional: infoAdicional.trim() || null,
-        costo: estado === "realizada" && costo ? parseFloat(costo.replace(",", ".")) : null,
+        costo: estado === "realizada" ? costoNumero : null,
       });
 
       // Tratamientos eliminados
@@ -261,12 +266,10 @@ export default function ModalEditarVisita({ visible, onClose, onEditada, visita 
 
       onEditada();
       onClose();
-      if (respuesta.tarea_creada) {
-        Alert.alert(
-          t('success'),
-          t('successTareaAgendada', { nombre: respuesta.tarea_nombre })
-        );
-      }
+      const successMessage = respuesta.tarea_creada
+        ? `${t('successEditar')}\n${t('successTareaAgendada', { nombre: respuesta.tarea_nombre })}`
+        : t('successEditar');
+      Alert.alert(t('success'), successMessage);
     } catch (e: any) {
       Alert.alert(t('error'), e?.response?.data?.error ?? t('errorEditar'));
     } finally {
