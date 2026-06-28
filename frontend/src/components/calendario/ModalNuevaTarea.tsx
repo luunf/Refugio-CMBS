@@ -108,7 +108,6 @@ export default function ModalNuevaTarea({ visible, onClose, onCreate, mesActual,
     }
   };
 
-  // ─── SOLO CAMBIO EN LA VALIDACIÓN ───
   const puedeCrear = () => {
     if (!nombre) return false;
     if (esFechaPasada(fecha)) return false;
@@ -203,7 +202,6 @@ export default function ModalNuevaTarea({ visible, onClose, onCreate, mesActual,
 
               {!esTodoElDia && (
                 <>
-                  {/* ─── SOLO CAMBIO: asterisco y mensaje ─── */}
                   <Text style={styles.label}>
                     {t('modalNuevaTarea.horaLabel')}
                     <Text style={styles.asterisco}> *</Text>
@@ -261,8 +259,6 @@ export default function ModalNuevaTarea({ visible, onClose, onCreate, mesActual,
                   </ScrollView>
                 </View>
               )}
-
-              {/* ─── SOLO CAMBIO: estilo del botón ─── */}
               <TouchableOpacity
                 onPress={handleCrear}
                 disabled={loading || !puedeCrear()}

@@ -43,8 +43,8 @@ export default function CalendarioScreen() {
       await crearTarea(nuevaTarea);
       
       Alert.alert(
-        "Éxito",
-        "Tarea creada correctamente",
+        t('alert.exito'),
+        t('alert.tareaCreada'),
         [{ text: "OK" }]
       );
     } catch (error: any) {
@@ -54,7 +54,7 @@ export default function CalendarioScreen() {
         console.error("Error inesperado al crear tarea:", error);
       }
 
-      let mensajeError = 'No se pudo crear la tarea. Inténtalo de nuevo.';
+      let mensajeError = t('alert.errorGenerico');
 
       if (error?.response?.data?.error) {
         mensajeError = error.response.data.error;
@@ -63,7 +63,7 @@ export default function CalendarioScreen() {
       }
 
       Alert.alert(
-        "Error",
+        t('alert.error'),
         mensajeError,
         [{ text: "OK" }]
       );
@@ -75,8 +75,8 @@ export default function CalendarioScreen() {
       await actualizarTarea(id, data);
       
       Alert.alert(
-        "Éxito",
-        "Tarea actualizada correctamente",
+        t('alert.exito'),
+        t('alert.tareaActualizada'),
         [{ text: "OK" }]
       );
     } catch (error: any) {
@@ -86,14 +86,14 @@ export default function CalendarioScreen() {
         console.error("Error inesperado al actualizar tarea:", error);
       }
 
-      let mensajeError = 'No se pudo actualizar la tarea.';
+      let mensajeError = t('alert.errorGenerico');
 
       if (error?.response?.data?.error) {
         mensajeError = error.response.data.error;
       }
 
       Alert.alert(
-        "Error",
+        t('alert.error'),
         mensajeError,
         [{ text: "OK" }]
       );

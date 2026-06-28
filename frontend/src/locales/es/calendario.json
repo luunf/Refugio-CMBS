@@ -62,11 +62,14 @@
     "btnGuardar": "Guardar",
     "errorHoraObligatoria": "La hora es obligatoria para tareas puntuales"
   },
-  "alert": {
-    "exito": "Éxito",
-    "tareaCreada": "Tarea creada correctamente",
-    "tareaActualizada": "Tarea actualizada correctamente",
-    "error": "Error"
+"alert": {
+  "exito": "Éxito",
+  "tareaCreada": "Tarea creada correctamente",
+  "tareaActualizada": "Tarea actualizada correctamente",
+  "tareaEliminada": "Tarea eliminada correctamente",
+  "error": "Error",
+  "errorGenerico": "No se pudo completar la operación. Inténtalo de nuevo.",
+  "errorEliminar": "No se pudo eliminar la tarea"
   },
   "datePicker": {
     "titulo": "Seleccionar fecha",

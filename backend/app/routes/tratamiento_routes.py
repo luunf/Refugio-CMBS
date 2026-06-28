@@ -1,5 +1,4 @@
-# app/routes/tratamiento_routes.py - VERSIÓN ORIGINAL RESTAURADA
-
+# app/routes/tratamiento_routes.py 
 from flask import Blueprint, jsonify
 from app.controllers.tratamiento_controller import (
     get_tratamientos,

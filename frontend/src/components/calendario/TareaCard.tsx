@@ -26,8 +26,8 @@ export default function TareaCard({ tarea, onUpdate, onDelete, onEdit }: Props) 
         console.error("Error inesperado:", error);
       }
       Alert.alert(
-        "Error",
-        error?.response?.data?.error || "No se pudo actualizar la tarea"
+        t('alert.error'),
+        error?.response?.data?.error || t('alert.errorGenerico')
       );
     }
   };
@@ -45,15 +45,15 @@ export default function TareaCard({ tarea, onUpdate, onDelete, onEdit }: Props) 
             try {
               await onDelete();
               Alert.alert(
-                "Éxito",
-                "Tarea eliminada correctamente",
+                t('alert.exito'),
+                t('alert.tareaEliminada'),
                 [{ text: "OK" }]
               );
             } catch (error: any) {
               console.error("Error al eliminar tarea:", error);
               Alert.alert(
-                "Error",
-                error?.response?.data?.error || "No se pudo eliminar la tarea",
+                t('alert.error'),
+                error?.response?.data?.error || t('alert.errorEliminar'),
                 [{ text: "OK" }]
               );
             }

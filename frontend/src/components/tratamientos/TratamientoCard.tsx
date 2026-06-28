@@ -41,12 +41,12 @@ export default function TratamientoCard({ tratamiento, onDelete, onAgendar, agen
 
   const handleEliminar = () => {
     Alert.alert(
-      t('card.confirmTitleEliminar') || 'Eliminar tratamiento',
-      t('card.confirmMessageEliminar') || '¿Estás seguro de eliminar este tratamiento?',
+      t('card.confirmTitleEliminar'),
+      t('card.confirmMessageEliminar'),
       [
-        { text: t('card.btnCancelar') || 'Cancelar', style: "cancel" },
+        { text: t('card.btnCancelar'), style: "cancel" },
         {
-          text: t('card.btnEliminar') || 'Eliminar',
+          text: t('card.btnEliminar'),
           style: "destructive",
           onPress: () => onDelete(tratamiento.id)
         },

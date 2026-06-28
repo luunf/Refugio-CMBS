@@ -114,7 +114,6 @@ export default function ModalEditarTarea({ visible, onClose, onUpdate, tarea }: 
     }
   };
 
-  // ─── SOLO CAMBIO EN LA VALIDACIÓN ───
   const puedeGuardar = () => {
     if (!nombre) return false;
     if (!esTodoElDia) {
@@ -193,7 +192,6 @@ export default function ModalEditarTarea({ visible, onClose, onUpdate, tarea }: 
 
               {!esTodoElDia && (
                 <>
-                  {/* ─── SOLO CAMBIO: asterisco y mensaje ─── */}
                   <Text style={styles.label}>
                     {t('modalNuevaTarea.horaLabel')}
                     <Text style={styles.asterisco}> *</Text>
@@ -251,8 +249,6 @@ export default function ModalEditarTarea({ visible, onClose, onUpdate, tarea }: 
                   </ScrollView>
                 </View>
               )}
-
-              {/* ─── SOLO CAMBIO: estilo del botón ─── */}
               <TouchableOpacity
                 onPress={handleGuardar}
                 disabled={loading || !puedeGuardar()}

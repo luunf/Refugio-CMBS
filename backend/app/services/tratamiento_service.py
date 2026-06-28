@@ -95,9 +95,6 @@ class TratamientoService:
         tratamiento = Tratamiento.query.get_or_404(id_tratamiento)
         visita_id = tratamiento.visita_id
 
-        # ─── ELIMINAR LLAMADA A notificar_tratamiento_eliminado ───
-        # (ya no se usa)
-
         db.session.delete(tratamiento)
         db.session.commit()
 

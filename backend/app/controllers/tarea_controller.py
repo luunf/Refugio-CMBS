@@ -56,22 +56,18 @@ class TareaController:
         if not data:
             return jsonify({"error": "Datos inválidos"}), 400
 
-        # Validaciones fuertes
         if not TareaController._validar_nombre(data.get("nombre")):
             return jsonify({"error": "El nombre debe tener al menos 3 caracteres y no puede ser solo números"}), 400
 
         if not data.get("fecha") or not TareaController._validar_fecha(data.get("fecha")):
             return jsonify({"error": "Fecha inválida. Formato: YYYY-MM-DD"}), 400
 
-        # ─── VALIDACIÓN DE HORA ───
         es_todo_el_dia = data.get("es_todo_el_dia", False)
         hora = data.get("hora")
 
-        # Si NO es todo el día, la hora es OBLIGATORIA
         if not es_todo_el_dia and not hora:
             return jsonify({"error": "Debes especificar una hora para una tarea puntual"}), 400
 
-        # Si se envía hora, validar formato
         if hora and not TareaController._validar_hora(hora):
             return jsonify({"error": "Hora inválida. Formato: HH:MM"}), 400
 
@@ -129,17 +125,13 @@ class TareaController:
         if "nombre" in data and not TareaController._validar_nombre(data.get("nombre")):
             return jsonify({"error": "El nombre debe tener al menos 3 caracteres y no puede ser solo números"}), 400
 
-        # ─── VALIDACIÓN DE HORA EN UPDATE ───
-        # Si se está actualizando es_todo_el_dia o hora
         if "es_todo_el_dia" in data or "hora" in data:
             es_todo_el_dia = data.get("es_todo_el_dia", False)
             hora = data.get("hora")
             
-            # Si NO es todo el día, la hora es OBLIGATORIA
             if not es_todo_el_dia and not hora:
                 return jsonify({"error": "Debes especificar una hora para una tarea puntual"}), 400
             
-            # Si se envía hora, validar formato
             if hora and not TareaController._validar_hora(hora):
                 return jsonify({"error": "Hora inválida. Formato: HH:MM"}), 400
 

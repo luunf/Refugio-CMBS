@@ -30,8 +30,6 @@ class TareaService:
 
     @staticmethod
     def crear_tarea(data, asignado_por="Sistema"):
-        # ─── VALIDACIÓN DE DUPLICADOS AL CREAR ───
-        # Si la tarea viene de una visita, no validar (puede haber múltiples visitas el mismo día)
         if not data.get("visita_id"):
             nombre = data.get("nombre")
             fecha = data.get("fecha")
@@ -43,7 +41,7 @@ class TareaService:
                     Tarea.fecha == fecha
                 )
                 
-                # Si se especifica hora, validar también la hora
+
                 if hora:
                     query = query.filter(Tarea.hora == hora)
                 
@@ -54,6 +52,21 @@ class TareaService:
                         raise ValueError(f"Ya existe una tarea con el nombre '{nombre}' en la fecha {fecha} a las {hora}")
                     else:
                         raise ValueError(f"Ya existe una tarea con el nombre '{nombre}' en la fecha {fecha}")
+        
+        personas_ids = data.get("personas_ids", [])
+        fecha = data.get("fecha")
+        hora = data.get("hora")
+        
+        if personas_ids and fecha and hora:
+            for persona_id in personas_ids:
+                conflicto = Tarea.query.filter(
+                    Tarea.fecha == fecha,
+                    Tarea.hora == hora
+                ).join(Tarea.personas).filter(Persona.id_persona == persona_id).first()
+                
+                if conflicto:
+                    persona = Persona.query.get(persona_id)
+                    raise ValueError(f"La persona '{persona.nombre} {persona.apellido}' ya tiene una tarea asignada en esa fecha y hora")
         
         personas_ids = data.pop("personas_ids", [])
         tarea = Tarea(
@@ -131,9 +144,7 @@ class TareaService:
 
         if not tarea:
             raise ValueError("Tarea no encontrada")
-        
-        # ─── VALIDACIÓN DE DUPLICADOS AL ACTUALIZAR ───
-        # Si la tarea está vinculada a una visita, no validar (puede haber múltiples visitas el mismo día)
+
         if not tarea.visita_id:
             nuevo_nombre = data.get("nombre") if "nombre" in data else None
             nueva_fecha = data.get("fecha") if "fecha" in data else None
@@ -150,7 +161,6 @@ class TareaService:
                 else:
                     query = query.filter(Tarea.fecha == tarea.fecha)
                 
-                # Si se especifica hora, validar también la hora
                 if nueva_hora:
                     query = query.filter(Tarea.hora == nueva_hora)
                 elif tarea.hora:
@@ -162,6 +172,22 @@ class TareaService:
                         raise ValueError(f"Ya existe una tarea con el nombre '{nuevo_nombre}' en la fecha {existente.fecha} a las {nueva_hora}")
                     else:
                         raise ValueError(f"Ya existe una tarea con el nombre '{nuevo_nombre}' en la fecha {existente.fecha}")
+        
+        nuevas_personas_ids = data.get("personas_ids") if "personas_ids" in data else None
+        nueva_fecha = data.get("fecha") if "fecha" in data else tarea.fecha
+        nueva_hora = data.get("hora") if "hora" in data else tarea.hora
+        
+        if nuevas_personas_ids is not None and nueva_fecha and nueva_hora:
+            for persona_id in nuevas_personas_ids:
+                conflicto = Tarea.query.filter(
+                    Tarea.fecha == nueva_fecha,
+                    Tarea.hora == nueva_hora,
+                    Tarea.id_tarea != id
+                ).join(Tarea.personas).filter(Persona.id_persona == persona_id).first()
+                
+                if conflicto:
+                    persona = Persona.query.get(persona_id)
+                    raise ValueError(f"La persona '{persona.nombre} {persona.apellido}' ya tiene una tarea asignada en esa fecha y hora")
         
         was_completed = tarea.completada
         personas_anteriores = set(p.id_persona for p in tarea.personas)
@@ -198,7 +224,6 @@ class TareaService:
             for persona in tarea.personas:
                 enviar_email_modificacion(persona, tarea)
 
-            # ─── NOTIFICAR PUSH A NUEVOS VOLUNTARIOS ───
             nuevas_personas = [p.id_persona for p in personas if p.id_persona not in personas_anteriores]
             if nuevas_personas:
                 print(f"[DEBUG] Nuevos voluntarios asignados: {nuevas_personas}")

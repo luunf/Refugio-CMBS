@@ -77,13 +77,13 @@ export default function TratamientosScreen() {
     try {
       await actualizarTratamiento(id, data);
       Alert.alert(
-        "Éxito",
-        "Tratamiento actualizado correctamente"
+        t('alertas.tratamientoActualizadoTitulo'),
+        t('alertas.tratamientoActualizadoMensaje')
       );
     } catch (e: any) {
       Alert.alert(
-        "Error",
-        e?.response?.data?.error ?? "No se pudo actualizar el tratamiento"
+        t('alertas.errorTitulo'),
+        e?.response?.data?.error ?? t('alertas.errorEditarMensaje')
       );
     }
   };

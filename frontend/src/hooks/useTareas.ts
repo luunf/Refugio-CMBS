@@ -23,11 +23,10 @@ export const useTareas = (mes: number, year: number) => {
       await api.createTarea(nuevaTarea);
       await cargarTareas();
     } catch (error: any) {
-      // Solo mostramos en consola errores graves (no 400)
       if (error?.response?.status !== 400) {
         console.error('Error al crear tarea:', error);
       }
-      throw error;   // ← Importante: seguimos lanzando el error para que lo capture el handle
+      throw error;   
     }
   }, [cargarTareas]);
 

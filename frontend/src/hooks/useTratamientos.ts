@@ -75,7 +75,7 @@ export const useTratamientos = () => {
         });
       }
       
-      console.log('✅ Tratamiento agendado y notificación enviada');
+      console.log('Tratamiento agendado y notificación enviada');
     } catch (error: any) {
       console.log('Error agendando tratamiento en calendario:', error);
       throw error;
