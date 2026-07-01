@@ -10,10 +10,12 @@ class Tarea(db.Model):
     es_todo_el_dia = db.Column(db.Boolean, nullable=False, default=False)
     completada = db.Column(db.Boolean, nullable=False, default=False)
     visita_id = db.Column(db.Integer, db.ForeignKey("visitas_veterinarias.id_visita", ondelete="CASCADE", onupdate="CASCADE"), nullable=True)
+    descripcion = db.Column(db.Text, nullable=True)
+    tratamiento_id = db.Column(db.Integer, db.ForeignKey("tratamientos.id_tratamiento", ondelete="CASCADE"), nullable=True)
 
     personas = db.relationship("Persona", secondary="tareas_personas", back_populates="tareas")
     visita = db.relationship("VisitaVeterinaria", back_populates="tarea")
-    
+    tratamiento = db.relationship("Tratamiento", back_populates="tareas")
 
     def to_dict(self):                        
         return {
@@ -23,6 +25,8 @@ class Tarea(db.Model):
             "hora": str(self.hora) if self.hora else None,
             "es_todo_el_dia": self.es_todo_el_dia,
             "completada": self.completada,
+            "descripcion": self.descripcion,
+            "tratamiento_id": self.tratamiento_id,
             "personas": [
                 {
                     "id_persona": p.id_persona,
@@ -31,5 +35,5 @@ class Tarea(db.Model):
                     "email": p.email
                 }
                 for p in self.personas
-            ]
+            ],
         }
