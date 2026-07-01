@@ -6,6 +6,7 @@ import {
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import DatePickerModal from './DatePickerModal';
+import TimePickerModal from './TimePickerModal';  // ← NUEVO
 import { Colors } from '@/constants/theme';
 import { api } from '@/config/api';
 import { MaterialIcons } from "@expo/vector-icons";
@@ -63,6 +64,7 @@ export default function ModalNuevaTarea({ visible, onClose, onCreate, mesActual,
   const [esTodoElDia, setEsTodoElDia] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);  // ← NUEVO
   const [errorHora, setErrorHora] = useState('');
 
   const [voluntarios, setVoluntarios] = useState<any[]>([]);
@@ -86,25 +88,22 @@ export default function ModalNuevaTarea({ visible, onClose, onCreate, mesActual,
     );
   };
 
-  const handleCambioHora = (texto: string) => {
-    setHora(texto);
-    if (texto.length === 5) {
-      if (!esHoraValida(texto)) {
-        setErrorHora(t('modalNuevaTarea.errorHoraInvalida'));
-      } else if (esHoraPasada(fecha, texto)) {
-        setErrorHora(t('modalNuevaTarea.errorHoraPasada'));
-      } else {
-        setErrorHora('');
-      }
-    } else {
-      setErrorHora('');
-    }
-  };
+  // ─── handleCambioHora ELIMINADO (ya no se necesita) ───
 
   const handleSelectFecha = (nuevaFecha: Date) => {
     setFecha(nuevaFecha);
     if (hora.length === 5 && esHoraValida(hora)) {
       setErrorHora(esHoraPasada(nuevaFecha, hora) ? t('modalNuevaTarea.errorHoraPasada') : '');
+    }
+  };
+
+  // ─── NUEVA: función para manejar selección de hora ───
+  const handleSelectTime = (horaSeleccionada: string) => {
+    setHora(horaSeleccionada);
+    if (esHoraPasada(fecha, horaSeleccionada)) {
+      setErrorHora(t('modalNuevaTarea.errorHoraPasada'));
+    } else {
+      setErrorHora('');
     }
   };
 
@@ -206,14 +205,15 @@ export default function ModalNuevaTarea({ visible, onClose, onCreate, mesActual,
                     {t('modalNuevaTarea.horaLabel')}
                     <Text style={styles.asterisco}> *</Text>
                   </Text>
-                  <TextInput
-                    value={hora}
-                    onChangeText={handleCambioHora}
-                    placeholder={t('modalNuevaTarea.horaPlaceholder')}
-                    style={[styles.input, errorHora && styles.inputError, !hora && styles.inputObligatorio]}
-                    maxLength={5}
-                    keyboardType="numbers-and-punctuation"
-                  />
+                  {/* ─── NUEVO: TouchableOpacity en vez de TextInput ─── */}
+                  <TouchableOpacity
+                    onPress={() => setShowTimePicker(true)}
+                    style={[styles.input, !hora && styles.inputObligatorio]}
+                  >
+                    <Text style={[styles.inputBtnText, !hora && { color: Colors.textFaint }]}>
+                      {hora || t('modalNuevaTarea.horaPlaceholder')}
+                    </Text>
+                  </TouchableOpacity>
                   {errorHora ? (
                     <Text style={styles.errorTexto}>{errorHora}</Text>
                   ) : !hora ? (
@@ -276,6 +276,14 @@ export default function ModalNuevaTarea({ visible, onClose, onCreate, mesActual,
         onClose={() => setShowDatePicker(false)}
         onSelectDate={handleSelectFecha}
         initialDate={fecha}
+      />
+
+      {/* ─── NUEVO: TimePickerModal ─── */}
+      <TimePickerModal
+        visible={showTimePicker}
+        onClose={() => setShowTimePicker(false)}
+        onSelectTime={handleSelectTime}
+        initialTime={hora || '08:00'}
       />
     </>
   );

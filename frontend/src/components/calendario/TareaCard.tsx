@@ -15,8 +15,17 @@ interface Props {
 export default function TareaCard({ tarea, onUpdate, onDelete, onEdit }: Props) {
   const { t } = useTranslation('calendario');
   const [expandida, setExpandida] = useState(false);
+  const tieneVoluntarios = tarea.personas && tarea.personas.length > 0;
 
   const toggleCompletada = async () => {
+    if (!tieneVoluntarios) {
+      Alert.alert(
+        t('alert.error'),
+        t('tareaCard.errorSinVoluntariosMensaje')
+      );
+      return;
+    }
+
     try {
       await onUpdate();
     } catch (error: any) {
@@ -76,9 +85,20 @@ export default function TareaCard({ tarea, onUpdate, onDelete, onEdit }: Props) 
           {tarea.nombre}
         </Text>
         {hora ? <Text style={styles.hora}>{hora}</Text> : null}
-        <View style={styles.voluntariosBadge}>
-          <Text style={styles.voluntariosText} numberOfLines={1}>{voluntarios}</Text>
+        
+        {/* ─── BADGE DE VOLUNTARIOS CON ESTILO DIFERENCIADO ─── */}
+        <View style={[
+          styles.voluntariosBadge,
+          !tieneVoluntarios && styles.voluntariosBadgeSinAsignar
+        ]}>
+          <Text style={[
+            styles.voluntariosText,
+            !tieneVoluntarios && styles.voluntariosTextSinAsignar
+          ]} numberOfLines={1}>
+            {voluntarios}
+          </Text>
         </View>
+        
         <TouchableOpacity
           onPress={(e) => { e.stopPropagation(); onEdit(); }}
           style={styles.btnLapiz}
@@ -101,12 +121,26 @@ export default function TareaCard({ tarea, onUpdate, onDelete, onEdit }: Props) 
 
           <TouchableOpacity
             onPress={toggleCompletada}
-            style={[styles.btnCompletar, tarea.completada && styles.btnCompletarGris]}
+            disabled={!tieneVoluntarios}
+            style={[
+              styles.btnCompletar,
+              tarea.completada && styles.btnCompletarGris,
+              !tieneVoluntarios && styles.btnCompletarDisabled
+            ]}
           >
-            <Text style={styles.btnCompletarText}>
+            <Text style={[
+              styles.btnCompletarText,
+              !tieneVoluntarios && styles.btnCompletarTextDisabled
+            ]}>
               {tarea.completada ? t('tareaCard.btnMarcarPendiente') : t('tareaCard.btnMarcarCompletada')}
             </Text>
           </TouchableOpacity>
+
+          {!tieneVoluntarios && !tarea.completada && (
+            <Text style={styles.mensajeAyuda}>
+              {t('tareaCard.errorSinVoluntarios')}
+            </Text>
+          )}
 
           <TouchableOpacity onPress={handleEliminar} style={styles.btnEliminar}>
             <Text style={styles.btnEliminarText}>{t('tareaCard.btnEliminar')}</Text>
@@ -132,7 +166,17 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     maxWidth: 120,
   },
+  // ─── NUEVO: estilo para badge sin asignar ───
+  voluntariosBadgeSinAsignar: {
+    backgroundColor: Colors.borderLight,
+    borderColor: Colors.border,
+  },
   voluntariosText: { color: Colors.primary, fontSize: 12 },
+  // ─── NUEVO: estilo para texto sin asignar ───
+  voluntariosTextSinAsignar: {
+    color: Colors.textFaint,
+    fontStyle: 'italic',
+  },
   btnLapiz: { marginLeft: 8, padding: 4 },
   chevron: { color: Colors.primary, marginLeft: 4 },
   detalle: { backgroundColor: Colors.primaryFaint, borderRadius: 12, padding: 12, marginTop: 4 },
@@ -146,7 +190,23 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   btnCompletarGris: { backgroundColor: Colors.border },
+  btnCompletarDisabled: {
+    backgroundColor: Colors.border,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    opacity: 0.6,
+  },
   btnCompletarText: { color: Colors.surface, fontWeight: "600", fontSize: 13 },
+  btnCompletarTextDisabled: {
+    color: Colors.textFaint,
+  },
+  mensajeAyuda: {
+    color: Colors.textFaint,
+    fontSize: 12,
+    fontStyle: 'italic',
+    marginTop: 4,
+    textAlign: 'center',
+  },
   btnEliminar: {
     backgroundColor: Colors.delete,
     borderRadius: 20,

@@ -55,25 +55,32 @@
     "btnEliminar": "Eliminar tarea",
     "confirmTitleEliminar": "Eliminar tarea",
     "confirmMessageEliminar": "¿Estás seguro de que deseas eliminar esta tarea?",
-    "btnCancelar": "Cancelar"
+    "btnCancelar": "Cancelar",
+    "errorSinVoluntariosMensaje": "Esta tarea no tiene voluntarios asignados. Asigná un voluntario antes de completarla.",
+    "errorSinVoluntarios": "Se necesita tener un voluntario asignado para completar esta tarea"
   },
   "modalEditarTarea": {
     "titulo": "Editar tarea",
     "btnGuardar": "Guardar",
     "errorHoraObligatoria": "La hora es obligatoria para tareas puntuales"
   },
-"alert": {
-  "exito": "Éxito",
-  "tareaCreada": "Tarea creada correctamente",
-  "tareaActualizada": "Tarea actualizada correctamente",
-  "tareaEliminada": "Tarea eliminada correctamente",
-  "error": "Error",
-  "errorGenerico": "No se pudo completar la operación. Inténtalo de nuevo.",
-  "errorEliminar": "No se pudo eliminar la tarea"
+  "alert": {
+    "exito": "Éxito",
+    "tareaCreada": "Tarea creada correctamente",
+    "tareaActualizada": "Tarea actualizada correctamente",
+    "tareaEliminada": "Tarea eliminada correctamente",
+    "error": "Error",
+    "errorGenerico": "No se pudo completar la operación. Inténtalo de nuevo.",
+    "errorEliminar": "No se pudo eliminar la tarea"
   },
   "datePicker": {
     "titulo": "Seleccionar fecha",
     "cancelar": "Cancelar",
     "aceptar": "Aceptar"
+  },
+  "timePicker": {
+    "titulo": "Seleccionar hora",
+    "cancelar": "Cancelar",
+    "confirmar": "Confirmar"
   }
 }
