@@ -87,9 +87,9 @@ export default function ModalEditarTratamiento({ visible, onClose, tratamiento, 
   };
 
   const FRECUENCIAS = [
-    { label: 'Cada 8 hs', value: 8 },
-    { label: 'Cada 12 hs', value: 12 },
-    { label: 'Cada 24 hs', value: 24 },
+    { label: t('modalEditar.frecuencia8'), value: 8 },
+    { label: t('modalEditar.frecuencia12'), value: 12 },
+    { label: t('modalEditar.frecuencia24'), value: 24 },
   ];
 
   return (
@@ -161,20 +161,25 @@ export default function ModalEditarTratamiento({ visible, onClose, tratamiento, 
                   styles.btnFrecuenciaText,
                   frecuenciaHoras === null && styles.btnFrecuenciaTextActivo
                 ]}>
-                  Sin frecuencia
+                  {t('modalEditar.frecuenciaFija')}
                 </Text>
               </TouchableOpacity>
             </View>
 
-            <Text style={styles.label}>{t('modalEditar.horaLabel')}</Text>
-            <TouchableOpacity
-              onPress={() => setShowTimePicker(true)}
-              style={[styles.inputBtn, !horaAdministracion && { borderColor: Colors.border }]}
-            >
-              <Text style={[styles.inputBtnText, !horaAdministracion && { color: Colors.textFaint }]}>
-                {horaAdministracion || 'Seleccionar hora...'}
-              </Text>
-            </TouchableOpacity>
+            {/* ─── CAMPO HORA SOLO SI HAY FRECUENCIA SELECCIONADA ─── */}
+            {frecuenciaHoras !== null && (
+              <>
+                <Text style={styles.label}>{t('modalEditar.horaLabel')}</Text>
+                <TouchableOpacity
+                  onPress={() => setShowTimePicker(true)}
+                  style={[styles.inputBtn, !horaAdministracion && { borderColor: Colors.border }]}
+                >
+                  <Text style={[styles.inputBtnText, !horaAdministracion && { color: Colors.textFaint }]}>
+                    {horaAdministracion || t('modalEditar.horaPlaceholder')}
+                  </Text>
+                </TouchableOpacity>
+              </>
+            )}
 
             <TouchableOpacity
               onPress={handleSave}
