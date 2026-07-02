@@ -6,6 +6,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useTareas } from '@/hooks/useTareas';
+import { useTratamientos } from '@/hooks/useTratamientos';  // ← NUEVO
 import TareaCard from '@/components/calendario/TareaCard';
 import ModalNuevaTarea from '@/components/calendario/ModalNuevaTarea';
 import ModalEditarTarea from '@/components/calendario/ModalEditarTarea';
@@ -24,6 +25,7 @@ export default function CalendarioScreen() {
   const [tareaEditando, setTareaEditando] = useState<any | null>(null);
 
   const { tareas, loading, cargarTareas, crearTarea, actualizarTarea, eliminarTarea } = useTareas(mes, year);
+  const { actualizarTratamiento, agendarEnCalendario } = useTratamientos();  // ← NUEVO
 
   useEffect(() => {
     cargarTareas();
@@ -98,6 +100,10 @@ export default function CalendarioScreen() {
         [{ text: "OK" }]
       );
     }
+  };
+
+  const recargarTareas = async () => {
+    await cargarTareas();
   };
 
   const tareasPorDia: Record<number, any[]> = {};

@@ -57,7 +57,9 @@
     "confirmMessageEliminar": "¿Estás seguro de que deseas eliminar esta tarea?",
     "btnCancelar": "Cancelar",
     "errorSinVoluntariosMensaje": "Esta tarea no tiene voluntarios asignados. Asigná un voluntario antes de completarla.",
-    "errorSinVoluntarios": "Se necesita tener un voluntario asignado para completar esta tarea"
+    "errorSinVoluntarios": "Se necesita tener un voluntario asignado para completar esta tarea",
+    "descripcionLabel": "Descripción: ",
+    "frecuenciaLabel": "Frecuencia: "
   },
   "modalEditarTarea": {
     "titulo": "Editar tarea",
@@ -71,7 +73,8 @@
     "tareaEliminada": "Tarea eliminada correctamente",
     "error": "Error",
     "errorGenerico": "No se pudo completar la operación. Inténtalo de nuevo.",
-    "errorEliminar": "No se pudo eliminar la tarea"
+    "errorEliminar": "No se pudo eliminar la tarea",
+    "errorCargarMensaje": "No se pudieron cargar los tratamientos"
   },
   "datePicker": {
     "titulo": "Seleccionar fecha",

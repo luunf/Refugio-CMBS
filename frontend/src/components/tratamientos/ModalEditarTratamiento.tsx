@@ -3,6 +3,7 @@ import { Modal, View, Text, TextInput, TouchableOpacity, ActivityIndicator, Styl
 import { useTranslation } from 'react-i18next';
 import { Colors } from '@/constants/theme';
 import DatePickerModal from '../calendario/DatePickerModal';
+import TimePickerModal from '../calendario/TimePickerModal';
 
 interface Props {
   visible: boolean;
@@ -37,15 +38,19 @@ export default function ModalEditarTratamiento({ visible, onClose, tratamiento, 
   const [fechaInicio, setFechaInicio] = useState(new Date());
   const [fechaFin, setFechaFin] = useState<Date | null>(null);
   const [descripcion, setDescripcion] = useState('');
+  const [frecuenciaHoras, setFrecuenciaHoras] = useState<number | null>(null);
+  const [horaAdministracion, setHoraAdministracion] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPickerInicio, setShowPickerInicio] = useState(false);
   const [showPickerFin, setShowPickerFin] = useState(false);
-
+  const [showTimePicker, setShowTimePicker] = useState(false);
 
   useEffect(() => {
     if (visible && tratamiento) {
       setTipo(tratamiento.tipo || '');
       setDescripcion(tratamiento.descripcion || '');
+      setFrecuenciaHoras(tratamiento.frecuencia_horas || null);
+      setHoraAdministracion(tratamiento.hora_administracion || '');
 
       if (tratamiento.fecha_inicio) {
         setFechaInicio(parseFecha(tratamiento.fecha_inicio.split('T')[0]));
@@ -70,6 +75,8 @@ export default function ModalEditarTratamiento({ visible, onClose, tratamiento, 
         fecha_inicio: formatDate(fechaInicio),
         fecha_fin: fechaFin ? formatDate(fechaFin) : null,
         descripcion,
+        frecuencia_horas: frecuenciaHoras,
+        hora_administracion: horaAdministracion || null,
       });
       onClose();
     } catch (error) {
@@ -78,6 +85,12 @@ export default function ModalEditarTratamiento({ visible, onClose, tratamiento, 
       setLoading(false);
     }
   };
+
+  const FRECUENCIAS = [
+    { label: 'Cada 8 hs', value: 8 },
+    { label: 'Cada 12 hs', value: 12 },
+    { label: 'Cada 24 hs', value: 24 },
+  ];
 
   return (
     <>
@@ -118,6 +131,51 @@ export default function ModalEditarTratamiento({ visible, onClose, tratamiento, 
               style={styles.input} 
             />
 
+            <Text style={styles.label}>{t('modalEditar.frecuenciaLabel')}</Text>
+            <View style={styles.frecuenciaContainer}>
+              {FRECUENCIAS.map((f) => (
+                <TouchableOpacity
+                  key={f.value}
+                  onPress={() => setFrecuenciaHoras(f.value)}
+                  style={[
+                    styles.btnFrecuencia,
+                    frecuenciaHoras === f.value && styles.btnFrecuenciaActivo
+                  ]}
+                >
+                  <Text style={[
+                    styles.btnFrecuenciaText,
+                    frecuenciaHoras === f.value && styles.btnFrecuenciaTextActivo
+                  ]}>
+                    {f.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+              <TouchableOpacity
+                onPress={() => setFrecuenciaHoras(null)}
+                style={[
+                  styles.btnFrecuencia,
+                  frecuenciaHoras === null && styles.btnFrecuenciaActivo
+                ]}
+              >
+                <Text style={[
+                  styles.btnFrecuenciaText,
+                  frecuenciaHoras === null && styles.btnFrecuenciaTextActivo
+                ]}>
+                  Sin frecuencia
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.label}>{t('modalEditar.horaLabel')}</Text>
+            <TouchableOpacity
+              onPress={() => setShowTimePicker(true)}
+              style={[styles.inputBtn, !horaAdministracion && { borderColor: Colors.border }]}
+            >
+              <Text style={[styles.inputBtnText, !horaAdministracion && { color: Colors.textFaint }]}>
+                {horaAdministracion || 'Seleccionar hora...'}
+              </Text>
+            </TouchableOpacity>
+
             <TouchableOpacity
               onPress={handleSave}
               disabled={loading || !tipo || fechaFinInvalida}
@@ -140,6 +198,12 @@ export default function ModalEditarTratamiento({ visible, onClose, tratamiento, 
         onClose={() => setShowPickerFin(false)}
         onSelectDate={setFechaFin}
         initialDate={fechaFin ?? fechaInicio}
+      />
+      <TimePickerModal
+        visible={showTimePicker}
+        onClose={() => setShowTimePicker(false)}
+        onSelectTime={(hora) => setHoraAdministracion(hora)}
+        initialTime={horaAdministracion || '08:00'}
       />
     </>
   );
@@ -177,4 +241,31 @@ const styles = StyleSheet.create({
   errorTexto: { color: Colors.delete, fontSize: 12, marginBottom: 8 },
   btnGuardar: { backgroundColor: Colors.primary, paddingVertical: 14, borderRadius: 20, alignItems: 'center', marginTop: 8 },
   btnTexto: { color: Colors.surface, fontWeight: 'bold', fontSize: 16 },
+  frecuenciaContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 8,
+  },
+  btnFrecuencia: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: Colors.primaryLight,
+    borderWidth: 1,
+    borderColor: Colors.primaryLight,
+  },
+  btnFrecuenciaActivo: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  btnFrecuenciaText: {
+    color: Colors.primary,
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  btnFrecuenciaTextActivo: {
+    color: Colors.surface,
+    fontWeight: '600',
+  },
 });

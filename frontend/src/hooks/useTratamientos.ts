@@ -13,8 +13,7 @@ export const useTratamientos = () => {
       const data = await api.getTratamientos();
       setTratamientos(Array.isArray(data) ? data : []);
     } catch (error) {
-      console.error('Error cargando tratamientos:', error);
-      setError('No se pudieron cargar los tratamientos');
+      setError('Error al cargar tratamientos');
     } finally {
       setLoading(false);
     }
@@ -26,17 +25,18 @@ export const useTratamientos = () => {
       await api.createTratamientoEnVisita(visita.id_visita, tratamientoData);
       await cargarTratamientos();
     } catch (error) {
-      console.error('Error creando tratamiento con visita:', error);
       throw error;
     }
   }, [cargarTratamientos]);
 
-  const actualizarTratamiento = useCallback(async (id: number, data: any) => {
+  const actualizarTratamiento = useCallback(async (id: number, data: any, recargarTareas?: () => Promise<void>) => {
     try {
       await api.updateTratamiento(id, data);
       await cargarTratamientos();
+      if (recargarTareas) {
+        await recargarTareas();
+      }
     } catch (error) {
-      console.log('Error actualizando tratamiento:', error);
       throw error;
     }
   }, [cargarTratamientos]);
@@ -46,12 +46,11 @@ export const useTratamientos = () => {
       await api.deleteTratamiento(id);
       await cargarTratamientos();
     } catch (error) {
-      console.error('Error eliminando tratamiento:', error);
       throw error;
     }
   }, [cargarTratamientos]);
 
-  const agendarEnCalendario = useCallback(async (tratamiento: any) => {
+  const agendarEnCalendario = useCallback(async (tratamiento: any, recargarTareas?: () => Promise<void>) => {
     try {
       const nombreTarea = `${tratamiento.tipo} - ${tratamiento.animal_nombre ?? 'animal'}`;
       await api.crearTareasDesdeTratamiento({
@@ -59,6 +58,7 @@ export const useTratamientos = () => {
         fecha_inicio: tratamiento.fecha_inicio,
         fecha_fin: tratamiento.fecha_fin,
         descripcion: tratamiento.descripcion,
+        tratamiento_id: tratamiento.id,
       });
 
       const firebaseUser = getAuth().currentUser;
@@ -75,9 +75,10 @@ export const useTratamientos = () => {
         });
       }
       
-      console.log('Tratamiento agendado y notificación enviada');
+      if (recargarTareas) {
+        await recargarTareas();
+      }
     } catch (error: any) {
-      console.log('Error agendando tratamiento en calendario:', error);
       throw error;
     }
   }, []);

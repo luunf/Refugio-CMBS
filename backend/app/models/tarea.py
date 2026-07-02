@@ -27,6 +27,7 @@ class Tarea(db.Model):
             "completada": self.completada,
             "descripcion": self.descripcion,
             "tratamiento_id": self.tratamiento_id,
+            "tratamiento_frecuencia": self.tratamiento.frecuencia_horas if self.tratamiento else None,  
             "personas": [
                 {
                     "id_persona": p.id_persona,

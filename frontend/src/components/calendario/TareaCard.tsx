@@ -1,4 +1,3 @@
-//tareacard
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -86,7 +85,6 @@ export default function TareaCard({ tarea, onUpdate, onDelete, onEdit }: Props) 
         </Text>
         {hora ? <Text style={styles.hora}>{hora}</Text> : null}
         
-        {/* ─── BADGE DE VOLUNTARIOS CON ESTILO DIFERENCIADO ─── */}
         <View style={[
           styles.voluntariosBadge,
           !tieneVoluntarios && styles.voluntariosBadgeSinAsignar
@@ -118,6 +116,20 @@ export default function TareaCard({ tarea, onUpdate, onDelete, onEdit }: Props) 
             <Text style={styles.bold}>{t('tareaCard.voluntariosLabel')}</Text>
             {voluntarios}
           </Text>
+
+          {tarea.descripcion && (
+            <Text style={[styles.detalleTexto, styles.descripcionText]}>
+              <Text style={styles.bold}>{t('tareaCard.descripcionLabel')}</Text>
+              {tarea.descripcion}
+            </Text>
+          )}
+
+          {tarea.tratamiento_frecuencia && (
+            <Text style={[styles.detalleTexto, styles.frecuenciaText]}>
+              <Text style={styles.bold}>{t('tareaCard.frecuenciaLabel')}</Text>
+              Cada {tarea.tratamiento_frecuencia} horas
+            </Text>
+          )}
 
           <TouchableOpacity
             onPress={toggleCompletada}
@@ -166,13 +178,11 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     maxWidth: 120,
   },
-  // ─── NUEVO: estilo para badge sin asignar ───
   voluntariosBadgeSinAsignar: {
     backgroundColor: Colors.borderLight,
     borderColor: Colors.border,
   },
   voluntariosText: { color: Colors.primary, fontSize: 12 },
-  // ─── NUEVO: estilo para texto sin asignar ───
   voluntariosTextSinAsignar: {
     color: Colors.textFaint,
     fontStyle: 'italic',
@@ -181,6 +191,16 @@ const styles = StyleSheet.create({
   chevron: { color: Colors.primary, marginLeft: 4 },
   detalle: { backgroundColor: Colors.primaryFaint, borderRadius: 12, padding: 12, marginTop: 4 },
   detalleTexto: { color: Colors.textSoft, fontSize: 13, marginBottom: 4 },
+  descripcionText: {
+    color: Colors.text,
+    fontSize: 13,
+    marginBottom: 4,
+  },
+  frecuenciaText: {
+    color: Colors.primary,
+    fontSize: 13,
+    marginBottom: 4,
+  },
   bold: { fontWeight: "600" },
   btnCompletar: {
     backgroundColor: Colors.primary,

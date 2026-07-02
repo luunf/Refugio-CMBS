@@ -41,7 +41,6 @@ class TareaService:
                     Tarea.fecha == fecha
                 )
                 
-
                 if hora:
                     query = query.filter(Tarea.hora == hora)
                 
@@ -83,7 +82,6 @@ class TareaService:
             tarea.personas = personas
 
         db.session.commit()
-        print(f"[DEBUG] Enviando notificación a personas: {personas_ids}")
 
         notificar_tarea_asignada(
             tarea=tarea,
@@ -97,39 +95,59 @@ class TareaService:
         return tarea.to_dict()
 
     @staticmethod
-    def crear_tareas_desde_tratamiento(nombre, fecha_inicio, fecha_fin, descripcion=None):
-        print(f"[DEBUG] Intentando agendar: nombre={nombre}, inicio={fecha_inicio}, fin={fecha_fin}")
+    def crear_tareas_desde_tratamiento(nombre, fecha_inicio, fecha_fin, descripcion=None, tratamiento_id=None):
         inicio = dt.strptime(fecha_inicio, "%Y-%m-%d").date()
         fin = dt.strptime(fecha_fin, "%Y-%m-%d").date() if fecha_fin else inicio
 
         if fin < inicio:
-           raise ValueError("La fecha de fin no puede ser anterior a la fecha de inicio")
+            raise ValueError("La fecha de fin no puede ser anterior a la fecha de inicio")
 
         if (fin - inicio).days > 90:
-           raise ValueError("El rango del tratamiento no puede superar los 90 días")
+            raise ValueError("El rango del tratamiento no puede superar los 90 días")
 
-        existentes = Tarea.query.filter(
-            Tarea.nombre == nombre,
-            Tarea.fecha >= inicio,
-            Tarea.fecha <= fin,
-            Tarea.es_todo_el_dia == True
-        ).count()
-        
-        print(f"[DEBUG] Tareas existentes encontradas: {existentes}")
+        if tratamiento_id:
+            from app.models.tratamiento import Tratamiento
+            tratamiento = Tratamiento.query.get(tratamiento_id)
+            if tratamiento:
+                if not descripcion and tratamiento.descripcion:
+                    descripcion = tratamiento.descripcion
+
+        if tratamiento_id:
+            existentes = Tarea.query.filter(
+                Tarea.tratamiento_id == tratamiento_id
+            ).count()
+        else:
+            existentes = Tarea.query.filter(
+                Tarea.nombre == nombre,
+                Tarea.fecha >= inicio,
+                Tarea.fecha <= fin,
+                Tarea.es_todo_el_dia == True
+            ).count()
         
         if existentes > 0:
             raise ValueError("Este tratamiento ya fue agendado previamente")
         
+        hora_administracion = None
+        if tratamiento_id:
+            from app.models.tratamiento import Tratamiento
+            tratamiento = Tratamiento.query.get(tratamiento_id)
+            if tratamiento:
+                hora_administracion = tratamiento.hora_administracion
+
         tareas_creadas = []
         fecha_actual = inicio
 
         while fecha_actual <= fin:
+            tiene_hora = hora_administracion is not None
+            
             tarea = Tarea(
                 nombre=nombre,
                 fecha=fecha_actual,
-                hora=None,
-                es_todo_el_dia=True,
-                completada=False
+                hora=hora_administracion.strftime("%H:%M") if tiene_hora else None,
+                es_todo_el_dia=not tiene_hora,
+                completada=False,
+                descripcion=descripcion,
+                tratamiento_id=tratamiento_id
             )
             db.session.add(tarea)
             tareas_creadas.append(tarea)
@@ -141,6 +159,8 @@ class TareaService:
     @staticmethod
     def actualizar_tarea(id, data, actualizado_por="Sistema"):
         tarea = Tarea.query.get(id)
+        if data.get("completada") == True and len(tarea.personas) == 0:
+            raise ValueError("No se puede completar una tarea sin voluntarios asignados")
 
         if not tarea:
             raise ValueError("Tarea no encontrada")
@@ -226,7 +246,6 @@ class TareaService:
 
             nuevas_personas = [p.id_persona for p in personas if p.id_persona not in personas_anteriores]
             if nuevas_personas:
-                print(f"[DEBUG] Nuevos voluntarios asignados: {nuevas_personas}")
                 notificar_tarea_asignada(
                     tarea=tarea,
                     personas_ids=nuevas_personas,

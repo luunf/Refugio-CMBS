@@ -109,7 +109,8 @@ class TareaController:
                 nombre=data["nombre"],
                 fecha_inicio=data["fecha_inicio"],
                 fecha_fin=data.get("fecha_fin"),
-                descripcion=data.get("descripcion")
+                descripcion=data.get("descripcion"),
+                tratamiento_id=data.get("tratamiento_id")
             )
             return jsonify(tareas), 201
         except Exception as e:

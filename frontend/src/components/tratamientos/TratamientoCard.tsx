@@ -1,4 +1,3 @@
-//tratamientocard
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, StyleSheet, Alert } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -98,6 +97,33 @@ export default function TratamientoCard({ tratamiento, onDelete, onAgendar, agen
           <Text style={[styles.badgeText, vencido && styles.badgeTextVencido]}>{fechaFin}</Text>
         </View>
       </View>
+
+      {tratamiento.frecuencia_horas && (
+        <View style={styles.fila}>
+          <Text style={[styles.label, vencido && styles.textoVencido]}>
+            {t('modalEditar.frecuenciaLabel')}
+          </Text>
+          <View style={[styles.badge, vencido && styles.badgeVencido]}>
+            <Text style={[styles.badgeText, vencido && styles.badgeTextVencido]}>
+              Cada {tratamiento.frecuencia_horas} hs
+            </Text>
+          </View>
+        </View>
+      )}
+
+      {tratamiento.hora_administracion && (
+        <View style={styles.fila}>
+          <Text style={[styles.label, vencido && styles.textoVencido]}>
+            {t('modalEditar.horaLabel')}
+          </Text>
+          <View style={[styles.badge, vencido && styles.badgeVencido]}>
+            <Text style={[styles.badgeText, vencido && styles.badgeTextVencido]}>
+              {tratamiento.hora_administracion}
+            </Text>
+          </View>
+        </View>
+      )}
+
       {tratamiento.descripcion && (
         <View style={styles.fila}>
           <Text style={[styles.label, vencido && styles.textoVencido]}>{t('card.descripcionLabel')}</Text>

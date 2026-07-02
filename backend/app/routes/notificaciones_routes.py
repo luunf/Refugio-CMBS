@@ -77,7 +77,7 @@ def notificar_tarea_asignada(tarea, personas_ids: list[int], asignado_por: str) 
         if tokens:
             _enviar_push(
                 tokens=tokens,
-                title="📋 Nueva tarea asignada",
+                title="Nueva tarea asignada",
                 body=f'{asignado_por} te asignó: "{tarea.nombre}"',
                 data={
                     "id_tarea": tarea.id_tarea,
@@ -92,7 +92,7 @@ def notificar_tarea_completada(tarea, completada_por: str) -> None:
         if tokens:
             _enviar_push(
                 tokens=tokens,
-                title="✅ Tarea completada",
+                title="Tarea completada",
                 body=f'"{tarea.nombre}" fue marcada como completada por {completada_por}',
                 data={"id_tarea": tarea.id_tarea, "tipo": "TAREA_COMPLETADA"},
             )
@@ -104,7 +104,7 @@ def notificar_tarea_cancelada(tarea, cancelada_por: str) -> None:
         if tokens:
             _enviar_push(
                 tokens=tokens,
-                title="❌ Tarea cancelada",
+                title="Tarea cancelada",
                 body=f'"{tarea.nombre}" fue cancelada por {cancelada_por}',
                 data={"id_tarea": tarea.id_tarea, "tipo": "TAREA_CANCELADA"},
             )
@@ -130,7 +130,7 @@ def _job_recordatorios_vencimiento(app) -> None:
                 if tokens:
                     _enviar_push(
                         tokens=tokens,
-                        title="⏰ Tarea por vencer",
+                        title="Tarea por vencer",
                         body=f'"{tarea.nombre}" vence mañana. ¡No te olvides!',
                         data={"id_tarea": tarea.id_tarea, "tipo": "TAREA_POR_VENCER"},
                     )
@@ -150,7 +150,7 @@ def notificar_tratamiento_actualizado(tratamiento) -> None:
         if tokens:
             _enviar_push(
                 tokens=tokens,
-                title="🔄 Tratamiento actualizado",
+                title="Tratamiento actualizado",
                 body=f'El tratamiento "{tratamiento.tipo}" de {animal.nombre} fue actualizado',
                 data={
                     "id_tratamiento": tratamiento.id_tratamiento,
@@ -177,7 +177,7 @@ def _notificar_tratamiento_agendado(tratamiento) -> None:
                 mensaje += f" (finaliza {tratamiento.fecha_fin.strftime('%d/%m/%Y')})"
             _enviar_push(
                 tokens=tokens,
-                title="📅 Tratamiento agendado",
+                title="Tratamiento agendado",
                 body=mensaje,
                 data={
                     "id_tratamiento": tratamiento.id_tratamiento,
@@ -202,7 +202,7 @@ def notificar_tratamiento_por_vencer(tratamiento) -> None:
             if tokens:
                 _enviar_push(
                     tokens=tokens,
-                    title="⏰ Tratamiento por vencer",
+                    title="Tratamiento por vencer",
                     body=f'El tratamiento "{tratamiento.tipo}" de {animal.nombre} vence mañana. ¡No te olvides!',
                     data={
                         "id_tratamiento": tratamiento.id_tratamiento,
@@ -232,12 +232,39 @@ def _job_recordatorios_tratamientos(app) -> None:
         logger.info(f"[Scheduler] Tratamientos por vencer mañana: {len(tratamientos)}")
 
 
+# Job del scheduler — recordatorios horarios
+def _job_recordatorios_horarios(app) -> None:
+    with app.app_context():
+        from app.models.tarea import Tarea
+
+        tz = timezone(timedelta(hours=-3))
+        ahora = datetime.now(tz)
+        en_una_hora = ahora + timedelta(hours=1)
+        
+        tareas = Tarea.query.filter(
+            Tarea.fecha == en_una_hora.date(),
+            Tarea.hora == en_una_hora.strftime("%H:%M"),
+            Tarea.completada == False
+        ).all()
+
+        for tarea in tareas:
+            for persona in tarea.personas:
+                tokens = _get_tokens_de_persona(persona.id_persona)
+                if tokens:
+                    _enviar_push(
+                        tokens=tokens,
+                        title="Recordatorio de tarea",
+                        body=f"La tarea '{tarea.nombre}' comienza en 1 hora. ¡No te olvides!",
+                        data={"id_tarea": tarea.id_tarea, "tipo": "RECORDATORIO_HORARIO"}
+                    )
+
+
 def init_scheduler(app) -> None:
     if getattr(app, '_scheduler_initialized', False):
         return
     
     if _scheduler.running:
-        return
+        _scheduler.remove_all_jobs()
 
     _scheduler.add_job(
         func=_job_recordatorios_vencimiento,
@@ -259,8 +286,19 @@ def init_scheduler(app) -> None:
         next_run_time=datetime.now(),
     )
 
-    _scheduler.start()
-    logger.info("[Scheduler] Iniciado: recordatorios de vencimiento y tratamientos cada 1 hora.")
+    _scheduler.add_job(
+        func=_job_recordatorios_horarios,
+        args=[app],
+        trigger="interval",
+        hours=1,
+        id="recordatorios_horarios",
+        replace_existing=True,
+        next_run_time=datetime.now(),
+    )
+
+    if not _scheduler.running:
+        _scheduler.start()
+        logger.info("[Scheduler] Iniciado: recordatorios de vencimiento, tratamientos y horarios cada 1 hora.")
     
     app._scheduler_initialized = True
 
