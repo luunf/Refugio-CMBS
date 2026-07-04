@@ -258,6 +258,35 @@ class TareaService:
             if hora_cambio:
                 tarea.visita.hora = nueva_hora_parseada
 
+        if tarea.tratamiento_id:
+            from app.services.tratamiento_service import TratamientoService
+            
+            tratamiento_data = {}
+            
+            if "nombre" in data:
+                nuevo_nombre = data["nombre"]
+                if " - " in nuevo_nombre:
+                    nuevo_tipo = nuevo_nombre.split(" - ")[0]
+                    tratamiento_data["tipo"] = nuevo_tipo
+            
+            if "fecha" in data:
+                tratamiento_data["fecha_inicio"] = data["fecha"]
+            
+            if "hora" in data:
+                tratamiento_data["hora_administracion"] = data["hora"] if data["hora"] else None
+            
+            if "descripcion" in data:
+                tratamiento_data["descripcion"] = data["descripcion"]
+            
+            if "frecuencia_horas" in data:
+                tratamiento_data["frecuencia_horas"] = data["frecuencia_horas"]
+
+            if tratamiento_data:
+                try:
+                    TratamientoService.update(tarea.tratamiento_id, tratamiento_data)
+                except Exception as e:
+                    print(f"[ERROR] No se pudo actualizar el tratamiento: {e}")
+
         db.session.commit()
 
         if not was_completed and tarea.completada:

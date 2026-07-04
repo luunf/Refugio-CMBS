@@ -136,7 +136,7 @@ class TareaController:
             if hora and not TareaController._validar_hora(hora):
                 return jsonify({"error": "Hora inválida. Formato: HH:MM"}), 400
 
-        allowed = {"nombre", "fecha", "hora", "es_todo_el_dia", "completada", "personas_ids", "descripcion"}
+        allowed = {"nombre", "fecha", "hora", "es_todo_el_dia", "completada", "personas_ids", "descripcion", "frecuencia_horas"}
         if any(key not in allowed for key in data.keys()):
             return jsonify({"error": "Campos no permitidos"}), 400
 

@@ -62,9 +62,20 @@
     "frecuenciaLabel": "Frecuencia: "
   },
   "modalEditarTarea": {
-    "titulo": "Editar tarea",
-    "btnGuardar": "Guardar",
-    "errorHoraObligatoria": "La hora es obligatoria para tareas puntuales"
+  "titulo": "Editar tarea",
+  "btnGuardar": "Guardar",
+  "errorHoraObligatoria": "La hora es obligatoria para tareas puntuales",
+  "descripcionLabel": "Descripción del tratamiento",
+  "descripcionPlaceholder": "Escribe una descripción...",
+  "frecuenciaLabel": "Frecuencia",
+  "frecuencia8": "Cada 8 hs",
+  "frecuencia12": "Cada 12 hs",
+  "frecuencia24": "Cada 24 hs",
+  "frecuenciaFija": "Duración fija",
+  "confirmTitulo": "ADVERTENCIA",
+  "confirmMensaje": "La hora de esta tarea ya pasó. Los voluntarios pueden haber visto la información anterior. ¿Seguro que quieres editarla?",
+  "confirmCancelar": "Cancelar",
+  "confirmAceptar": "Sí, editar"
   },
   "alert": {
     "exito": "Éxito",

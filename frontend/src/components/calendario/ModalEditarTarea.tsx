@@ -1,12 +1,11 @@
-// src/components/calendario/ModalEditarTarea.tsx
 import React, { useState, useEffect } from 'react';
 import {
   Modal, View, Text, TextInput, TouchableOpacity,
-  ScrollView, ActivityIndicator, StyleSheet
+  ScrollView, ActivityIndicator, StyleSheet, Alert
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import DatePickerModal from './DatePickerModal';
-import TimePickerModal from './TimePickerModal';  // ← NUEVO
+import TimePickerModal from './TimePickerModal';
 import { Colors } from '@/constants/theme';
 import { api } from '@/config/api';
 import { MaterialIcons } from "@expo/vector-icons";
@@ -62,8 +61,12 @@ export default function ModalEditarTarea({ visible, onClose, onUpdate, tarea }: 
   const [esTodoElDia, setEsTodoElDia] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [showTimePicker, setShowTimePicker] = useState(false);  // ← NUEVO
+  const [showTimePicker, setShowTimePicker] = useState(false);
   const [errorHora, setErrorHora] = useState('');
+
+  const [descripcion, setDescripcion] = useState('');
+  const [frecuenciaHoras, setFrecuenciaHoras] = useState<number | null>(null);
+  const esTareaDeTratamiento = tarea?.tratamiento_id != null;
 
   const [voluntarios, setVoluntarios] = useState<any[]>([]);
   const [voluntariosSeleccionados, setVoluntariosSeleccionados] = useState<number[]>([]);
@@ -77,6 +80,10 @@ export default function ModalEditarTarea({ visible, onClose, onUpdate, tarea }: 
       setHora(tarea.hora ? tarea.hora.substring(0, 5) : '');
       setEsTodoElDia(!!tarea.es_todo_el_dia);
       setErrorHora('');
+      
+      setDescripcion(tarea.descripcion || '');
+      setFrecuenciaHoras(tarea.tratamiento_frecuencia || null);
+      
       const idsActuales = tarea.personas?.map((p: any) => p.id_persona) ?? [];
       setVoluntariosSeleccionados(idsActuales);
 
@@ -94,8 +101,6 @@ export default function ModalEditarTarea({ visible, onClose, onUpdate, tarea }: 
     );
   };
 
-  // ─── handleCambioHora ELIMINADO (ya no se necesita) ───
-
   const handleSelectFecha = (nuevaFecha: Date) => {
     setFecha(nuevaFecha);
     if (hora.length === 5 && esHoraValida(hora)) {
@@ -103,7 +108,6 @@ export default function ModalEditarTarea({ visible, onClose, onUpdate, tarea }: 
     }
   };
 
-  // ─── NUEVA: función para manejar selección de hora ───
   const handleSelectTime = (horaSeleccionada: string) => {
     setHora(horaSeleccionada);
     if (esHoraPasada(fecha, horaSeleccionada)) {
@@ -117,29 +121,89 @@ export default function ModalEditarTarea({ visible, onClose, onUpdate, tarea }: 
     if (!nombre) return false;
     if (!esTodoElDia) {
       if (!hora || !esHoraValida(hora)) return false;
-      if (esHoraPasada(fecha, hora)) return false;
+      // if (esHoraPasada(fecha, hora)) return false;
     }
     return true;
   };
 
+  const esTareaOriginalVencida = (): boolean => {
+    if (!tarea) return false;
+    
+    if (tarea.completada) return false;
+    
+    if (tarea.es_todo_el_dia) return false;
+    
+    if (!tarea.hora) return false;
+    
+    const fechaOriginal = tarea.fecha ? parseFecha(tarea.fecha) : null;
+    if (!fechaOriginal) return false;
+    
+    const horaOriginal = tarea.hora.substring(0, 5);
+    if (!esHoraValida(horaOriginal)) return false;
+    
+    return esHoraPasada(fechaOriginal, horaOriginal) || esFechaPasada(fechaOriginal);
+  };
+
   const handleGuardar = async () => {
     if (!puedeGuardar() || !tarea) return;
+    
+    const tareaOriginalVencida = esTareaOriginalVencida();
+    
+    if (tareaOriginalVencida) {
+      Alert.alert(
+        t('modalEditarTarea.confirmTitulo'), 
+        t('modalEditarTarea.confirmMensaje'), 
+        [
+          {
+            text: t('modalEditarTarea.confirmCancelar') || 'Cancelar',
+            style: 'cancel',
+          },
+          {
+            text: t('modalEditarTarea.confirmAceptar') || 'Sí, editar',
+            onPress: guardarTarea,
+            style: 'default',
+          },
+        ]
+      );
+    } else {
+      guardarTarea();
+    }
+  };
+
+  const guardarTarea = async () => {
     setLoading(true);
     try {
-      await onUpdate(tarea.id_tarea, {
+      const dataToSend: any = {
         nombre,
         fecha: formatDate(fecha),
         hora: esTodoElDia ? null : hora || null,
         es_todo_el_dia: esTodoElDia,
         personas_ids: voluntariosSeleccionados,
-      });
+      };
+
+      if (esTareaDeTratamiento) {
+        dataToSend.descripcion = descripcion;
+        dataToSend.frecuencia_horas = frecuenciaHoras;
+      }
+
+      await onUpdate(tarea.id_tarea, dataToSend);
       onClose();
     } catch (e) {
       console.error(e);
+      Alert.alert(
+        t('alert.error'),
+        t('alert.errorGenerico')
+      );
     } finally {
       setLoading(false);
     }
   };
+
+  const FRECUENCIAS = [
+    { label: t('modalEditarTarea.frecuencia8'), value: 8 },
+    { label: t('modalEditarTarea.frecuencia12'), value: 12 },
+    { label: t('modalEditarTarea.frecuencia24'), value: 24 },
+  ];
 
   const fechaStr = formatDate(fecha);
   const fechaInvalida = esFechaPasada(fecha);
@@ -199,7 +263,6 @@ export default function ModalEditarTarea({ visible, onClose, onUpdate, tarea }: 
                     {t('modalNuevaTarea.horaLabel')}
                     <Text style={styles.asterisco}> *</Text>
                   </Text>
-                  {/* ─── NUEVO: TouchableOpacity en vez de TextInput ─── */}
                   <TouchableOpacity
                     onPress={() => setShowTimePicker(true)}
                     style={[styles.input, !hora && styles.inputObligatorio]}
@@ -213,6 +276,54 @@ export default function ModalEditarTarea({ visible, onClose, onUpdate, tarea }: 
                   ) : !hora ? (
                     <Text style={styles.errorTexto}>{t('modalNuevaTarea.errorHoraObligatoria')}</Text>
                   ) : null}
+                </>
+              )}
+
+              {esTareaDeTratamiento && (
+                <>
+                  <Text style={styles.label}>{t('modalEditarTarea.descripcionLabel')}</Text>
+                  <TextInput
+                    value={descripcion}
+                    onChangeText={setDescripcion}
+                    placeholder={t('modalEditarTarea.descripcionPlaceholder')}
+                    multiline
+                    style={styles.input}
+                  />
+
+                  <Text style={styles.label}>{t('modalEditarTarea.frecuenciaLabel')}</Text>
+                  <View style={styles.frecuenciaContainer}>
+                    {FRECUENCIAS.map((f) => (
+                      <TouchableOpacity
+                        key={f.value}
+                        onPress={() => setFrecuenciaHoras(f.value)}
+                        style={[
+                          styles.btnFrecuencia,
+                          frecuenciaHoras === f.value && styles.btnFrecuenciaActivo
+                        ]}
+                      >
+                        <Text style={[
+                          styles.btnFrecuenciaText,
+                          frecuenciaHoras === f.value && styles.btnFrecuenciaTextActivo
+                        ]}>
+                          {f.label}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                    <TouchableOpacity
+                      onPress={() => setFrecuenciaHoras(null)}
+                      style={[
+                        styles.btnFrecuencia,
+                        frecuenciaHoras === null && styles.btnFrecuenciaActivo
+                      ]}
+                    >
+                      <Text style={[
+                        styles.btnFrecuenciaText,
+                        frecuenciaHoras === null && styles.btnFrecuenciaTextActivo
+                      ]}>
+                        {t('modalEditarTarea.frecuenciaFija')}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
                 </>
               )}
 
@@ -272,7 +383,6 @@ export default function ModalEditarTarea({ visible, onClose, onUpdate, tarea }: 
         initialDate={fecha}
       />
 
-      {/* ─── NUEVO: TimePickerModal ─── */}
       <TimePickerModal
         visible={showTimePicker}
         onClose={() => setShowTimePicker(false)}
@@ -428,5 +538,32 @@ const styles = StyleSheet.create({
     color: Colors.text,
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  frecuenciaContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 8,
+  },
+  btnFrecuencia: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: Colors.primaryLight,
+    borderWidth: 1,
+    borderColor: Colors.primaryLight,
+  },
+  btnFrecuenciaActivo: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  btnFrecuenciaText: {
+    color: Colors.primary,
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  btnFrecuenciaTextActivo: {
+    color: Colors.surface,
+    fontWeight: '600',
   },
 });
