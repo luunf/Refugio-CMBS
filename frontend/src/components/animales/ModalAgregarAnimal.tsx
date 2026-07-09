@@ -6,7 +6,6 @@ import {
 import { api } from "@/config/api";
 import MultiSelector from "./MultiSelector";
 import SingleSelector from "./SingleSelector";
-import EstadoSelector from "./EstadoSelector";
 import AnimalDatePickerModal from "./AnimalDatePickerModal"
 import { Colors } from '@/constants/theme';
 import { useTranslation } from 'react-i18next';
@@ -88,7 +87,8 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
   const [infoAdicional, setInfoAdicional] = useState("");
   const [comportamiento, setComportamiento] = useState("");
   const [esterilizado, setEsterilizado] = useState(false);
-  const [estadoIds, setEstadoIds] = useState<number[]>([]);
+  const [ubicacionId, setUbicacionId] = useState<number | null>(null);
+  const [estadoAdopcionId, setEstadoAdopcionId] = useState<number | null>(null);
   const [compatibilidadIds, setCompatibilidadIds] = useState<number[]>([]);
   const [voluntarioIds, setVoluntarioIds] = useState<number[]>([]);
   const [adoptanteId, setAdoptanteId] = useState<number | null>(null);
@@ -101,12 +101,15 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
   const [imagenUrl, setImagenUrl] = useState<string | null>(null);
   const [subiendoImagen, setSubiendoImagen] = useState(false);
 
-  const tieneTransito = estadoIds.some(id =>
-    estados.find(e => e.id_estado === id)?.nombre === "En tránsito"
+  const estadosUbicacion = estados.filter(e =>
+    e.nombre === "En tránsito" || e.nombre === "En refugio"
   );
-  const tieneAdoptado = estadoIds.some(id =>
-    estados.find(e => e.id_estado === id)?.nombre === "Adoptado"
+  const estadosAdopcion = estados.filter(e =>
+    e.nombre === "En adopción" || e.nombre === "Adoptado"
   );
+
+  const tieneTransito = estadosUbicacion.find(e => e.id_estado === ubicacionId)?.nombre === "En tránsito";
+  const tieneAdoptado = estadosAdopcion.find(e => e.id_estado === estadoAdopcionId)?.nombre === "Adoptado";
 
   const errorFechaNacimiento = fechaNacimientoInvalida(fechaNacimiento, fechaIngreso, hoy);
   const errorFechaIngreso = fechaIngresoInvalida(fechaIngreso, fechaNacimiento);
@@ -149,7 +152,8 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
     setInfoAdicional("");
     setComportamiento("");
     setEsterilizado(false);
-    setEstadoIds([]);
+    setUbicacionId(null);
+    setEstadoAdopcionId(null);
     setCompatibilidadIds([]);
     setVoluntarioIds([]);
     setAdoptanteId(null);
@@ -172,7 +176,7 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
     if (!fechaIngreso) return Alert.alert(t('error'), t('errorFechaIngreso'));
     if (errorFechaNacimiento) return Alert.alert(t('error'), t('errorFechaNacimientoInvalida'));
     if (errorFechaIngreso) return Alert.alert(t('error'), t('errorFechaIngresoInvalida'));
-    if (estadoIds.length === 0) return Alert.alert(t('error'), t('errorEstados'));
+    if (!ubicacionId && !estadoAdopcionId) return Alert.alert(t('error'), t('errorEstados'));
     if (tieneTransito && !hogarId) return Alert.alert(t('error'), t('errorHogarRequerido'));
     if (tieneAdoptado && !adoptanteId) return Alert.alert(t('error'), t('errorAdoptanteRequerido'));
 
@@ -206,7 +210,7 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
         info_adicional: infoAdicional.trim() || null,
         comportamiento: comportamiento.trim() || null,
         esterilizado,
-        estados: estadoIds,
+        estados: [ubicacionId, estadoAdopcionId].filter((id): id is number => id !== null),
         compatibilidades: compatibilidadIds,
         voluntarios: voluntarioIds,
         adoptante: tieneAdoptado ? adoptanteId : null,
@@ -388,21 +392,19 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
 
             {/* Estados */}
             <Text style={styles.label}>{t('labelEstados')}{t('requiredSymbol')}</Text>
-            <EstadoSelector
-              value={estadoIds}
-              onChange={setEstadoIds}
-              estados={estados}
-              placeholder={t('placeholderSeleccionarEstados')}
+            {/* Ubicación */}
+            <SingleSelector
+              value={ubicacionId}
+              onChange={setUbicacionId}
+              items={estadosUbicacion.map(e => ({ id: e.id_estado, nombre: e.nombre }))}
+              placeholder={t('placeholderSeleccionarUbicacion')}
             />
-
-            {/* Voluntarios */}
-            <Text style={styles.label}>{t('labelVoluntarios')}</Text>
-            <MultiSelector
-              value={voluntarioIds}
-              onChange={setVoluntarioIds}
-              items={voluntariosItems}
-              placeholder={t('placeholderSeleccionarVoluntarios')}
-              searchable
+            {/* Estado de adopción */}
+            <SingleSelector
+              value={estadoAdopcionId}
+              onChange={setEstadoAdopcionId}
+              items={estadosAdopcion.map(e => ({ id: e.id_estado, nombre: e.nombre }))}
+              placeholder={t('placeholderSeleccionarEstadoAdopcion')}
             />
 
             {/* Hogar de tránsito */}
@@ -432,6 +434,10 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
                 />
               </>
             )}
+
+            {/* Voluntarios */}
+            <Text style={styles.label}>{t('labelVoluntarios')}</Text>
+            <MultiSelector value={voluntarioIds} onChange={setVoluntarioIds} items={voluntariosItems} placeholder={t('placeholderSeleccionarVoluntarios')} searchable />
 
             {/* Imagen */}
             <Text style={styles.label}>{t('labelImagen')}</Text>

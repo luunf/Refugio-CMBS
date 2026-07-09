@@ -6,7 +6,6 @@ import {
 import { api } from '@/config/api';
 import MultiSelector from './MultiSelector';
 import SingleSelector from './SingleSelector';
-import EstadoSelector from './EstadoSelector';
 import AnimalDatePickerModal from './AnimalDatePickerModal';
 import { Colors } from '@/constants/theme';
 import { useTranslation } from 'react-i18next';
@@ -110,7 +109,8 @@ export default function ModalEditarAnimal({ visible, onClose, onEditado, animal 
   const [infoAdicional, setInfoAdicional] = useState('');
   const [comportamiento, setComportamiento] = useState('');
   const [esterilizado, setEsterilizado] = useState(false);
-  const [estadoIds, setEstadoIds] = useState<number[]>([]);
+  const [ubicacionId, setUbicacionId] = useState<number | null>(null);
+  const [estadoAdopcionId, setEstadoAdopcionId] = useState<number | null>(null);
   const [compatibilidadIds, setCompatibilidadIds] = useState<number[]>([]);
   const [voluntarioIds, setVoluntarioIds] = useState<number[]>([]);
   const [adoptanteId, setAdoptanteId] = useState<number | null>(null);
@@ -121,12 +121,15 @@ export default function ModalEditarAnimal({ visible, onClose, onEditado, animal 
   const [pickerNacimiento, setPickerNacimiento] = useState(false);
   const [pickerIngreso, setPickerIngreso] = useState(false);
 
-  const tieneTransito = estadoIds.some(id =>
-    estados.find(e => e.id_estado === id)?.nombre === 'En tránsito'
+  const estadosUbicacion = estados.filter(e =>
+    e.nombre === 'En tránsito' || e.nombre === 'En refugio'
   );
-  const tieneAdoptado = estadoIds.some(id =>
-    estados.find(e => e.id_estado === id)?.nombre === 'Adoptado'
+  const estadosAdopcion = estados.filter(e =>
+    e.nombre === 'En adopción' || e.nombre === 'Adoptado'
   );
+
+  const tieneTransito = estadosUbicacion.find(e => e.id_estado === ubicacionId)?.nombre === 'En tránsito';
+  const tieneAdoptado = estadosAdopcion.find(e => e.id_estado === estadoAdopcionId)?.nombre === 'Adoptado';
 
   const errorFechaNacimiento = fechaNacimientoInvalida(fechaNacimiento, fechaIngreso, hoy);
   const errorFechaIngreso = fechaIngresoInvalida(fechaIngreso, fechaNacimiento);
@@ -155,7 +158,10 @@ export default function ModalEditarAnimal({ visible, onClose, onEditado, animal 
     setInfoAdicional(animal.info_adicional ?? '');
     setComportamiento(animal.comportamiento ?? '');
     setEsterilizado(animal.esterilizado);
-    setEstadoIds(animal.estados.map(e => e.id_estado));
+    const ubicacion = animal.estados.find(e => e.nombre === 'En tránsito' || e.nombre === 'En refugio');
+    const estadoAdopcion = animal.estados.find(e => e.nombre === 'En adopción' || e.nombre === 'Adoptado');
+    setUbicacionId(ubicacion?.id_estado ?? null);
+    setEstadoAdopcionId(estadoAdopcion?.id_estado ?? null);
     setCompatibilidadIds(animal.compatibilidades.map(c => c.id_compatibilidad));
     setVoluntarioIds(animal.voluntarios.map(v => v.id_persona));
     setAdoptanteId(animal.adoptante?.id_persona ?? null);
@@ -225,7 +231,7 @@ export default function ModalEditarAnimal({ visible, onClose, onEditado, animal 
     if (!fechaIngreso) return Alert.alert(t('error'), t('errorFechaIngreso'));
     if (errorFechaNacimiento) return Alert.alert(t('error'), t('errorFechaNacimientoInvalida'));
     if (errorFechaIngreso) return Alert.alert(t('error'), t('errorFechaIngresoInvalida'));
-    if (estadoIds.length === 0) return Alert.alert(t('error'), t('errorEstados'));
+    if (!ubicacionId && !estadoAdopcionId) return Alert.alert(t('error'), t('errorEstados'));
     if (tieneTransito && !hogarId) return Alert.alert(t('error'), t('errorHogarRequerido'));
     if (tieneAdoptado && !adoptanteId) return Alert.alert(t('error'), t('errorAdoptanteRequerido'));
 
@@ -267,7 +273,7 @@ export default function ModalEditarAnimal({ visible, onClose, onEditado, animal 
         info_adicional: infoAdicional.trim() || null,
         comportamiento: comportamiento.trim() || null,
         esterilizado,
-        estados: estadoIds,
+        estados: [ubicacionId, estadoAdopcionId].filter((id): id is number => id !== null),
         compatibilidades: compatibilidadIds,
         voluntarios: voluntarioIds,
         adoptante: tieneAdoptado ? adoptanteId : null,
@@ -359,10 +365,20 @@ export default function ModalEditarAnimal({ visible, onClose, onEditado, animal 
             )}
 
             <Text style={styles.label}>{t('labelEstados')}{t('requiredSymbol')}</Text>
-            <EstadoSelector value={estadoIds} onChange={setEstadoIds} estados={estados} placeholder={t('placeholderSeleccionarEstados')} />
-
-            <Text style={styles.label}>{t('labelVoluntarios')}</Text>
-            <MultiSelector value={voluntarioIds} onChange={setVoluntarioIds} items={voluntariosItems} placeholder={t('placeholderSeleccionarVoluntarios')} searchable />
+            {/* Ubicación */}
+            <SingleSelector
+              value={ubicacionId}
+              onChange={setUbicacionId}
+              items={estadosUbicacion.map(e => ({ id: e.id_estado, nombre: e.nombre }))}
+              placeholder={t('placeholderSeleccionarUbicacion')}
+            />
+            {/* Estado de adopción */}
+            <SingleSelector
+              value={estadoAdopcionId}
+              onChange={setEstadoAdopcionId}
+              items={estadosAdopcion.map(e => ({ id: e.id_estado, nombre: e.nombre }))}
+              placeholder={t('placeholderSeleccionarEstadoAdopcion')}
+            />
 
             {tieneTransito && (
               <>
@@ -377,6 +393,9 @@ export default function ModalEditarAnimal({ visible, onClose, onEditado, animal 
                 <SingleSelector value={adoptanteId} onChange={setAdoptanteId} items={adoptantesItems} placeholder={t('placeholderSeleccionarAdoptante')} searchable />
               </>
             )}
+
+            <Text style={styles.label}>{t('labelVoluntarios')}</Text>
+            <MultiSelector value={voluntarioIds} onChange={setVoluntarioIds} items={voluntariosItems} placeholder={t('placeholderSeleccionarVoluntarios')} searchable />
 
             <Text style={styles.label}>{t('labelImagen')}</Text>
             {imagenMostrar && (

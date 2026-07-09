@@ -8,6 +8,7 @@ import { Colors } from "@/constants/theme";
 import { useTranslation } from 'react-i18next';
 import SingleSelector from "@/components/animales/SingleSelector";
 import AnimalDatePickerModal from "@/components/animales/AnimalDatePickerModal";
+import TimePickerModal from '@/components/calendario/TimePickerModal';
 
 interface Persona {
   id_persona: number;
@@ -119,6 +120,7 @@ export default function ModalEditarVisita({ visible, onClose, onEditada, visita 
   const [infoAdicional, setInfoAdicional] = useState(visita.info_adicional ?? "");
   const [costo, setCosto] = useState(visita.costo ? String(visita.costo) : "");
   const [pickerFecha, setPickerFecha] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
   const [tratamientos, setTratamientos] = useState<TratamientoForm[]>([]);
 
   const fechaMin = estado === "proxima" ? hoy : undefined;
@@ -311,18 +313,14 @@ export default function ModalEditarVisita({ visible, onClose, onEditada, visita 
             )}
 
             <Text style={styles.label}>{t('labelHora')}</Text>
-              <TextInput
-                value={hora}
-                onChangeText={setHora}
+              <TouchableOpacity
+                onPress={() => setShowTimePicker(true)}
                 style={styles.input}
-                placeholder={t('placeholderHora')}
-                placeholderTextColor={Colors.textFaint}
-                keyboardType="numbers-and-punctuation"
-                maxLength={5}
-              />
-              {horaFormatoInvalido && (
-                <Text style={styles.fechaErrorTexto}>{t('errorHoraInvalida')}</Text>
-              )}
+              >
+                <Text style={hora ? styles.horaTexto : { color: Colors.textFaint }}>
+                  {hora || t('placeholderHora')}
+                </Text>
+              </TouchableOpacity>
               {horaInvalida && (
                 <Text style={styles.fechaErrorTexto}>
                   {estado === "proxima" ? t('errorHoraDebeSerFutura') : t('errorHoraDebeSerPasada')}
@@ -425,6 +423,13 @@ export default function ModalEditarVisita({ visible, onClose, onEditada, visita 
         minDate={fechaMin}
         maxDate={fechaMax}
       />
+
+      <TimePickerModal
+        visible={showTimePicker}
+        onClose={() => setShowTimePicker(false)}
+        onSelectTime={(h) => setHora(h)}
+        initialTime={hora || '08:00'}
+      />
     </Modal>
   );
 }
@@ -523,6 +528,7 @@ const styles = StyleSheet.create({
   inputMultiline: { textAlignVertical: "top" },
   inputFecha: { backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.border, borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, marginBottom: 16 },
   fechaTexto: { fontSize: 14, color: Colors.text },
+  horaTexto: { fontSize: 14, color: Colors.text },
   fechaPlaceholder: { fontSize: 14, color: Colors.textFaint },
   opcionesRow: { flexDirection: "row", gap: 8, marginBottom: 16 },
   badge: { flex: 1, alignItems: "center", paddingVertical: 10, borderRadius: 20, backgroundColor: Colors.surface, borderWidth: 1, borderColor: Colors.border },

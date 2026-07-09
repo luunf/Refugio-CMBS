@@ -8,6 +8,7 @@ import { Colors } from "@/constants/theme";
 import { useTranslation } from 'react-i18next';
 import SingleSelector from "@/components/animales/SingleSelector";
 import AnimalDatePickerModal from "@/components/animales/AnimalDatePickerModal";
+import TimePickerModal from '@/components/calendario/TimePickerModal';
 
 interface Persona {
   id_persona: number;
@@ -93,6 +94,7 @@ export default function ModalRegistrarVisita({ visible, onClose, onCreada, anima
   const [infoAdicional, setInfoAdicional]   = useState("");
   const [costo, setCosto]                   = useState("");
   const [pickerFecha, setPickerFecha] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
   const [tratamientos, setTratamientos] = useState<TratamientoForm[]>([]);
 
   const fechaMin = estado === "proxima" ? hoy : undefined;
@@ -248,23 +250,19 @@ export default function ModalRegistrarVisita({ visible, onClose, onCreada, anima
 
             {/* Hora */}
             <Text style={styles.label}>{t('labelHora')}</Text>
-              <TextInput
-                value={hora}
-                onChangeText={setHora}
+              <TouchableOpacity
+                onPress={() => setShowTimePicker(true)}
                 style={styles.input}
-                placeholder={t('placeholderHora')}
-                placeholderTextColor={Colors.textFaint}
-                keyboardType="numbers-and-punctuation"
-                maxLength={5}
-              />
-              {horaFormatoInvalido && (
-                <Text style={styles.fechaErrorTexto}>{t('errorHoraInvalida')}</Text>
-              )}
+              >
+                <Text style={hora ? styles.horaTexto : { color: Colors.textFaint }}>
+                  {hora || t('placeholderHora')}
+                </Text>
+              </TouchableOpacity>
               {horaInvalida && (
-              <Text style={styles.fechaErrorTexto}>
-                {estado === "proxima" ? t('errorHoraDebeSerFutura') : t('errorHoraDebeSerPasada')}
-              </Text>
-            )}
+                <Text style={styles.fechaErrorTexto}>
+                  {estado === "proxima" ? t('errorHoraDebeSerFutura') : t('errorHoraDebeSerPasada')}
+                </Text>
+              )}
 
             {/* Procedimiento */}
             <Text style={styles.label}>{t('labelProcedimiento')}{t('requiredSymbol')}</Text>
@@ -377,6 +375,14 @@ export default function ModalRegistrarVisita({ visible, onClose, onCreada, anima
         fechaSeleccionada={fecha}
         minDate={fechaMin}
         maxDate={fechaMax}
+      />
+
+      {/* Picker hora visita */}
+      <TimePickerModal
+        visible={showTimePicker}
+        onClose={() => setShowTimePicker(false)}
+        onSelectTime={(h) => setHora(h)}
+        initialTime={hora || '08:00'}
       />
     </Modal>
   );
@@ -540,6 +546,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   fechaTexto: { fontSize: 14, color: Colors.text },
+  horaTexto: { fontSize: 14, color: Colors.text },
   fechaPlaceholder: { fontSize: 14, color: Colors.textFaint },
   opcionesRow: { flexDirection: "row", gap: 8, marginBottom: 16 },
   badge: {

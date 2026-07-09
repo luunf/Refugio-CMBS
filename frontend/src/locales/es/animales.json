@@ -37,6 +37,8 @@
   "btnAceptar": "Aceptar",
   "btnListo": "Listo",
   "placeholderSeleccionarEstados": "Seleccionar estados",
+  "placeholderSeleccionarUbicacion": "Seleccionar ubicación",
+  "placeholderSeleccionarEstadoAdopcion": "Seleccionar estado de adopción",
   "placeholderSeleccionar": "Seleccionar",
   "placeholderNombre": "Nombre",
   "placeholderRaza": "Raza",
