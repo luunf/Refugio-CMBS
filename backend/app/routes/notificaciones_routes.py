@@ -258,6 +258,19 @@ def _job_recordatorios_horarios(app) -> None:
                         data={"id_tarea": tarea.id_tarea, "tipo": "RECORDATORIO_HORARIO"}
                     )
 
+# Job del scheduler — sincronización de estado "en tratamiento"
+def _job_sincronizar_estados_tratamiento(app) -> None:
+    with app.app_context():
+        from app.services.tratamiento_service import TratamientoService
+
+        try:
+            print(f"[Scheduler] Ejecutando sincronización de estados...")
+            TratamientoService.sincronizar_animales_en_tratamiento()
+            print(f"[Scheduler] Sincronización completada.")
+            logger.info("[Scheduler] Sincronización de estados 'en tratamiento' completada.")
+        except Exception as e:
+            print(f"[ERROR sincronizar_estados_tratamiento] {e}")
+            logger.error(f"[ERROR sincronizar_estados_tratamiento] {e}")
 
 def init_scheduler(app) -> None:
     if getattr(app, '_scheduler_initialized', False):
@@ -292,6 +305,17 @@ def init_scheduler(app) -> None:
         trigger="interval",
         hours=1,
         id="recordatorios_horarios",
+        replace_existing=True,
+        next_run_time=datetime.now(),
+    )
+
+    _scheduler.add_job(
+        func=_job_sincronizar_estados_tratamiento,
+        args=[app],
+        trigger="cron",
+        hour=0,
+        minute=1,
+        id="sincronizar_estados_tratamiento",
         replace_existing=True,
         next_run_time=datetime.now(),
     )

@@ -15,3 +15,4 @@ class Persona(db.Model):
     animales = db.relationship("Animal", secondary="animales_personas", back_populates="personas")
     visitas_veterinarias = db.relationship("VisitaVeterinaria", back_populates="veterinario")
     tareas = db.relationship("Tarea", secondary="tareas_personas", back_populates="personas")
+    historial_estados = db.relationship("HistorialEstado", back_populates="persona")

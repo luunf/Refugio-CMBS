@@ -7,3 +7,4 @@ class Estado(db.Model):
     nombre = db.Column(db.String, nullable=False, unique=True)
 
     animales = db.relationship("Animal", secondary="animales_estados", back_populates="estados")
+    historial_estados = db.relationship("HistorialEstado", back_populates="estado")

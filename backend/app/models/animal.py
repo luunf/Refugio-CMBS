@@ -22,3 +22,4 @@ class Animal(db.Model):
     personas = db.relationship("Persona", secondary="animales_personas", back_populates="animales")
     visitas = db.relationship("VisitaVeterinaria", back_populates="animal", cascade="all, delete-orphan")
     vacunas = db.relationship("Vacuna", back_populates="animal", cascade="all, delete-orphan")
+    historial_estados = db.relationship("HistorialEstado", back_populates="animal", cascade="all, delete-orphan")

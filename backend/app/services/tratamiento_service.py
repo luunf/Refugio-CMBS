@@ -163,3 +163,10 @@ class TratamientoService:
         if not visita or not visita.animal:
             return
         TratamientoService.sincronizar_estado_tratamiento_por_animal(visita.animal)
+    
+    @staticmethod
+    def sincronizar_animales_en_tratamiento():
+        from app.models.animal import Animal
+        animales = Animal.query.all()
+        for animal in animales:
+            TratamientoService.sincronizar_estado_tratamiento_por_animal(animal)
