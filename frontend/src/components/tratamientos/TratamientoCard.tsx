@@ -114,7 +114,7 @@ export default function TratamientoCard({ tratamiento, onDelete, onAgendar, agen
       {tratamiento.hora_administracion && (
         <View style={styles.fila}>
           <Text style={[styles.label, vencido && styles.textoVencido]}>
-            {t('modalEditar.horaLabel')}
+            {t('modalEditar.primeraDosisLabel')}
           </Text>
           <View style={[styles.badge, vencido && styles.badgeVencido]}>
             <Text style={[styles.badgeText, vencido && styles.badgeTextVencido]}>

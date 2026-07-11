@@ -94,7 +94,7 @@ class TareaService:
 
         return tarea.to_dict()
 
-    @staticmethod
+    @staticmethod  
     def crear_tareas_desde_tratamiento(nombre, fecha_inicio, fecha_fin, descripcion=None, tratamiento_id=None):
         inicio = dt.strptime(fecha_inicio, "%Y-%m-%d").date()
         fin = dt.strptime(fecha_fin, "%Y-%m-%d").date() if fecha_fin else inicio
@@ -105,6 +105,7 @@ class TareaService:
         if (fin - inicio).days > 90:
             raise ValueError("El rango del tratamiento no puede superar los 90 días")
 
+        tratamiento = None
         if tratamiento_id:
             from app.models.tratamiento import Tratamiento
             tratamiento = Tratamiento.query.get(tratamiento_id)
@@ -127,36 +128,63 @@ class TareaService:
         if existentes > 0:
             raise ValueError("Este tratamiento ya fue agendado previamente")
         
+        frecuencia_horas = None
         hora_administracion = None
-        if tratamiento_id:
-            from app.models.tratamiento import Tratamiento
-            tratamiento = Tratamiento.query.get(tratamiento_id)
-            if tratamiento:
-                hora_administracion = tratamiento.hora_administracion
+        
+        if tratamiento_id and tratamiento:
+            frecuencia_horas = tratamiento.frecuencia_horas
+            hora_administracion = tratamiento.hora_administracion
 
         tareas_creadas = []
-        fecha_actual = inicio
 
-        while fecha_actual <= fin:
-            tiene_hora = hora_administracion is not None
+        if not frecuencia_horas:
+            fecha_actual = inicio
+            while fecha_actual <= fin:
+                tarea = Tarea(
+                    nombre=nombre,
+                    fecha=fecha_actual,
+                    hora=None,
+                    es_todo_el_dia=True,
+                    completada=False,
+                    descripcion=descripcion,
+                    tratamiento_id=tratamiento_id
+                )
+                db.session.add(tarea)
+                tareas_creadas.append(tarea)
+                fecha_actual += timedelta(days=1)
             
+            db.session.commit()
+            return [t.to_dict() for t in tareas_creadas]
+
+        if not hora_administracion:
+            raise ValueError("Debes especificar una hora de administración cuando hay frecuencia")
+
+        if frecuencia_horas not in [8, 12, 24]:
+            raise ValueError("La frecuencia debe ser 8, 12 o 24 horas")
+
+        fecha_hora_inicio = dt.combine(inicio, hora_administracion)
+        fecha_hora_fin = dt.combine(fin, hora_administracion)
+        
+        admin_actual = fecha_hora_inicio
+        
+        while admin_actual <= fecha_hora_fin:
             tarea = Tarea(
                 nombre=nombre,
-                fecha=fecha_actual,
-                hora=hora_administracion.strftime("%H:%M") if tiene_hora else None,
-                es_todo_el_dia=not tiene_hora,
+                fecha=admin_actual.date(),
+                hora=admin_actual.time(),
+                es_todo_el_dia=False,
                 completada=False,
                 descripcion=descripcion,
                 tratamiento_id=tratamiento_id
             )
             db.session.add(tarea)
             tareas_creadas.append(tarea)
-            fecha_actual += timedelta(days=1)
-
+            admin_actual += timedelta(hours=frecuencia_horas)
+        
         db.session.commit()
         return [t.to_dict() for t in tareas_creadas]
 
-    @staticmethod
+    @staticmethod 
     def actualizar_tarea(id, data, actualizado_por="Sistema"):
         tarea = Tarea.query.get(id)
         if data.get("completada") == True and len(tarea.personas) == 0:

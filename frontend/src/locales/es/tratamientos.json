@@ -18,7 +18,8 @@
     "vencido": "Finalizado",
     "confirmTitleEliminar": "Eliminar tratamiento",
     "confirmMessageEliminar": "¿Estás seguro de que deseas eliminar este tratamiento?",
-    "btnCancelar": "Cancelar"
+    "btnCancelar": "Cancelar",
+    "primeraDosisLabel": "1ra dosis"
   },
   "modalEditar": {
     "titulo": "Editar tratamiento",
@@ -34,8 +35,9 @@
     "frecuencia12": "Cada 12 hs",
     "frecuencia24": "Cada 24 hs",
     "frecuenciaFija": "Duración fija",
-    "horaLabel": "Hora de administración",
-    "horaPlaceholder": "Seleccionar hora..."
+    "primeraDosisLabel": "Horario de la primera dosis",
+    "primeraDosisHelper": "Las siguientes dosis se calcularán automáticamente según la frecuencia",
+    "primeraDosisPlaceholder": "Ej: 08:00"
   },
   "alertas": {
     "sinFechaFinTitulo": "Error",

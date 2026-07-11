@@ -70,7 +70,6 @@ def _enviar_push(tokens: list[str], title: str, body: str, data: dict = None) ->
         logger.error(f"[Push] Error al enviar notificaciones: {e}")
 
 
-# Funciones públicas — llamalas desde tus otras rutas
 def notificar_tarea_asignada(tarea, personas_ids: list[int], asignado_por: str) -> None:
     for id_persona in personas_ids:
         tokens = _get_tokens_de_persona(id_persona)
@@ -110,7 +109,6 @@ def notificar_tarea_cancelada(tarea, cancelada_por: str) -> None:
             )
 
 
-# Job del scheduler — recordatorios de vencimiento
 def _job_recordatorios_vencimiento(app) -> None:
     with app.app_context():
         from app.models.tarea import Tarea
@@ -136,7 +134,6 @@ def _job_recordatorios_vencimiento(app) -> None:
                     )
 
 
-# Notificaciones para TRATAMIENTOS
 def notificar_tratamiento_actualizado(tratamiento) -> None:
     visita = tratamiento.visita
     animal = visita.animal
@@ -215,7 +212,6 @@ def notificar_tratamiento_por_vencer(tratamiento) -> None:
         logger.error(f"[ERROR notificar_tratamiento_por_vencer] {e}")
 
 
-# Job del scheduler — recordatorios de vencimiento para TRATAMIENTOS
 def _job_recordatorios_tratamientos(app) -> None:
     with app.app_context():
         from app.models.tratamiento import Tratamiento
@@ -232,7 +228,6 @@ def _job_recordatorios_tratamientos(app) -> None:
         logger.info(f"[Scheduler] Tratamientos por vencer mañana: {len(tratamientos)}")
 
 
-# Job del scheduler — recordatorios horarios
 def _job_recordatorios_horarios(app) -> None:
     with app.app_context():
         from app.models.tarea import Tarea
@@ -240,10 +235,9 @@ def _job_recordatorios_horarios(app) -> None:
         tz = timezone(timedelta(hours=-3))
         ahora = datetime.now(tz)
         en_una_hora = ahora + timedelta(hours=1)
-        
         tareas = Tarea.query.filter(
             Tarea.fecha == en_una_hora.date(),
-            Tarea.hora == en_una_hora.strftime("%H:%M"),
+            Tarea.hora == en_una_hora.time(),  
             Tarea.completada == False
         ).all()
 
@@ -258,7 +252,7 @@ def _job_recordatorios_horarios(app) -> None:
                         data={"id_tarea": tarea.id_tarea, "tipo": "RECORDATORIO_HORARIO"}
                     )
 
-# Job del scheduler — sincronización de estado "en tratamiento"
+
 def _job_sincronizar_estados_tratamiento(app) -> None:
     with app.app_context():
         from app.services.tratamiento_service import TratamientoService
@@ -327,7 +321,6 @@ def init_scheduler(app) -> None:
     app._scheduler_initialized = True
 
 
-# Endpoints REST
 @notificaciones_bp.route("/token", methods=["POST"])
 @token_required
 def guardar_token(decoded_token):

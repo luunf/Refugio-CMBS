@@ -166,16 +166,15 @@ export default function ModalEditarTratamiento({ visible, onClose, tratamiento, 
               </TouchableOpacity>
             </View>
 
-            {/* ─── CAMPO HORA SOLO SI HAY FRECUENCIA SELECCIONADA ─── */}
             {frecuenciaHoras !== null && (
               <>
-                <Text style={styles.label}>{t('modalEditar.horaLabel')}</Text>
+                <Text style={styles.label}>{t('modalEditar.primeraDosisLabel')}</Text>
                 <TouchableOpacity
                   onPress={() => setShowTimePicker(true)}
                   style={[styles.inputBtn, !horaAdministracion && { borderColor: Colors.border }]}
                 >
                   <Text style={[styles.inputBtnText, !horaAdministracion && { color: Colors.textFaint }]}>
-                    {horaAdministracion || t('modalEditar.horaPlaceholder')}
+                    {horaAdministracion || t('modalEditar.primeraDosisPlaceholder')}
                   </Text>
                 </TouchableOpacity>
               </>
