@@ -4,7 +4,6 @@ from app.models.visita_veterinaria import VisitaVeterinaria
 from app.services.tarea_service import TareaService
 from datetime import datetime, date
 from app.models.estado import Estado
-from app.services.estado_historial_service import EstadoHistorialService
 
 class TratamientoService:
 
