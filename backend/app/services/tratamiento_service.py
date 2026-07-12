@@ -210,8 +210,6 @@ class TratamientoService:
             fecha_evento = max((t.fecha_fin for t in vencidos), default=hoy)
             nuevos_estados.remove(estado_tratamiento)
 
-        EstadoHistorialService.sincronizar_estados(animal, nuevos_estados, fecha=fecha_evento)
-
         db.session.commit()
 
     @staticmethod
