@@ -2,7 +2,9 @@ from app.extensions import db
 from app.models.tratamiento import Tratamiento
 from app.models.visita_veterinaria import VisitaVeterinaria
 from app.services.tarea_service import TareaService
-from datetime import datetime
+from datetime import datetime, date
+from app.models.estado import Estado
+from app.services.estado_historial_service import EstadoHistorialService
 
 class TratamientoService:
 
@@ -89,6 +91,9 @@ class TratamientoService:
             raise ValueError(f"Error al crear las tareas del tratamiento: {str(e)}")
 
         db.session.commit()
+
+        TratamientoService.sincronizar_estado_tratamiento(tratamiento.visita_id)
+
         return tratamiento.to_dict()
 
     @staticmethod 
@@ -159,6 +164,9 @@ class TratamientoService:
                 raise ValueError(f"Error al actualizar las tareas del tratamiento: {str(e)}")
 
         db.session.commit()
+
+        TratamientoService.sincronizar_estado_tratamiento(tratamiento.visita_id)
+
         return tratamiento.to_dict()
 
     @staticmethod 
@@ -167,5 +175,56 @@ class TratamientoService:
         if not tratamiento:
             raise ValueError("Tratamiento no encontrado")
 
+        visita_id = tratamiento.visita_id
+
         db.session.delete(tratamiento)
         db.session.commit()
+
+        TratamientoService.sincronizar_estado_tratamiento(visita_id)
+
+    @staticmethod
+    def sincronizar_estado_tratamiento_por_animal(animal):
+        hoy = date.today()
+
+        tratamientos = [t for v in animal.visitas for t in v.tratamientos]
+
+        vigentes = [
+            t for t in tratamientos
+            if t.fecha_inicio <= hoy and (t.fecha_fin is None or t.fecha_fin >= hoy)
+        ]
+        tiene_vigente = len(vigentes) > 0
+
+        estado_tratamiento = Estado.query.filter_by(nombre="En tratamiento").first()
+        if not estado_tratamiento:
+            return
+
+        ya_en_tratamiento = estado_tratamiento in animal.estados
+        if tiene_vigente == ya_en_tratamiento:
+            return 
+
+        nuevos_estados = list(animal.estados)
+        if tiene_vigente:
+            fecha_evento = min(t.fecha_inicio for t in vigentes)
+            nuevos_estados.append(estado_tratamiento)
+        else:
+            vencidos = [t for t in tratamientos if t.fecha_fin and t.fecha_fin < hoy]
+            fecha_evento = max((t.fecha_fin for t in vencidos), default=hoy)
+            nuevos_estados.remove(estado_tratamiento)
+
+        EstadoHistorialService.sincronizar_estados(animal, nuevos_estados, fecha=fecha_evento)
+
+        db.session.commit()
+
+    @staticmethod
+    def sincronizar_estado_tratamiento(visita_id):
+        visita = VisitaVeterinaria.query.get(visita_id)
+        if not visita or not visita.animal:
+            return
+        TratamientoService.sincronizar_estado_tratamiento_por_animal(visita.animal)
+    
+    @staticmethod
+    def sincronizar_animales_en_tratamiento():
+        from app.models.animal import Animal
+        animales = Animal.query.all()
+        for animal in animales:
+            TratamientoService.sincronizar_estado_tratamiento_por_animal(animal)
