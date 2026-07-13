@@ -287,7 +287,7 @@ class TareaService:
                 tarea.visita.hora = nueva_hora_parseada
 
         if tarea.tratamiento_id:
-            from app.services.tratamiento_service import TratamientoService
+            from app.models.tratamiento import Tratamiento
             
             tratamiento_data = {}
             
@@ -311,7 +311,12 @@ class TareaService:
 
             if tratamiento_data:
                 try:
-                    TratamientoService.update(tarea.tratamiento_id, tratamiento_data)
+                    tratamiento_obj = Tratamiento.query.get(tarea.tratamiento_id)
+                    if tratamiento_obj:
+                        for key, value in tratamiento_data.items():
+                            if hasattr(tratamiento_obj, key):
+                                setattr(tratamiento_obj, key, value)
+                        db.session.add(tratamiento_obj)
                 except Exception as e:
                     print(f"[ERROR] No se pudo actualizar el tratamiento: {e}")
 

@@ -21,7 +21,6 @@ class TratamientoService:
 
     @staticmethod  
     def create(visita_id, data):
-        # Validar que la visita exista
         visita = VisitaVeterinaria.query.get(visita_id)
         if not visita:
             raise ValueError("Visita no encontrada")
@@ -52,7 +51,7 @@ class TratamientoService:
         
         if frecuencia_horas:
             if not data.get("hora_administracion"):
-                raise ValueError("Debes especificar una hora de administración cuando hay frecuencia")
+                raise ValueError("Si se especifica una frecuencia de administración, la hora de inicio de administración es obligatoria.")
             
             if frecuencia_horas not in [8, 12, 24]:
                 raise ValueError("La frecuencia debe ser 8, 12 o 24 horas")
@@ -101,6 +100,10 @@ class TratamientoService:
         if not tratamiento:
             raise ValueError("Tratamiento no encontrado")
 
+        from app.models.tarea import Tarea
+        tareas_existentes = Tarea.query.filter_by(tratamiento_id=id).count()
+        tareas_existen = tareas_existentes > 0
+
         if "fecha_inicio" in data:
             try:
                 fecha_inicio = datetime.strptime(data["fecha_inicio"], "%Y-%m-%d").date()
@@ -141,13 +144,12 @@ class TratamientoService:
                 tratamiento.hora_administracion = None
 
         if tratamiento.frecuencia_horas and not tratamiento.hora_administracion:
-            raise ValueError("Si hay frecuencia, debe haber hora de administración")
+            raise ValueError("Si se especifica una frecuencia de administración, la hora de inicio de administración es obligatoria.")
 
         cambios_importantes = any(key in data for key in 
             ["frecuencia_horas", "hora_administracion", "fecha_inicio", "fecha_fin", "tipo", "descripcion"])
 
-        if cambios_importantes:
-            from app.models.tarea import Tarea
+        if cambios_importantes and tareas_existen:
             Tarea.query.filter_by(tratamiento_id=id).delete()
             
             try:

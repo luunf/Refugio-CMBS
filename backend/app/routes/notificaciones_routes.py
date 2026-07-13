@@ -234,10 +234,11 @@ def _job_recordatorios_horarios(app) -> None:
 
         tz = timezone(timedelta(hours=-3))
         ahora = datetime.now(tz)
-        en_una_hora = ahora + timedelta(hours=1)
+        en_una_hora = (ahora + timedelta(hours=1)).replace(second=0, microsecond=0)
+        
         tareas = Tarea.query.filter(
             Tarea.fecha == en_una_hora.date(),
-            Tarea.hora == en_una_hora.time(),  
+            Tarea.hora == en_una_hora.time(),
             Tarea.completada == False
         ).all()
 
