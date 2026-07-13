@@ -2,6 +2,7 @@ from flask import Blueprint
 from app.controllers.animal_controller import AnimalController
 from app.controllers.visita_controller import VisitaController
 from app.controllers.vacuna_controller import VacunaController
+from app.controllers.historial_estado_controller import HistorialEstadoController
 
 animal_bp = Blueprint('animales', __name__)
 
@@ -41,3 +42,11 @@ def get_vacunas_animal(animal_id):
 @animal_bp.route('/<int:animal_id>/vacunas', methods=['POST'])
 def create_vacuna_animal(animal_id):
     return VacunaController.create_vacuna(animal_id)
+
+@animal_bp.route('/<int:animal_id>/historial-estados', methods=['GET'])
+def get_historial_animal(animal_id):
+    return HistorialEstadoController.get_historial(animal_id)
+
+@animal_bp.route('/<int:animal_id>/historial-estados', methods=['POST'])
+def create_historial_animal(animal_id):
+    return HistorialEstadoController.create_registro_historial(animal_id)

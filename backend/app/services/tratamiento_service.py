@@ -187,31 +187,20 @@ class TratamientoService:
     def sincronizar_estado_tratamiento_por_animal(animal):
         hoy = date.today()
 
-        tratamientos = [t for v in animal.visitas for t in v.tratamientos]
-
-        vigentes = [
-            t for t in tratamientos
-            if t.fecha_inicio <= hoy and (t.fecha_fin is None or t.fecha_fin >= hoy)
-        ]
-        tiene_vigente = len(vigentes) > 0
+        tiene_vigente = any(
+            t.fecha_inicio <= hoy and (t.fecha_fin is None or t.fecha_fin >= hoy)
+            for v in animal.visitas
+            for t in v.tratamientos
+        )
 
         estado_tratamiento = Estado.query.filter_by(nombre="En tratamiento").first()
         if not estado_tratamiento:
             return
 
-        ya_en_tratamiento = estado_tratamiento in animal.estados
-        if tiene_vigente == ya_en_tratamiento:
-            return 
-
-        nuevos_estados = list(animal.estados)
-        if tiene_vigente:
-            fecha_evento = min(t.fecha_inicio for t in vigentes)
-            nuevos_estados.append(estado_tratamiento)
-        else:
-            vencidos = [t for t in tratamientos if t.fecha_fin and t.fecha_fin < hoy]
-            fecha_evento = max((t.fecha_fin for t in vencidos), default=hoy)
-            nuevos_estados.remove(estado_tratamiento)
-
+        if tiene_vigente and estado_tratamiento not in animal.estados:
+            animal.estados.append(estado_tratamiento)
+        elif not tiene_vigente and estado_tratamiento in animal.estados:
+            animal.estados.remove(estado_tratamiento)
         db.session.commit()
 
     @staticmethod

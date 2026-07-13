@@ -1,11 +1,14 @@
 from app.extensions import db
 from app.models import Animal, Estado, Compatibilidad, Persona, AnimalPersona, Rol
 from sqlalchemy.orm import joinedload
+from app.services.historial_estado_service import HistorialEstadoService
 
 TIPOS_VALIDOS = {"perro", "gato"}
 GENEROS_VALIDOS = {"macho", "hembra"}
 TAMANIOS_VALIDOS = {"grande", "mediano", "chico"}
 ROLES_VALIDOS = {"voluntario", "hogar_transito", "adoptante"}
+ESTADO_EN_TRANSITO = "En tránsito"
+ESTADO_ADOPTADO = "Adoptado"
 
 class AnimalService:
     
@@ -52,7 +55,6 @@ class AnimalService:
             url_imagen=data.get("url_imagen"),
         )
 
-        animal.estados = estados
         animal.compatibilidades = compatibilidades
 
         db.session.add(animal)
@@ -75,6 +77,17 @@ class AnimalService:
             if not persona:
                 raise LookupError(f"Persona con id {data['adoptante']} no encontrada")
             db.session.add(AnimalPersona(animal_id=animal.id_animal, persona_id=data["adoptante"], rol_id=roles["adoptante"]))
+
+        nombres_especiales = {ESTADO_EN_TRANSITO, ESTADO_ADOPTADO}
+        ids_especiales = {e.nombre: e.id_estado for e in Estado.query.filter(Estado.nombre.in_(nombres_especiales)).all()}
+
+        personas_por_estado = {}
+        if data.get("hogar_transito") and ESTADO_EN_TRANSITO in ids_especiales:
+            personas_por_estado[ids_especiales[ESTADO_EN_TRANSITO]] = data["hogar_transito"]
+        if data.get("adoptante") and ESTADO_ADOPTADO in ids_especiales:
+            personas_por_estado[ids_especiales[ESTADO_ADOPTADO]] = data["adoptante"]
+
+        HistorialEstadoService.sincronizar_estados(animal, estados, personas_por_estado)
 
         db.session.commit()
 
@@ -224,15 +237,6 @@ class AnimalService:
 
         roles = {r.nombre: r.id_rol for r in Rol.query.filter(Rol.nombre.in_(ROLES_VALIDOS)).all()}
 
-        if "estados" in data:
-            estados = []
-            for id_estado in data["estados"] or []:
-                estado = Estado.query.get(id_estado)
-                if not estado:
-                    raise LookupError(f"Estado con id {id_estado} no encontrado")
-                estados.append(estado)
-            animal.estados = estados
-
         if "compatibilidades" in data:
             compatibilidades = []
             for id_comp in data["compatibilidades"] or []:
@@ -296,6 +300,39 @@ class AnimalService:
             for id_persona in nuevos_ids:
                 if id_persona not in actuales_ids:
                     db.session.add(AnimalPersona(animal_id=animal.id_animal,persona_id=id_persona,rol_id=rol_id))
+
+        if "hogar_transito" in data:
+            hogar_transito_final = data["hogar_transito"]
+        else:
+            actual = AnimalPersona.query.filter_by(animal_id=animal.id_animal, rol_id=roles["hogar_transito"]).first()
+            hogar_transito_final = actual.persona_id if actual else None
+
+        if "adoptante" in data:
+            adoptante_final = data["adoptante"]
+        else:
+            actual = AnimalPersona.query.filter_by(animal_id=animal.id_animal, rol_id=roles["adoptante"]).first()
+            adoptante_final = actual.persona_id if actual else None
+
+        nombres_especiales = {ESTADO_EN_TRANSITO, ESTADO_ADOPTADO}
+        ids_especiales = {e.nombre: e.id_estado for e in Estado.query.filter(Estado.nombre.in_(nombres_especiales)).all()}
+
+        personas_por_estado = {}
+        if hogar_transito_final and ESTADO_EN_TRANSITO in ids_especiales:
+            personas_por_estado[ids_especiales[ESTADO_EN_TRANSITO]] = hogar_transito_final
+        if adoptante_final and ESTADO_ADOPTADO in ids_especiales:
+            personas_por_estado[ids_especiales[ESTADO_ADOPTADO]] = adoptante_final
+
+        if "estados" in data:
+            nuevos_estados = []
+            for id_estado in data["estados"] or []:
+                estado = Estado.query.get(id_estado)
+                if not estado:
+                    raise LookupError(f"Estado con id {id_estado} no encontrado")
+                nuevos_estados.append(estado)
+        else:
+            nuevos_estados = list(animal.estados)
+
+        HistorialEstadoService.sincronizar_estados(animal, nuevos_estados, personas_por_estado)
 
         db.session.commit()
 

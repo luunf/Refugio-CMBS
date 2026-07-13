@@ -19,6 +19,7 @@ from app.routes.compatibilidad_routes import compatibilidad_bp
 from app.routes.tratamiento_routes import tratamiento_bp
 from app.routes.visita_routes import visita_bp
 from app.routes.vacuna_routes import vacuna_bp
+from app.routes.historial_estado_routes import historial_estado_bp
 
 
 #notis
@@ -56,6 +57,7 @@ def create_app():
     app.register_blueprint(tratamiento_bp, url_prefix="/tratamientos")
     app.register_blueprint(visita_bp, url_prefix="/visitas")
     app.register_blueprint(vacuna_bp, url_prefix="/vacunas")
+    app.register_blueprint(historial_estado_bp, url_prefix="/historial-estados")
 
     #notis
     app.register_blueprint(notificaciones_bp, url_prefix="/notificaciones")
