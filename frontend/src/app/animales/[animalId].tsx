@@ -14,6 +14,7 @@ import { Colors } from "@/constants/theme";
 import AnimalInfo from "@/components/animales/AnimalInfo";
 import AnimalVisitas from "@/components/visitas/AnimalVisitas";
 import AnimalVacunas from "@/components/vacunas/AnimalVacunas";
+import AnimalHistorial from "@/components/historial/AnimalHistorial";
 import { useTranslation } from "react-i18next";
 import { Image } from "expo-image";
 import { ref, deleteObject } from "firebase/storage";
@@ -21,7 +22,8 @@ import { storage } from "@/config/firebase";
 import ModalEditarAnimal from "@/components/animales/ModalEditarAnimal";
 import { MaterialIcons } from "@expo/vector-icons";
 
-type Pestaña = "informacion" | "ficha" | "vacunas";
+
+type Pestaña = "informacion" | "ficha" | "vacunas" | "historial";;
 
 interface Animal {
   id_animal: number;
@@ -161,37 +163,44 @@ export default function AnimalDetalleScreen() {
 
       {/* Pestañas */}
       <View style={styles.pestañas}>
-        {(["informacion", "ficha", "vacunas"] as Pestaña[]).map((p) => (
+        {(["informacion", "ficha", "vacunas", "historial"] as Pestaña[]).map((p) => (
           <TouchableOpacity
             key={p}
-            style={[styles.pestaña, pestaña === p && styles.pestañaActiva]}
+            style={[
+              p === "historial" ? styles.pestañaIcono : styles.pestaña,
+              pestaña === p && styles.pestañaActiva,
+            ]}
             onPress={() => setPestaña(p)}
           >
-            <Text
-              style={[
-                styles.pestañaTexto,
-                pestaña === p && styles.pestañaTextoActivo,
-              ]}
-            >
-              {p === "informacion"
-                ? t("tabInformacion")
-                : p === "ficha"
-                  ? t("tabFichaVeterinaria")
-                  : t("tabVacunas")}
-            </Text>
+            {p === "historial" ? (
+              <MaterialIcons
+                name="history"
+                size={20}
+                color={pestaña === p ? Colors.primary : Colors.textFaint}
+              />
+            ) : (
+              <Text
+                style={[
+                  styles.pestañaTexto,
+                  pestaña === p && styles.pestañaTextoActivo,
+                ]}
+              >
+                {p === "informacion"
+                  ? t("tabInformacion")
+                  : p === "ficha"
+                    ? t("tabFichaVeterinaria")
+                    : t("tabVacunas")}
+              </Text>
+            )}
           </TouchableOpacity>
         ))}
       </View>
 
       {/* Contenido */}
       {pestaña === "informacion" && <AnimalInfo animal={animal} />}
-      {pestaña === "ficha" && (
-        <AnimalVisitas
-          animalId={animal.id_animal}
-          onCambioVisitas={cargarAnimal}
-        />
-      )}
+      {pestaña === "ficha" && (<AnimalVisitas animalId={animal.id_animal} onCambioVisitas={cargarAnimal}/>)}
       {pestaña === "vacunas" && <AnimalVacunas animalId={animal.id_animal} />}
+      {pestaña === "historial" && <AnimalHistorial animalId={animal.id_animal} onCambioHistorial={cargarAnimal}/>}
 
       {animal && (
         <ModalEditarAnimal
@@ -261,6 +270,14 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     alignItems: "center",
+    borderBottomWidth: 2,
+    borderBottomColor: "transparent",
+  },
+  pestañaIcono: {
+    width: 56,
+    paddingVertical: 12,
+    alignItems: "center",
+    justifyContent: "center",
     borderBottomWidth: 2,
     borderBottomColor: "transparent",
   },

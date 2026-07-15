@@ -244,4 +244,24 @@ export const api = {
     const res = await apiClient.get("/compatibilidades");
     return res.data;
   },
+
+  // HISTORIAL DE ESTADOS
+  getHistorialAnimal: async (animalId: number) => {
+    const res = await apiClient.get(`/animales/${animalId}/historial-estados`);
+    return res.data;
+  },
+  createHistorial: async (animalId: number, data: any) => {
+    const res = await apiClient.post(`/animales/${animalId}/historial-estados`, data);
+    return res.data;
+  },
+  updateHistorial: async (historialId: number, data: any) => {
+    const res = await apiClient.patch(`/historial-estados/${historialId}`, data);
+    return res.data;
+  },
+  deleteHistorial: async (historialId: number) => {
+    const res = await apiClient.delete(`/historial-estados/${historialId}`);
+    return res.data;
+  },
+
 };
+

@@ -44,7 +44,7 @@ class HistorialEstadoController:
         except ValueError as e:
             return jsonify({"error": str(e)}), 400
         except LookupError as e:
-            return jsonify({"error": str(e)}), 404
+            return jsonify({"error": str(e)}), 404 if "Registro de historial" in str(e) else 422
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
