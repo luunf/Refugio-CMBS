@@ -42,9 +42,13 @@ class VisitaService:
         if not veterinario:
             raise ValueError(f"Veterinario con id {data['veterinario_id']} no encontrado")
         
+        fecha = datetime.strptime(data["fecha"], "%Y-%m-%d").date()
+        hora = datetime.strptime(data["hora"], "%H:%M").time() if data.get("hora") else None
+        VisitaService._validar_visita_duplicada(animal_id, fecha, hora) 
+        
         visita = VisitaVeterinaria(
-            fecha=datetime.strptime(data["fecha"], "%Y-%m-%d").date(),
-            hora=datetime.strptime(data["hora"], "%H:%M").time() if data.get("hora") else None,
+            fecha=fecha,
+            hora=hora,
             estado=data.get("estado", "realizada"),
             procedimiento=data["procedimiento"],
             info_adicional=data.get("info_adicional"),
@@ -63,6 +67,7 @@ class VisitaService:
                 hora=visita.hora,
                 es_todo_el_dia=visita.hora is None,
                 visita_id=visita.id_visita,
+                descripcion=visita.procedimiento,
             )
             db.session.add(tarea)
 
@@ -116,10 +121,15 @@ class VisitaService:
                 raise ValueError(f"Veterinario con id {data['veterinario_id']} no encontrado")
             visita.veterinario_id = data["veterinario_id"]
 
+        nueva_fecha = (datetime.strptime(data["fecha"], "%Y-%m-%d").date() if "fecha" in data else visita.fecha)
+        nueva_hora = ((datetime.strptime(data["hora"], "%H:%M").time() if data["hora"] else None) if "hora" in data else visita.hora)
+        if "fecha" in data or "hora" in data:
+            VisitaService._validar_visita_duplicada(visita.animal_id, nueva_fecha, nueva_hora, visita_id=visita_id)
+
         if "fecha" in data:
-            visita.fecha = datetime.strptime(data["fecha"], "%Y-%m-%d").date()
+            visita.fecha = nueva_fecha
         if "hora" in data:
-            visita.hora = datetime.strptime(data["hora"], "%H:%M").time() if data["hora"] else None
+            visita.hora = nueva_hora
         if "estado" in data:
             visita.estado = data["estado"]
         if "procedimiento" in data:
@@ -166,6 +176,7 @@ class VisitaService:
             tarea.fecha = visita.fecha
             tarea.hora = visita.hora
             tarea.es_todo_el_dia = visita.hora is None
+            tarea.descripcion = visita.procedimiento
             ya_estaba_completada = tarea.completada
             tarea.completada = True
             db.session.commit()
@@ -183,6 +194,7 @@ class VisitaService:
                 tarea.es_todo_el_dia = visita.hora is None
                 tarea.nombre = f"Visita veterinaria {visita.animal.nombre}"
                 tarea.completada = False
+                tarea.descripcion = visita.procedimiento
             else:
                 tarea = Tarea(
                     nombre=f"Visita veterinaria {visita.animal.nombre}",
@@ -190,9 +202,20 @@ class VisitaService:
                     hora=visita.hora,
                     es_todo_el_dia=visita.hora is None,
                     visita_id=visita.id_visita,
+                    descripcion=visita.procedimiento,
                 )
                 db.session.add(tarea)
             db.session.commit()
+
+    @staticmethod
+    def _validar_visita_duplicada(animal_id, fecha, hora, visita_id=None):
+        if hora is None:
+            return
+        query = VisitaVeterinaria.query.filter_by(animal_id=animal_id, fecha=fecha, hora=hora)
+        if visita_id:
+            query = query.filter(VisitaVeterinaria.id_visita != visita_id)
+        if query.first():
+            raise ValueError("Ya existe una visita agendada para este animal en esa fecha y hora")
     
 
 
