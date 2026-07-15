@@ -97,8 +97,10 @@ class VisitaService:
                     "descripcion": t.descripcion,
                     "fecha_inicio": str(t.fecha_inicio),
                     "fecha_fin": str(t.fecha_fin) if t.fecha_fin else None,
+                    "frecuencia_horas": t.frecuencia_horas,
+                    "hora_administracion": t.hora_administracion.strftime("%H:%M") if t.hora_administracion else None,
                 }
-                for t in sorted(visita.tratamientos, key=lambda t: (t.fecha_fin is None, t.fecha_fin), reverse=True)
+                for t in sorted(visita.tratamientos, key=lambda t: (t.fecha_fin is None, t.fecha_fin or t.fecha_inicio, t.fecha_inicio,), reverse=True)
             ],
         }
 

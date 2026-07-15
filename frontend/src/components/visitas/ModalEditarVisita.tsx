@@ -22,6 +22,8 @@ interface TratamientoExistente {
   descripcion?: string | null;
   fecha_inicio: string;
   fecha_fin?: string | null;
+  frecuencia_horas?: number | null;
+  hora_administracion?: string | null;
 }
 
 interface TratamientoForm {
@@ -31,8 +33,11 @@ interface TratamientoForm {
   fecha_inicio: string;
   fecha_fin: string;
   descripcion: string;
+  frecuencia_horas: number | null;
+  hora_administracion: string;
   pickerInicio: boolean;
   pickerFin: boolean;
+  pickerHora: boolean;
   eliminado: boolean;
 }
 
@@ -153,8 +158,11 @@ export default function ModalEditarVisita({ visible, onClose, onEditada, visita 
         fecha_inicio: t.fecha_inicio,
         fecha_fin: t.fecha_fin ?? "",
         descripcion: t.descripcion ?? "",
+        frecuencia_horas: t.frecuencia_horas ?? null,
+        hora_administracion: t.hora_administracion ?? "",
         pickerInicio: false,
         pickerFin: false,
+        pickerHora: false,
         eliminado: false,
       }))
     );
@@ -175,8 +183,11 @@ export default function ModalEditarVisita({ visible, onClose, onEditada, visita 
     fecha_inicio: fecha,
     fecha_fin: "",
     descripcion: "",
+    frecuencia_horas: null,
+    hora_administracion: "",
     pickerInicio: false,
     pickerFin: false,
+    pickerHora: false,
     eliminado: false,
   });
 
@@ -223,6 +234,9 @@ export default function ModalEditarVisita({ visible, onClose, onEditada, visita 
       if (fechaFinTratamientoInvalida(tratamiento.fecha_fin, tratamiento.fecha_inicio)) {
         return Alert.alert(t('error'), t('errorFechaFinTratamiento'));
       }
+      if (tratamiento.frecuencia_horas && !esHoraValida(tratamiento.hora_administracion)) {
+        return Alert.alert(t('error'), t('errorPrimeraDosis'));
+      }
     }
 
     setLoading(true);
@@ -252,6 +266,8 @@ export default function ModalEditarVisita({ visible, onClose, onEditada, visita 
           descripcion: t.descripcion.trim() || null,
           fecha_inicio: t.fecha_inicio,
           fecha_fin: t.fecha_fin || null,
+          frecuencia_horas: t.frecuencia_horas,
+          hora_administracion: t.hora_administracion || null,
         });
       }
 
@@ -263,6 +279,8 @@ export default function ModalEditarVisita({ visible, onClose, onEditada, visita 
           descripcion: t.descripcion.trim() || null,
           fecha_inicio: t.fecha_inicio,
           fecha_fin: t.fecha_fin || null,
+          frecuencia_horas: t.frecuencia_horas,
+          hora_administracion: t.hora_administracion || null,
         });
       }
 
@@ -497,6 +515,56 @@ function TratamientoItem({ index, tratamiento, fechaVisita, onChange, onEliminar
         numberOfLines={2}
       />
 
+      {/* Frecuencia */}
+      <Text style={itemStyles.label}>{t('labelFrecuencia')}</Text>
+      <View style={itemStyles.frecuenciaContainer}>
+        {[8, 12, 24].map((f) => (
+          <TouchableOpacity
+            key={f}
+            onPress={() => onChange({ frecuencia_horas: f })}
+            style={[
+              itemStyles.btnFrecuencia,
+              tratamiento.frecuencia_horas === f && itemStyles.btnFrecuenciaActivo,
+            ]}
+          >
+            <Text style={[
+              itemStyles.btnFrecuenciaText,
+              tratamiento.frecuencia_horas === f && itemStyles.btnFrecuenciaTextActivo,
+            ]}>
+              {t(`frecuencia${f}`)}
+            </Text>
+          </TouchableOpacity>
+        ))}
+        <TouchableOpacity
+          onPress={() => onChange({ frecuencia_horas: null, hora_administracion: "" })}
+          style={[
+            itemStyles.btnFrecuencia,
+            tratamiento.frecuencia_horas === null && itemStyles.btnFrecuenciaActivo,
+          ]}
+        >
+          <Text style={[
+            itemStyles.btnFrecuenciaText,
+            tratamiento.frecuencia_horas === null && itemStyles.btnFrecuenciaTextActivo,
+          ]}>
+            {t('frecuenciaFija')}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {tratamiento.frecuencia_horas !== null && (
+        <>
+          <Text style={itemStyles.label}>{t('labelPrimeraDosis')}</Text>
+          <TouchableOpacity
+            onPress={() => onChange({ pickerHora: true })}
+            style={itemStyles.inputFecha}
+          >
+            <Text style={tratamiento.hora_administracion ? itemStyles.fechaTexto : itemStyles.fechaPlaceholder}>
+              {tratamiento.hora_administracion || t('placeholderPrimeraDosis')}
+            </Text>
+          </TouchableOpacity>
+        </>
+      )}
+
       <AnimalDatePickerModal
         visible={tratamiento.pickerInicio}
         onClose={() => onChange({ pickerInicio: false })}
@@ -513,6 +581,14 @@ function TratamientoItem({ index, tratamiento, fechaVisita, onChange, onEliminar
         fechaSeleccionada={tratamiento.fecha_fin || tratamiento.fecha_inicio || fechaVisita}
         minDate={tratamiento.fecha_inicio || fechaVisita}
       />
+
+      <TimePickerModal
+        visible={tratamiento.pickerHora}
+        onClose={() => onChange({ pickerHora: false })}
+        onSelectTime={(h) => onChange({ hora_administracion: h, pickerHora: false })}
+        initialTime={tratamiento.hora_administracion || '08:00'}
+      />
+
     </View>
   );
 }
@@ -557,4 +633,31 @@ const itemStyles = StyleSheet.create({
   fechaTexto: { fontSize: 13, color: Colors.text },
   fechaPlaceholder: { fontSize: 13, color: Colors.textFaint },
   fechaErrorTexto: { color: Colors.delete, fontSize: 11, marginTop: -8, marginBottom: 10 },
+  frecuenciaContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 12,
+  },
+  btnFrecuencia: {
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 18,
+    backgroundColor: Colors.primaryLight,
+    borderWidth: 1,
+    borderColor: Colors.primaryLight,
+  },
+  btnFrecuenciaActivo: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  btnFrecuenciaText: {
+    color: Colors.primary,
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  btnFrecuenciaTextActivo: {
+    color: Colors.surface,
+    fontWeight: '600',
+  },
 });

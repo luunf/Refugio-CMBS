@@ -22,8 +22,11 @@ interface TratamientoForm {
   fecha_inicio: string;
   fecha_fin: string;
   descripcion: string;
+  frecuencia_horas: number | null;
+  hora_administracion: string;
   pickerInicio: boolean;
   pickerFin: boolean;
+  pickerHora: boolean;
 }
 
 interface Props {
@@ -139,8 +142,11 @@ export default function ModalRegistrarVisita({ visible, onClose, onCreada, anima
     fecha_inicio: fecha, 
     fecha_fin: "",
     descripcion: "",
+    frecuencia_horas: null,
+    hora_administracion: "",
     pickerInicio: false,
     pickerFin: false,
+    pickerHora: false,
   });
 
   const agregarTratamiento = () =>
@@ -177,6 +183,9 @@ export default function ModalRegistrarVisita({ visible, onClose, onCreada, anima
       if (fechaFinTratamientoInvalida(tratamiento.fecha_fin, tratamiento.fecha_inicio)) {
         return Alert.alert(t('error'), t('errorFechaFinTratamiento'));
       }
+      if (tratamiento.frecuencia_horas && !esHoraValida(tratamiento.hora_administracion)) {
+        return Alert.alert(t('error'), t('errorPrimeraDosis'));
+      }
     }
 
     setLoading(true);
@@ -199,6 +208,8 @@ export default function ModalRegistrarVisita({ visible, onClose, onCreada, anima
           descripcion: t.descripcion.trim() || null,
           fecha_inicio: t.fecha_inicio,
           fecha_fin: t.fecha_fin || null,
+          frecuencia_horas: t.frecuencia_horas,
+          hora_administracion: t.hora_administracion || null,
         });
       }
 
@@ -404,6 +415,12 @@ function TratamientoItem({ index, tratamiento, fechaVisita, onChange, onEliminar
     const fechaInicioInvalida = fechaInicioTratamientoInvalida(tratamiento.fecha_inicio, fechaVisita);
     const fechaFinInvalida = fechaFinTratamientoInvalida(tratamiento.fecha_fin, tratamiento.fecha_inicio);
 
+    const FRECUENCIAS = [
+      { label: t('frecuencia8'), value: 8 },
+      { label: t('frecuencia12'), value: 12 },
+      { label: t('frecuencia24'), value: 24 },
+    ];
+
     return (
     <View style={itemStyles.container}>
 
@@ -433,7 +450,7 @@ function TratamientoItem({ index, tratamiento, fechaVisita, onChange, onEliminar
       >
         <Text style={tratamiento.fecha_inicio ? itemStyles.fechaTexto : itemStyles.fechaPlaceholder}>
           {tratamiento.fecha_inicio
-            ? formatFechaItem(tratamiento.fecha_inicio)
+            ? formatFecha(tratamiento.fecha_inicio)
             : t('placeholderSeleccionarFecha')}
         </Text>
       </TouchableOpacity>
@@ -449,7 +466,7 @@ function TratamientoItem({ index, tratamiento, fechaVisita, onChange, onEliminar
       >
         <Text style={tratamiento.fecha_fin ? itemStyles.fechaTexto : itemStyles.fechaPlaceholder}>
           {tratamiento.fecha_fin
-            ? formatFechaItem(tratamiento.fecha_fin)
+            ? formatFecha(tratamiento.fecha_fin)
             : t('placeholderSeleccionarFecha')}
         </Text>
       </TouchableOpacity>
@@ -469,6 +486,56 @@ function TratamientoItem({ index, tratamiento, fechaVisita, onChange, onEliminar
         numberOfLines={2}
       />
 
+      {/* Frecuencia */}
+      <Text style={itemStyles.label}>{t('labelFrecuencia')}</Text>
+      <View style={itemStyles.frecuenciaContainer}>
+        {FRECUENCIAS.map((f) => (
+          <TouchableOpacity
+            key={f.value}
+            onPress={() => onChange({ frecuencia_horas: f.value })}
+            style={[
+              itemStyles.btnFrecuencia,
+              tratamiento.frecuencia_horas === f.value && itemStyles.btnFrecuenciaActivo,
+            ]}
+          >
+            <Text style={[
+              itemStyles.btnFrecuenciaText,
+              tratamiento.frecuencia_horas === f.value && itemStyles.btnFrecuenciaTextActivo,
+            ]}>
+              {f.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+        <TouchableOpacity
+          onPress={() => onChange({ frecuencia_horas: null, hora_administracion: "" })}
+          style={[
+            itemStyles.btnFrecuencia,
+            tratamiento.frecuencia_horas === null && itemStyles.btnFrecuenciaActivo,
+          ]}
+        >
+          <Text style={[
+            itemStyles.btnFrecuenciaText,
+            tratamiento.frecuencia_horas === null && itemStyles.btnFrecuenciaTextActivo,
+          ]}>
+            {t('frecuenciaFija')}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {tratamiento.frecuencia_horas !== null && (
+        <>
+          <Text style={itemStyles.label}>{t('labelPrimeraDosis')}{t('requiredSymbol')}</Text>
+          <TouchableOpacity
+            onPress={() => onChange({ pickerHora: true })}
+            style={itemStyles.inputFecha}
+          >
+            <Text style={tratamiento.hora_administracion ? itemStyles.fechaTexto : itemStyles.fechaPlaceholder}>
+              {tratamiento.hora_administracion || t('placeholderPrimeraDosis')}
+            </Text>
+          </TouchableOpacity>
+        </>
+      )}
+
       {/* Pickers internos del tratamiento */}
       <AnimalDatePickerModal
         visible={tratamiento.pickerInicio}
@@ -486,14 +553,14 @@ function TratamientoItem({ index, tratamiento, fechaVisita, onChange, onEliminar
         fechaSeleccionada={tratamiento.fecha_fin || tratamiento.fecha_inicio || fechaVisita}
         minDate={tratamiento.fecha_inicio || fechaVisita}
       />
+      <TimePickerModal
+        visible={tratamiento.pickerHora}
+        onClose={() => onChange({ pickerHora: false })}
+        onSelectTime={(h) => onChange({ hora_administracion: h, pickerHora: false })}
+        initialTime={tratamiento.hora_administracion || '08:00'}
+      />
     </View>
   );
-}
-
-function formatFechaItem(fechaStr: string): string {
-  if (!fechaStr) return "";
-  const [year, month, day] = fechaStr.split("-");
-  return `${parseInt(day)}/${parseInt(month)}/${year}`;
 }
 
 const styles = StyleSheet.create({
@@ -662,5 +729,32 @@ const itemStyles = StyleSheet.create({
     fontSize: 11,
     marginTop: -8,
     marginBottom: 10,
+  },
+  frecuenciaContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 12,
+  },
+  btnFrecuencia: {
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 18,
+    backgroundColor: Colors.primaryLight,
+    borderWidth: 1,
+    borderColor: Colors.primaryLight,
+  },
+  btnFrecuenciaActivo: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  btnFrecuenciaText: {
+    color: Colors.primary,
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  btnFrecuenciaTextActivo: {
+    color: Colors.surface,
+    fontWeight: '600',
   },
 });

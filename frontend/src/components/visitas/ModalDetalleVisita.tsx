@@ -15,6 +15,8 @@ interface Tratamiento {
   descripcion: string | null;
   fecha_inicio: string;
   fecha_fin: string | null;
+  frecuencia_horas: number | null;
+  hora_administracion: string | null;
 }
 
 interface DetalleVisita {
@@ -276,6 +278,28 @@ function TratamientoCard({ tratamiento }: { tratamiento: Tratamiento }) {
           </Text>
         </View>
       </View>
+
+      {tratamiento.frecuencia_horas && (
+        <View style={tratStyles.fila}>
+          <Text style={[tratStyles.label, vencido && tratStyles.textoVencido]}>{t('labelFrecuencia2')}</Text>
+          <View style={[tratStyles.badge, vencido && tratStyles.badgeVencido]}>
+            <Text style={[tratStyles.badgeText, vencido && tratStyles.badgeTextVencido]}>
+              Cada {tratamiento.frecuencia_horas} hs
+            </Text>
+          </View>
+        </View>
+      )}
+
+      {tratamiento.hora_administracion && (
+        <View style={tratStyles.fila}>
+          <Text style={[tratStyles.label, vencido && tratStyles.textoVencido]}>{t('labelPrimeraDosis2')}</Text>
+          <View style={[tratStyles.badge, vencido && tratStyles.badgeVencido]}>
+            <Text style={[tratStyles.badgeText, vencido && tratStyles.badgeTextVencido]}>
+              {tratamiento.hora_administracion}
+            </Text>
+          </View>
+        </View>
+      )}
 
       {tratamiento.descripcion ? (
         <View style={tratStyles.fila}>
