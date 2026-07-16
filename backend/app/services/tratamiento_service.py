@@ -75,19 +75,6 @@ class TratamientoService:
         
         db.session.add(tratamiento)
         db.session.flush()
-
-        try:
-            TareaService.crear_tareas_desde_tratamiento(
-                nombre=tratamiento.tipo,
-                fecha_inicio=tratamiento.fecha_inicio.strftime("%Y-%m-%d"),
-                fecha_fin=tratamiento.fecha_fin.strftime("%Y-%m-%d") if tratamiento.fecha_fin else None,
-                descripcion=tratamiento.descripcion,
-                tratamiento_id=tratamiento.id_tratamiento
-            )
-        except Exception as e:
-            db.session.rollback()
-            raise ValueError(f"Error al crear las tareas del tratamiento: {str(e)}")
-
         db.session.commit()
 
         TratamientoService.sincronizar_estado_tratamiento(tratamiento.visita_id)

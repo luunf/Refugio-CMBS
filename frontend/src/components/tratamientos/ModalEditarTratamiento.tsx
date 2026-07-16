@@ -76,7 +76,7 @@ export default function ModalEditarTratamiento({ visible, onClose, tratamiento, 
         fecha_fin: fechaFin ? formatDate(fechaFin) : null,
         descripcion,
         frecuencia_horas: frecuenciaHoras,
-        hora_administracion: horaAdministracion || null,
+        hora_administracion: frecuenciaHoras !== null ? (horaAdministracion || null) : null,
       });
       onClose();
     } catch (error) {
