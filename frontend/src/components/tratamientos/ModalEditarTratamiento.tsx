@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, View, Text, TextInput, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import { Modal, View, Text, TextInput, TouchableOpacity, ActivityIndicator, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Colors } from '@/constants/theme';
 import DatePickerModal from '../calendario/DatePickerModal';
@@ -95,7 +95,10 @@ export default function ModalEditarTratamiento({ visible, onClose, tratamiento, 
   return (
     <>
       <Modal visible={visible} animationType="slide" transparent>
-        <View style={styles.overlay}>
+        <KeyboardAvoidingView
+          style={styles.overlay}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
           <View style={styles.container}>
             <View style={styles.header}>
               <Text style={styles.titulo}>{t('modalEditar.titulo')}</Text>
@@ -188,7 +191,7 @@ export default function ModalEditarTratamiento({ visible, onClose, tratamiento, 
               {loading ? <ActivityIndicator color={Colors.surface} /> : <Text style={styles.btnTexto}>{t('modalEditar.btnGuardar')}</Text>}
             </TouchableOpacity>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       <DatePickerModal

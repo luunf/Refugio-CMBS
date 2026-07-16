@@ -2,7 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import {
   Modal, View, Text, TextInput, TouchableOpacity,
-  ScrollView, ActivityIndicator, StyleSheet
+  ScrollView, ActivityIndicator, StyleSheet,
+  KeyboardAvoidingView,
+  Platform
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import DatePickerModal from './DatePickerModal';
@@ -153,7 +155,10 @@ export default function ModalNuevaTarea({ visible, onClose, onCreate, mesActual,
   return (
     <>
       <Modal visible={visible} animationType="slide" transparent>
-        <View style={styles.overlay}>
+        <KeyboardAvoidingView
+          style={styles.overlay}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
           <View style={styles.container}>
             <View style={styles.header}>
               <Text style={styles.titulo}>{t('modalNuevaTarea.titulo')}</Text>
@@ -268,7 +273,7 @@ export default function ModalNuevaTarea({ visible, onClose, onCreate, mesActual,
               </TouchableOpacity>
             </ScrollView>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       <DatePickerModal

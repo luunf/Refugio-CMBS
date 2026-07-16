@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import {
   Modal, View, Text, TextInput, TouchableOpacity,
   ScrollView, ActivityIndicator, StyleSheet, Alert,
+  Platform,
+  KeyboardAvoidingView,
 } from "react-native";
 import { api } from "@/config/api";
 import { Colors } from "@/constants/theme";
@@ -312,7 +314,10 @@ export default function ModalEditarVisita({ visible, onClose, onEditada, visita 
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <View style={styles.overlay}>
+      <KeyboardAvoidingView
+        style={styles.overlay}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
         <View style={styles.container}>
 
           <View style={styles.header}>
@@ -436,7 +441,7 @@ export default function ModalEditarVisita({ visible, onClose, onEditada, visita 
 
           </ScrollView>
         </View>
-      </View>
+      </KeyboardAvoidingView>
 
       <AnimalDatePickerModal
         visible={pickerFecha}

@@ -9,6 +9,8 @@ import {
   ActivityIndicator,
   StyleSheet,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 
 import { useTranslation } from "react-i18next";
@@ -213,7 +215,10 @@ export default function ModalCrearUsuario({
       transparent
       animationType="slide"
     >
-      <View style={styles.overlay}>
+      <KeyboardAvoidingView
+        style={styles.overlay}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
         <View style={styles.container}>
 
           <Text style={styles.titulo}>
@@ -302,7 +307,7 @@ export default function ModalCrearUsuario({
           </TouchableOpacity>
 
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

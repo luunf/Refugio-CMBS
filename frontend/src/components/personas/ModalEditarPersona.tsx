@@ -9,6 +9,8 @@ import {
   ActivityIndicator,
   StyleSheet,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 
 import { useTranslation } from "react-i18next";
@@ -169,7 +171,10 @@ export default function ModalEditarPersona({
       animationType="slide"
       transparent
     >
-      <View style={styles.overlay}>
+      <KeyboardAvoidingView
+        style={styles.overlay}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
         <View style={styles.container}>
           <View style={styles.header}>
             <Text style={styles.titulo}>
@@ -183,6 +188,7 @@ export default function ModalEditarPersona({
 
           <ScrollView
             showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
           >
             <Text style={styles.label}>
               {t("nombre")}*
@@ -290,7 +296,7 @@ export default function ModalEditarPersona({
             </TouchableOpacity>
           </ScrollView>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

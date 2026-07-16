@@ -10,6 +10,8 @@ import {
   Switch,
   Alert,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { api } from "@/config/api";
 import { Colors } from "@/constants/theme";
@@ -111,7 +113,10 @@ export default function ModalEditarVacuna({
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <View style={styles.overlay}>
+      <KeyboardAvoidingView
+        style={styles.overlay}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
         <View style={styles.container}>
           <View style={styles.header}>
             <Text style={styles.titulo}>{t("titleEditarVacuna")}</Text>
@@ -204,7 +209,7 @@ export default function ModalEditarVacuna({
             </TouchableOpacity>
           </ScrollView>
         </View>
-      </View>
+      </KeyboardAvoidingView>
 
       <AnimalDatePickerModal
         visible={pickerFechaAplicacion}

@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import {
   Modal, View, Text, TextInput, TouchableOpacity,
-  ScrollView, ActivityIndicator, StyleSheet, Alert, Switch
+  ScrollView, ActivityIndicator, StyleSheet, Alert, Switch,
+  KeyboardAvoidingView,
+  Platform
 } from 'react-native';
 import { api } from '@/config/api';
 import MultiSelector from './MultiSelector';
@@ -304,7 +306,10 @@ export default function ModalEditarAnimal({ visible, onClose, onEditado, animal 
 
   return (
     <Modal visible={visible} animationType='slide' transparent>
-      <View style={styles.overlay}>
+      <KeyboardAvoidingView
+        style={styles.overlay}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
         <View style={styles.container}>
           <View style={styles.header}>
             <Text style={styles.titulo}>{t('titleEditarAnimal')}</Text>
@@ -453,7 +458,7 @@ export default function ModalEditarAnimal({ visible, onClose, onEditado, animal 
 
           </ScrollView>
         </View>
-      </View>
+      </KeyboardAvoidingView>
 
       <AnimalDatePickerModal visible={pickerNacimiento} onClose={() => setPickerNacimiento(false)} onSelectDate={setFechaNacimiento} titulo={t('titleSeleccionarFechaNacimiento')} fechaSeleccionada={fechaNacimiento} maxDate={maxDateNacimiento}/>
       <AnimalDatePickerModal visible={pickerIngreso} onClose={() => setPickerIngreso(false)} onSelectDate={setFechaIngreso} titulo={t('titleSeleccionarFechaIngreso')} fechaSeleccionada={fechaIngreso} minDate={minDateIngreso}/>

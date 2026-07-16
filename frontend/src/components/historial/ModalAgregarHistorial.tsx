@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import {
   Modal, View, Text, TouchableOpacity,
   ScrollView, ActivityIndicator, StyleSheet, Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { api } from "@/config/api";
 import { Colors } from "@/constants/theme";
@@ -134,7 +136,10 @@ export default function ModalAgregarHistorial({ visible, onClose, onCreado, anim
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <View style={styles.overlay}>
+      <KeyboardAvoidingView
+        style={styles.overlay}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
         <View style={styles.container}>
           <View style={styles.header}>
             <Text style={styles.titulo}>{t("titleNuevoHistorial")}</Text>
@@ -233,7 +238,7 @@ export default function ModalAgregarHistorial({ visible, onClose, onCreado, anim
 
           </ScrollView>
         </View>
-      </View>
+      </KeyboardAvoidingView>
 
       <AnimalDatePickerModal
         visible={pickerDesde}

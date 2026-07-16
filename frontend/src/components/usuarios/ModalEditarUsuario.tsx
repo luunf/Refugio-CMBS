@@ -10,6 +10,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 
 import { useTranslation } from "react-i18next";
@@ -84,7 +86,10 @@ export default function ModalEditarUsuario({
       transparent
       animationType="slide"
     >
-      <View style={styles.overlay}>
+      <KeyboardAvoidingView
+        style={styles.overlay}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
         <View style={styles.container}>
 
           <Text style={styles.title}>
@@ -189,7 +194,7 @@ export default function ModalEditarUsuario({
           </TouchableOpacity>
 
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

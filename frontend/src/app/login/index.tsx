@@ -9,6 +9,8 @@ import {
   StyleSheet,
   Image,
   Modal,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -19,6 +21,7 @@ import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/aut
 import { auth } from "@/config/firebase";
 import { Colors } from "@/constants/theme";
 import { publicApi } from "@/config/api";
+import KeyboardAvoidingScreen from "@/components/KeyboardAvoidingScreen";
 
 import { router } from "expo-router";
 
@@ -107,68 +110,71 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.safeArea}>
+      <KeyboardAvoidingScreen contentContainerStyle={styles.container}>
 
-      <View style={styles.logoContainer}>
-        <Image
-          source={require("@/assets/images/logo.png")}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-      </View>
+        <View style={styles.logoContainer}>
+          <Image
+            source={require("@/assets/images/logo.png")}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+        </View>
 
-      <View style={styles.card}>
-        <Text style={styles.title}>
-          {t("iniciarSesion")}
-        </Text>
-
-        <Text style={styles.label}>
-          {t("email")}
-        </Text>
-
-        <TextInput
-          value={email}
-          onChangeText={setEmail}
-          placeholder={t("emailPlaceholder")}
-          placeholderTextColor={Colors.textMuted}
-          autoCapitalize="none"
-          keyboardType="email-address"
-          style={styles.input}
-        />
-
-        <Text style={styles.label}>
-          {t("password")}
-        </Text>
-
-        <TextInput
-          value={password}
-          onChangeText={setPassword}
-          placeholder={t("passwordPlaceholder")}
-          placeholderTextColor={Colors.textMuted}
-          secureTextEntry
-          style={styles.input}
-        />
-
-        <TouchableOpacity
-          onPress={handleLogin}
-          disabled={loading}
-          style={styles.button}
-        >
-          {loading ? (
-            <ActivityIndicator color="white" />
-          ) : (
-            <Text style={styles.buttonText}>
-              {t("ingresar")}
-            </Text>
-          )}
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={handleOpenResetModal}>
-          <Text style={styles.forgotText}>
-            {t("olvidastePassword")}
+        <View style={styles.card}>
+          <Text style={styles.title}>
+            {t("iniciarSesion")}
           </Text>
-        </TouchableOpacity>
-      </View>
+
+          <Text style={styles.label}>
+            {t("email")}
+          </Text>
+
+          <TextInput
+            value={email}
+            onChangeText={setEmail}
+            placeholder={t("emailPlaceholder")}
+            placeholderTextColor={Colors.textMuted}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            style={styles.input}
+          />
+
+          <Text style={styles.label}>
+            {t("password")}
+          </Text>
+
+          <TextInput
+            value={password}
+            onChangeText={setPassword}
+            placeholder={t("passwordPlaceholder")}
+            placeholderTextColor={Colors.textMuted}
+            secureTextEntry
+            style={styles.input}
+          />
+
+          <TouchableOpacity
+            onPress={handleLogin}
+            disabled={loading}
+            style={styles.button}
+          >
+            {loading ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <Text style={styles.buttonText}>
+                {t("ingresar")}
+              </Text>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={handleOpenResetModal}>
+            <Text style={styles.forgotText}>
+              {t("olvidastePassword")}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+      </KeyboardAvoidingScreen>
 
       {/* Modal restablecer contraseña */}
       <Modal
@@ -177,7 +183,10 @@ export default function LoginScreen() {
         animationType="fade"
         onRequestClose={() => setResetModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
+        <KeyboardAvoidingView
+          style={styles.modalOverlay}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>
               {t("restablecerPassword")}
@@ -225,7 +234,7 @@ export default function LoginScreen() {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
     </SafeAreaView>
@@ -233,9 +242,13 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
     backgroundColor: Colors.background,
+  },
+
+  container: {
+    flexGrow: 1,
     justifyContent: "center",
     paddingHorizontal: 24,
   },

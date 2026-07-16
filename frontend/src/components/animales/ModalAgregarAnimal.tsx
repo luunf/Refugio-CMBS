@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import {
   Modal, View, Text, TextInput, TouchableOpacity,
-  ScrollView, ActivityIndicator, StyleSheet, Alert, Switch
+  ScrollView, ActivityIndicator, StyleSheet, Alert, Switch,
+  Platform,
+  KeyboardAvoidingView
 } from "react-native";
 import { api } from "@/config/api";
 import MultiSelector from "./MultiSelector";
@@ -279,7 +281,10 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <View style={styles.overlay}>
+      <KeyboardAvoidingView
+        style={styles.overlay}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
         <View style={styles.container}>
 
           <View style={styles.header}>
@@ -525,7 +530,7 @@ export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props
 
           </ScrollView>
         </View>
-      </View>
+      </KeyboardAvoidingView>
 
       {/* Date Pickers */}
       <AnimalDatePickerModal
