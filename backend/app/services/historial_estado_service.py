@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from zoneinfo import ZoneInfo
 from app.extensions import db
 from app.models.historial_estado import HistorialEstado
 from app.models.estado import Estado
@@ -30,7 +31,7 @@ class HistorialEstadoService:
         agregados = nuevos_ids - actuales_ids
         quitados = actuales_ids - nuevos_ids
         mantenidos = actuales_ids & nuevos_ids
-        hoy = date.today()
+        hoy = datetime.now(ZoneInfo("America/Argentina/Buenos_Aires")).date()
 
         for estado_id in quitados:
             abierto = HistorialEstado.query.filter_by(
@@ -107,14 +108,15 @@ class HistorialEstadoService:
                 f"El estado '{ESTADO_CALCULADO}' se calcula automáticamente a partir de los tratamientos y no se puede cargar manualmente"
             )
 
+        hoy = datetime.now(ZoneInfo("America/Argentina/Buenos_Aires")).date()
         fecha_desde = datetime.strptime(data["fecha_desde"], "%Y-%m-%d").date()
-        if fecha_desde > date.today():
+        if fecha_desde > hoy:
             raise ValueError("El campo fecha_desde no puede ser posterior a hoy")
         
         fecha_hasta = data.get("fecha_hasta")
         if fecha_hasta:
             fecha_hasta = datetime.strptime(fecha_hasta, "%Y-%m-%d").date()
-            if fecha_hasta > date.today():
+            if fecha_hasta > hoy:
                 raise ValueError("El campo fecha_hasta no puede ser posterior a hoy")
             if fecha_hasta < fecha_desde:
                 raise ValueError("El campo fecha_hasta no puede ser anterior a fecha_desde")
@@ -161,16 +163,17 @@ class HistorialEstadoService:
         else:
             nuevo_estado = estado_anterior
 
+        hoy = datetime.now(ZoneInfo("America/Argentina/Buenos_Aires")).date()
         nueva_desde = data.get("fecha_desde", registro.fecha_desde)
         if isinstance(nueva_desde, str):
             nueva_desde = datetime.strptime(nueva_desde, "%Y-%m-%d").date()
-        if nueva_desde > date.today():
+        if nueva_desde > hoy:
             raise ValueError("El campo fecha_desde no puede ser posterior a hoy")
         
         nueva_hasta = data["fecha_hasta"] if "fecha_hasta" in data else registro.fecha_hasta
         if isinstance(nueva_hasta, str):
             nueva_hasta = datetime.strptime(nueva_hasta, "%Y-%m-%d").date()
-        if nueva_hasta is not None and nueva_hasta > date.today():
+        if nueva_hasta is not None and nueva_hasta > hoy:
             raise ValueError("El campo fecha_hasta no puede ser posterior a hoy")
         if nueva_hasta is not None and nueva_hasta < nueva_desde:
             raise ValueError("El campo fecha_hasta no puede ser anterior a fecha_desde")
