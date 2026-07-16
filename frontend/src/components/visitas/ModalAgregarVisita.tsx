@@ -36,8 +36,6 @@ interface Props {
   animalId: number;
 }
 
-const hoy = getFechaLocal(new Date());
-
 function formatFecha(fechaStr: string): string {
   if (!fechaStr) return "";
   const [year, month, day] = fechaStr.split("-");
