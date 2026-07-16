@@ -25,7 +25,11 @@ export const Colors = {
   textFaint:      '#9ca3af',  // gris claro texto
   textMuted:      '#6b7280',  // gris medio para icono cancelar
   shadow:         '#000000',   // negro sombra
-  delete:         '#ef4444'
+  delete:         '#ef4444',
+  warning:        '#f59e0b',  // ambar - avisos
+  warningBg:      '#fffbeb',  // fondo aviso
+  warningBorder:  '#fde68a',  // borde aviso
+  warningText:    '#92400e'   // texto aviso
 } as const;
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;

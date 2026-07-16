@@ -32,5 +32,8 @@
 
   "direccionInvalida": "La dirección debe tener al menos 5 caracteres",
 
-  "confirmarLogout": "¿Está seguro que desea cerrar sesión?"
+  "confirmarLogout": "¿Está seguro que desea cerrar sesión?",
+
+  "perfilIncompletoTitulo": "Completá tu perfil",
+  "perfilIncompletoMensaje": "Para seguir usando la app necesitás completar al menos tu nombre y apellido."
 }

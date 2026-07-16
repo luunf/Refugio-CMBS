@@ -184,10 +184,20 @@ class PersonaService:
             persona.email = data["email"]
 
         if "nombre" in data:
-            persona.nombre = data["nombre"]
+            nombre = (data["nombre"] or "").strip()
+
+            if not nombre:
+                raise Exception("El nombre es obligatorio")
+
+            persona.nombre = nombre
 
         if "apellido" in data:
-            persona.apellido = data["apellido"]
+            apellido = (data["apellido"] or "").strip()
+
+            if not apellido:
+                raise Exception("El apellido es obligatorio")
+
+            persona.apellido = apellido
 
         if "telefono" in data:
             persona.telefono = data["telefono"]

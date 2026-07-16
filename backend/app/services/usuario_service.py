@@ -91,7 +91,7 @@ class UsuarioService:
             email_verified=False
         )
 
-        link = auth.generate_email_verification_link(
+        link = auth.generate_email_verification_link( #generar link de verificacion de correo auth
             email
         )
 

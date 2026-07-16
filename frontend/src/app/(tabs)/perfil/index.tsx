@@ -23,16 +23,18 @@ import {
   sendPasswordResetEmail,
 } from "firebase/auth";
 import { isEmailValid, isPhoneValid } from "@/utils/validators";
+import RolSelector from "@/components/personas/RolSelector";
 
 
 export default function PerfilScreen() {
-  const { usuario, recargar } = useAuth();
+  const { usuario, recargar, perfilCompleto } = useAuth();
   const { t } = useTranslation("perfil");
 
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
   const [telefono, setTelefono] = useState("");
   const [direccion, setDireccion] = useState("");
+  const [rolIds, setRolIds] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingDatos, setLoadingDatos] = useState(true);
   const [editando, setEditando] = useState(false);
@@ -42,6 +44,7 @@ export default function PerfilScreen() {
     apellido: "",
     telefono: "",
     direccion: "",
+    rolIds: [] as number[],
   });
 
   useEffect(() => {
@@ -59,13 +62,21 @@ export default function PerfilScreen() {
           apellido: data.apellido ?? "",
           telefono: data.telefono ?? "",
           direccion: data.direccion ?? "",
+          rolIds: (data.roles ?? []).map(
+            (r: { id_rol: number }) => r.id_rol
+          ),
         };
 
         setNombre(valores.nombre);
         setApellido(valores.apellido);
         setTelefono(valores.telefono);
         setDireccion(valores.direccion);
+        setRolIds(valores.rolIds);
         setOriginal(valores);
+
+        if (!valores.nombre.trim() || !valores.apellido.trim()) {
+          setEditando(true);
+        }
       } catch (e) {
         console.error(e);
       } finally {
@@ -81,6 +92,7 @@ export default function PerfilScreen() {
     setApellido(original.apellido);
     setTelefono(original.telefono);
     setDireccion(original.direccion);
+    setRolIds(original.rolIds);
     setEditando(false);
   };
 
@@ -137,7 +149,8 @@ export default function PerfilScreen() {
         nombre: nombre.trim(),
         apellido: apellido.trim(),
         telefono: telefono.trim() || null,
-        direccion: direccion.trim() || null
+        direccion: direccion.trim() || null,
+        roles: rolIds,
       });
 
       await recargar();
@@ -147,6 +160,7 @@ export default function PerfilScreen() {
         apellido,
         telefono,
         direccion,
+        rolIds,
       });
 
       setEditando(false);
@@ -246,6 +260,17 @@ export default function PerfilScreen() {
         style={styles.scroll}
         showsVerticalScrollIndicator={false}
       >
+        {!loadingDatos && !perfilCompleto && (
+          <View style={styles.avisoContainer}>
+            <Text style={styles.avisoTitulo}>
+              {t("perfilIncompletoTitulo")}
+            </Text>
+            <Text style={styles.avisoTexto}>
+              {t("perfilIncompletoMensaje")}
+            </Text>
+          </View>
+        )}
+
         <View style={styles.avatarContainer}>
           <View style={styles.avatar}>
             <Text style={styles.avatarTexto}>
@@ -265,7 +290,12 @@ export default function PerfilScreen() {
         </View>
 
         <View style={styles.form}>
-          <Text style={styles.label}>{t("nombre")}</Text>
+          <Text style={styles.label}>
+            {t("nombre")}
+            {editando && (
+              <Text style={styles.obligatorio}> *</Text>
+            )}
+          </Text>
 
           {editando ? (
             <TextInput
@@ -282,7 +312,12 @@ export default function PerfilScreen() {
             </View>
           )}
 
-          <Text style={styles.label}>{t("apellido")}</Text>
+          <Text style={styles.label}>
+            {t("apellido")}
+            {editando && (
+              <Text style={styles.obligatorio}> *</Text>
+            )}
+          </Text>
 
           {editando ? (
             <TextInput
@@ -338,24 +373,34 @@ export default function PerfilScreen() {
             {t("roles")}
           </Text>
 
-          <View style={styles.valorContainer}>
-            <Text style={styles.valorTexto}>
-              {usuario?.roles?.length
-                ? usuario.roles.join(", ")
-                : t("sinDato")}
-            </Text>
-          </View>
+          {editando ? (
+            <RolSelector
+              value={rolIds}
+              onChange={setRolIds}
+              excluir={["voluntario"]}
+            />
+          ) : (
+            <View style={styles.valorContainer}>
+              <Text style={styles.valorTexto}>
+                {usuario?.roles?.length
+                  ? usuario.roles.join(", ")
+                  : t("sinDato")}
+              </Text>
+            </View>
+          )}
 
           {editando && (
             <View style={styles.botonesRow}>
-              <TouchableOpacity
-                onPress={handleCancelar}
-                style={styles.btnCancelar}
-              >
-                <Text style={styles.btnCancelarTexto}>
-                  {t("cancelar")}
-                </Text>
-              </TouchableOpacity>
+              {perfilCompleto && (
+                <TouchableOpacity
+                  onPress={handleCancelar}
+                  style={styles.btnCancelar}
+                >
+                  <Text style={styles.btnCancelarTexto}>
+                    {t("cancelar")}
+                  </Text>
+                </TouchableOpacity>
+              )}
 
               <TouchableOpacity
                 onPress={handleGuardar}
@@ -440,6 +485,28 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
 
+  avisoContainer: {
+    backgroundColor: Colors.warningBg,
+    borderWidth: 1,
+    borderColor: Colors.warningBorder,
+    borderRadius: 16,
+    padding: 16,
+    marginTop: 16,
+    gap: 4,
+  },
+
+  avisoTitulo: {
+    color: Colors.warningText,
+    fontWeight: "700",
+    fontSize: 15,
+  },
+
+  avisoTexto: {
+    color: Colors.warningText,
+    fontSize: 13,
+    lineHeight: 18,
+  },
+
   avatarContainer: {
     alignItems: "center",
     paddingVertical: 24,
@@ -501,6 +568,11 @@ const styles = StyleSheet.create({
     color: Colors.textSoft,
     fontSize: 14,
     marginTop: 4,
+  },
+
+  obligatorio: {
+    color: Colors.delete,
+    fontWeight: "700",
   },
 
   input: {
@@ -575,18 +647,17 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     fontSize: 16,
   },
-
+  
   passwordBtn: {
-    backgroundColor: Colors.primary,
     marginTop: 16,
-    paddingVertical: 14,
-    borderRadius: 14,
-    alignItems: "center",
+    alignSelf: "center",
+    paddingVertical: 4,
+    paddingHorizontal: 8,
   },
 
   passwordText: {
-    color: "white",
-    fontWeight: "700",
+    color: Colors.primary,
     fontSize: 16,
+    textDecorationLine: "underline",
   },
 });
