@@ -1,3 +1,4 @@
+from zoneinfo import ZoneInfo
 from app.extensions import db
 from app.models.tratamiento import Tratamiento
 from app.models.visita_veterinaria import VisitaVeterinaria
@@ -172,7 +173,7 @@ class TratamientoService:
 
     @staticmethod
     def sincronizar_estado_tratamiento_por_animal(animal):
-        hoy = date.today()
+        hoy = datetime.now(ZoneInfo("America/Argentina/Buenos_Aires")).date()
 
         tiene_vigente = any(
             t.fecha_inicio <= hoy and (t.fecha_fin is None or t.fecha_fin >= hoy)

@@ -48,6 +48,13 @@ const formatFecha = (fecha?: string) => {
   return `${d}/${m}/${y}`;
 };
 
+function getFechaLocal(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
 const fechaNacimientoInvalida = (fechaNacimiento: string, fechaIngreso: string, hoy: string): boolean => {
   if (!fechaNacimiento) return false;
   if (fechaNacimiento > hoy) return true;
@@ -67,7 +74,7 @@ const nombreCompleto = (p: Persona) =>
 export default function ModalAgregarAnimal({ visible, onClose, onCreado }: Props) {
   const { t } = useTranslation('animales');
   
-  const hoy = new Date().toISOString().split('T')[0];
+  const hoy = getFechaLocal(new Date());
   
   const [loading, setLoading] = useState(false);
   const [estados, setEstados] = useState<Estado[]>([]);
