@@ -64,19 +64,24 @@ interface Props {
   visita: Visita;
 }
 
-const hoy = new Date().toISOString().split("T")[0];
-
 function formatFecha(fechaStr: string): string {
   if (!fechaStr) return "";
   const [year, month, day] = fechaStr.split("-");
   return `${parseInt(day)}/${parseInt(month)}/${year}`;
 }
 
+function getFechaLocal(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
 const esHoraValida = (hora: string): boolean => {
   return /^([01]\d|2[0-3]):([0-5]\d)$/.test(hora);
 };
 
-const esHoraPasada = (fechaStr: string, hora: string): boolean => {
+const esHoraPasada = (fechaStr: string, hora: string, hoy: string): boolean => {
   if (!esHoraValida(hora)) return false;
   if (fechaStr !== hoy) return false;
   const ahora = new Date();
@@ -86,7 +91,7 @@ const esHoraPasada = (fechaStr: string, hora: string): boolean => {
   return horaVisita < ahora;
 };
 
-const esHoraFutura = (fechaStr: string, hora: string): boolean => {
+const esHoraFutura = (fechaStr: string, hora: string, hoy: string): boolean => {
   if (!esHoraValida(hora)) return false;
   if (fechaStr !== hoy) return false;
   const ahora = new Date();
@@ -108,6 +113,7 @@ const fechaFinTratamientoInvalida = (fechaFin: string, fechaInicio: string): boo
 
 export default function ModalEditarVisita({ visible, onClose, onEditada, visita }: Props) {
   const { t } = useTranslation('visitas');
+  const hoy = getFechaLocal(new Date());
 
   const ESTADOS = [
     { label: t('optionProxima'), valor: "proxima" },
@@ -132,7 +138,7 @@ export default function ModalEditarVisita({ visible, onClose, onEditada, visita 
   const fechaMax = estado === "realizada" ? hoy : undefined;
 
   const fechaInvalida = !!estado && ((estado === "proxima" && fecha < hoy) || (estado === "realizada" && fecha > hoy));
-  const horaInvalida = estado === "proxima" ? esHoraPasada(fecha, hora) : estado === "realizada" ? esHoraFutura(fecha, hora) : false;
+  const horaInvalida = estado === "proxima" ? esHoraPasada(fecha, hora, hoy) : estado === "realizada" ? esHoraFutura(fecha, hora, hoy) : false;
   const horaFormatoInvalido = hora.length > 0 && !esHoraValida(hora);
 
   useEffect(() => {
